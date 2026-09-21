@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 
-from ..config import Settings, SettingsError, check_llm_data_combination, load_settings
+from ..config import Settings, SettingsError, load_settings
 from ..evidence.loader import EvidenceError, LoadResult, is_real_evidence, load_evidence
 
 log = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ class EvidenceState:
     result: LoadResult | None
     errors: tuple[str, ...]
     is_real: bool
-    # 실제 자료 + 클라우드 LLM 조합. 서버 시작과 LLM 호출을 막는 기준
+    # 이전 내부용 서비스와 같은 화면 상태 형태를 유지한다. 공개 배포본에서는 항상 False다.
     blocked: bool
 
     @property
@@ -71,16 +71,7 @@ def load_evidence_state(environ: Mapping[str, str] | None = None) -> EvidenceSta
             log.warning("근거 파일 경고: %s", warning)
 
     is_real = is_real_evidence(path, result.file if result else None)
-    blocked = False
-    try:
-        check_llm_data_combination(settings, is_real)
-    except SettingsError as exc:
-        log.error("설정 조합 차단: %s", exc)
-        errors.append(str(exc))
-        blocked = True
-        result = None
-
-    return EvidenceState(settings, result, tuple(errors), is_real=is_real, blocked=blocked)
+    return EvidenceState(settings, result, tuple(errors), is_real=is_real, blocked=False)
 
 
 @cache

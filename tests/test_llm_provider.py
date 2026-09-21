@@ -1,51 +1,13 @@
-"""LLM 제공자 계층 (6LLM참고의견계획.md C-2). 실제 모델을 부르지 않는다."""
+"""Google AI 제공자 계층. 실제 외부 API는 부르지 않는다."""
 
 import json
 import urllib.error
 
 import pytest
 
-from policy_signal_map.config import DEFAULT_LLM_TIMEOUT_S, SettingsError, load_settings
+from policy_signal_map.config import load_settings
 from policy_signal_map.llm.base import FakeProvider, LLMError, Message, get_provider
-from policy_signal_map.llm.local import LocalProvider, is_installed, list_models
-
-
-def settings(**env: str):
-    return load_settings(env)
-
-
-def test_no_provider_by_default():
-    assert get_provider(settings()) is None
-
-
-def test_cloud_is_not_implemented_yet():
-    with pytest.raises(LLMError) as exc:
-        get_provider(settings(PSM_LLM_PROVIDER="cloud", PSM_LLM_MODEL="m", PSM_LLM_API_KEY="k"))
-    assert "아직 구현하지 않았습니다" in str(exc.value)
-
-
-def test_local_provider_is_built_from_settings():
-    provider = get_provider(
-        settings(
-            PSM_LLM_PROVIDER="local",
-            PSM_LLM_MODEL="exaone",
-            PSM_LLM_BASE_URL="http://127.0.0.1:11434/v1",
-        )
-    )
-    assert provider is not None
-    assert provider.name == "local"
-    assert provider.model == "exaone"
-
-
-def test_timeout_default_and_override():
-    assert settings().llm_timeout_s == DEFAULT_LLM_TIMEOUT_S
-    assert settings(PSM_LLM_TIMEOUT_S="5.5").llm_timeout_s == 5.5
-
-
-def test_bad_timeout_is_rejected():
-    for value in ("빠르게", "0", "-3"):
-        with pytest.raises(SettingsError):
-            settings(PSM_LLM_TIMEOUT_S=value)
+from policy_signal_map.llm.google_ai import GoogleAIProvider, is_available, list_models
 
 
 class FakeResponse:
@@ -62,51 +24,148 @@ class FakeResponse:
         return None
 
 
-def local_provider() -> LocalProvider:
-    return LocalProvider(base_url="http://127.0.0.1:11434/v1", model="exaone")
+def provider(model: str = "gemini-3.8-flash") -> GoogleAIProvider:
+    return GoogleAIProvider(api_key="secret-test-key", model=model)
 
 
-def test_local_call_sends_openai_shape_and_reads_content(monkeypatch: pytest.MonkeyPatch):
+def response(text: str = "확인할 점") -> bytes:
+    return json.dumps({"candidates": [{"content": {"parts": [{"text": text}]}}]}).encode()
+
+
+def test_no_provider_by_default():
+    assert get_provider(load_settings({})) is None
+
+
+def test_google_provider_is_built_from_settings():
+    settings = load_settings({"PSM_LLM_PROVIDER": "google_ai", "GEMINI_API_KEY": "k"})
+    built = get_provider(settings)
+    assert built is not None
+    assert built.name == "google_ai"
+    assert built.model == "gemini-3.8-flash"
+
+
+def test_provider_uses_chosen_model_and_refuses_outside_list():
+    settings = load_settings(
+        {
+            "PSM_LLM_PROVIDER": "google_ai",
+            "GEMINI_API_KEY": "k",
+            "PSM_LLM_MODELS": "gemini-3.8-flash,gemma-4-31b-it",
+        }
+    )
+    assert get_provider(settings, "gemma-4-31b-it").model == "gemma-4-31b-it"
+    with pytest.raises(LLMError, match="선택할 수 없는 모델"):
+        get_provider(settings, "gemini-3.5-flash-lite")
+
+
+@pytest.mark.parametrize(
+    ("model", "thinking"),
+    [
+        ("gemini-3.8-flash", {"thinkingLevel": "low"}),
+        ("gemini-3.6-flash", {"thinkingLevel": "low"}),
+        ("gemini-2.5-pro", {"thinkingBudget": 128}),
+        ("gemma-4-31b-it", {"thinkingLevel": "minimal"}),
+    ],
+)
+def test_call_uses_model_specific_google_shape(monkeypatch, model, thinking):
     sent: dict[str, object] = {}
 
     def fake_urlopen(request, timeout):
         sent["url"] = request.full_url
         sent["timeout"] = timeout
+        sent["headers"] = dict(request.header_items())
         sent["body"] = json.loads(request.data.decode("utf-8"))
-        return FakeResponse(json.dumps({"choices": [{"message": {"content": "확인할 점"}}]}).encode())
+        return FakeResponse(response())
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
-    text = local_provider().generate([Message("user", "질문")], max_tokens=300, timeout_s=7)
+    text = provider(model).generate(
+        [Message("system", "보조자"), Message("user", "질문")],
+        max_tokens=2048,
+        timeout_s=7,
+    )
 
     assert text == "확인할 점"
-    assert sent["url"] == "http://127.0.0.1:11434/v1/chat/completions"
+    assert sent["url"] == f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+    assert "secret-test-key" not in str(sent["url"])
     assert sent["timeout"] == 7
-    assert sent["body"]["model"] == "exaone"
-    assert sent["body"]["messages"] == [{"role": "user", "content": "질문"}]
-    assert sent["body"]["stream"] is False
-    # 생각 과정 출력을 끈다 (C-0: gemma4는 켜져 있으면 본문이 비었다)
-    assert sent["body"]["reasoning_effort"] == "none"
+    body = sent["body"]
+    assert body["systemInstruction"] == {"parts": [{"text": "보조자"}]}
+    assert body["contents"] == [{"role": "user", "parts": [{"text": "질문"}]}]
+    assert body["generationConfig"] == {
+        "maxOutputTokens": 2048,
+        "thinkingConfig": thinking,
+    }
+    assert not {"temperature", "topP", "topK"} & body["generationConfig"].keys()
+    assert "secret-test-key" not in json.dumps(body)
+    assert dict(sent["headers"])["X-goog-api-key"] == "secret-test-key"
 
 
-def test_local_call_failure_becomes_llm_error(monkeypatch: pytest.MonkeyPatch):
-    def refuse(request, timeout):
+def test_response_ignores_thought_parts(monkeypatch):
+    payload = {
+        "candidates": [
+            {"content": {"parts": [{"text": "내부 사고", "thought": True}, {"text": "표시 답변"}]}}
+        ]
+    }
+    monkeypatch.setattr(
+        "urllib.request.urlopen", lambda request, timeout: FakeResponse(json.dumps(payload).encode())
+    )
+    assert provider().generate([Message("user", "질문")], max_tokens=100, timeout_s=1) == "표시 답변"
+
+
+@pytest.mark.parametrize("status", [400, 401, 403, 404, 429, 500])
+def test_http_failures_become_safe_llm_errors(monkeypatch, status):
+    def fail(request, timeout):
+        raise urllib.error.HTTPError(request.full_url, status, "detail", {}, None)
+
+    monkeypatch.setattr("urllib.request.urlopen", fail)
+    with pytest.raises(LLMError) as exc:
+        provider().generate([Message("user", "질문")], max_tokens=100, timeout_s=1)
+    assert "secret-test-key" not in str(exc.value)
+    assert "generativelanguage" not in str(exc.value)
+
+
+def test_unexpected_response_becomes_llm_error(monkeypatch):
+    monkeypatch.setattr("urllib.request.urlopen", lambda request, timeout: FakeResponse(b'{"candidates": []}'))
+    with pytest.raises(LLMError):
+        provider().generate([Message("user", "질문")], max_tokens=100, timeout_s=1)
+
+
+def test_list_models_filters_generate_content(monkeypatch):
+    payload = {
+        "models": [
+            {
+                "name": "models/gemini-3.8-flash",
+                "baseModelId": "gemini-3.8-flash",
+                "supportedGenerationMethods": ["generateContent"],
+            },
+            {"name": "models/embed", "supportedGenerationMethods": ["embedContent"]},
+        ]
+    }
+    sent: dict[str, object] = {}
+
+    def fake_urlopen(request, timeout):
+        sent["url"] = request.full_url
+        sent["headers"] = dict(request.header_items())
+        return FakeResponse(json.dumps(payload).encode())
+
+    list_models.cache_clear()
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+    available = list_models("model-list-key")
+    assert sent["url"].endswith("/v1beta/models?pageSize=1000")
+    assert "model-list-key" not in str(sent["url"])
+    assert dict(sent["headers"])["X-goog-api-key"] == "model-list-key"
+    assert available == frozenset({"gemini-3.8-flash"})
+    assert is_available("gemini-3.8-flash", available) is True
+    assert is_available("gemma-4-31b-it", available) is False
+    assert is_available("anything", None) is None
+
+
+def test_list_models_failure_is_unknown(monkeypatch):
+    def fail(request, timeout):
         raise urllib.error.URLError("연결 거부")
 
-    monkeypatch.setattr("urllib.request.urlopen", refuse)
-    with pytest.raises(LLMError) as exc:
-        local_provider().generate([Message("user", "질문")], max_tokens=300, timeout_s=1)
-    # 화면에 그대로 보여도 서버 정보가 드러나지 않아야 한다
-    assert "연결 거부" not in str(exc.value)
-    assert "11434" not in str(exc.value)
-
-
-def test_local_call_with_unexpected_shape_becomes_llm_error(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(
-        "urllib.request.urlopen",
-        lambda request, timeout: FakeResponse(b'{"choices": []}'),
-    )
-    with pytest.raises(LLMError):
-        local_provider().generate([Message("user", "질문")], max_tokens=300, timeout_s=1)
+    list_models.cache_clear()
+    monkeypatch.setattr("urllib.request.urlopen", fail)
+    assert list_models("failing-key") is None
 
 
 def test_fake_provider_records_calls_and_can_fail():
@@ -117,56 +176,3 @@ def test_fake_provider_records_calls_and_can_fail():
     broken = FakeProvider(error=LLMError("연결 실패"))
     with pytest.raises(LLMError):
         broken.generate([], max_tokens=100, timeout_s=1)
-
-
-LOCAL = dict(PSM_LLM_PROVIDER="local", PSM_LLM_BASE_URL="http://127.0.0.1:11434/v1")
-
-
-def test_provider_uses_the_chosen_model_from_the_list():
-    provider = get_provider(settings(**LOCAL, PSM_LLM_MODELS="a,b"), "b")
-    assert provider is not None and provider.model == "b"
-
-
-def test_provider_refuses_a_model_outside_the_list():
-    with pytest.raises(LLMError, match="선택할 수 없는 모델"):
-        get_provider(settings(**LOCAL, PSM_LLM_MODELS="a,b"), "c")
-
-
-def test_list_models_reads_openai_model_list(monkeypatch: pytest.MonkeyPatch):
-    sent: dict[str, object] = {}
-
-    def fake_urlopen(request, timeout):
-        sent["url"] = request.full_url
-        sent["timeout"] = timeout
-        return FakeResponse(json.dumps({"data": [{"id": "exaone3.5:7.8b"}, {"id": "gemma"}]}).encode())
-
-    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
-    installed = list_models("http://127.0.0.1:11434/v1/")
-    assert sent["url"] == "http://127.0.0.1:11434/v1/models"
-    assert sent["timeout"] == 2.0
-    assert is_installed("exaone3.5:7.8b", installed) is True
-    # 태그 없는 이름은 :latest와 같다
-    assert is_installed("gemma:latest", installed) is True
-    assert is_installed("gemma4:26b-a4b-it-qat", installed) is False
-
-
-def test_list_models_failure_is_unknown_not_empty(monkeypatch: pytest.MonkeyPatch):
-    def refuse(request, timeout):
-        raise urllib.error.URLError("연결 거부")
-
-    monkeypatch.setattr("urllib.request.urlopen", refuse)
-    assert list_models("http://127.0.0.1:11434/v1") is None
-    assert is_installed("a", None) is None
-
-
-def test_reasoning_effort_can_be_left_out(monkeypatch: pytest.MonkeyPatch):
-    sent: dict[str, object] = {}
-
-    def fake_urlopen(request, timeout):
-        sent["body"] = json.loads(request.data.decode("utf-8"))
-        return FakeResponse(json.dumps({"choices": [{"message": {"content": "확인할 점"}}]}).encode())
-
-    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
-    monkeypatch.setattr("policy_signal_map.llm.local.REASONING_EFFORT", None)
-    local_provider().generate([Message("user", "질문")], max_tokens=300, timeout_s=1)
-    assert "reasoning_effort" not in sent["body"]

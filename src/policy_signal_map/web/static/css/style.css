@@ -1230,6 +1230,10 @@ textarea.input {
   gap: 8px;
 }
 
+.ai-generate-row {
+  margin-top: 14px;
+}
+
 .ai-opinion-about {
   margin: 0 0 8px;
 }

@@ -7,7 +7,13 @@ from policy_signal_map.llm.catalog import CatalogError, load_catalog, model_info
 
 def test_catalog_file_loads():
     catalog = load_catalog()
-    assert "gemma4:26b-a4b-it-qat" in catalog
+    assert tuple(catalog) == (
+        "gemini-3.8-flash",
+        "gemini-3.6-flash",
+        "gemini-2.5-pro",
+        "gemma-4-31b-it",
+    )
+    assert "gemini-3.5-flash-lite" not in catalog
     assert all(info.label and info.description for info in catalog.values())
 
 

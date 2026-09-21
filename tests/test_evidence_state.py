@@ -9,7 +9,11 @@ from policy_signal_map.config import (
 )
 from policy_signal_map.web.evidence_state import load_evidence_state
 
-CLOUD = {"PSM_LLM_PROVIDER": "cloud", "PSM_LLM_MODEL": "some-model", "PSM_LLM_API_KEY": "k"}
+GOOGLE = {
+    "PSM_LLM_PROVIDER": "google_ai",
+    "PSM_LLM_MODEL": "gemini-3.8-flash",
+    "GEMINI_API_KEY": "test-key",
+}
 
 
 def test_default_state_loads_demo():
@@ -48,18 +52,18 @@ def test_invalid_settings_is_error_state():
     assert "gpt" in state.errors[0]
 
 
-def test_real_with_cloud_is_blocked(tmp_path: Path):
+def test_google_setting_does_not_add_a_data_block(tmp_path: Path):
     private_copy = tmp_path / "private" / "demo_copy.json"
     private_copy.parent.mkdir()
     shutil.copy(DEFAULT_EVIDENCE_PATH, private_copy)
 
-    state = load_evidence_state({"PSM_EVIDENCE_PATH": str(private_copy), **CLOUD})
+    state = load_evidence_state({"PSM_EVIDENCE_PATH": str(private_copy), **GOOGLE})
     assert state.is_real
-    assert state.blocked
-    assert not state.ok
-    assert state.result is None
+    assert not state.blocked
+    assert state.ok
+    assert state.result is not None
 
-    assert load_evidence_state({"PSM_EVIDENCE_PATH": str(DEFAULT_EVIDENCE_PATH), **CLOUD}).ok
+    assert load_evidence_state({"PSM_EVIDENCE_PATH": str(DEFAULT_EVIDENCE_PATH), **GOOGLE}).ok
 
 
 def test_real_badge(tmp_path: Path):
@@ -83,9 +87,9 @@ def test_unknown_data_kind_is_treated_as_real_even_when_file_is_rejected(tmp_pat
     state = load_evidence_state({"PSM_EVIDENCE_PATH": str(path)})
     assert not state.ok and state.is_real
 
-    blocked = load_evidence_state({"PSM_EVIDENCE_PATH": str(path), **CLOUD})
-    assert blocked.blocked
-    assert any("클라우드 LLM" in message for message in blocked.errors)
+    with_google = load_evidence_state({"PSM_EVIDENCE_PATH": str(path), **GOOGLE})
+    assert not with_google.blocked
+    assert not with_google.ok  # 파일 자체의 data_kind 계약 위반은 그대로 오류다
 
 
 def test_rejected_synthetic_file_is_not_real(tmp_path: Path):

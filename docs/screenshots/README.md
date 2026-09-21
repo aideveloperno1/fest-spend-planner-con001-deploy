@@ -34,7 +34,7 @@
 ### 다시 찍기
 
 ```powershell
-uv run python scripts/capture_screenshots.py          # 3단계 AI 참고 의견 포함 (Ollama와 gemma4:26b-a4b-it-qat 필요)
+uv run python scripts/capture_screenshots.py          # 3단계 AI 참고 의견 포함 (GEMINI_API_KEY 필요)
 uv run python scripts/capture_screenshots.py --no-ai  # AI 영역 없이
 ```
 

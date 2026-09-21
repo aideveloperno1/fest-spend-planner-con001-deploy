@@ -56,9 +56,12 @@ def test_공개_전달본으로_근거화면과_검토질문을_완성한다():
     assert review.outcomes
 
 
-def test_배포_실행_스크립트는_공개자료와_로컬_LLM만_지정한다():
+def test_배포_실행_스크립트는_공개자료와_Google_AI만_지정한다():
     script = (Path(__file__).resolve().parent.parent / "run_deploy.ps1").read_text(encoding="utf-8")
     assert "review_evidence_public_v2.1.json" in script
-    assert 'PSM_LLM_PROVIDER = "local"' in script
+    assert 'PSM_LLM_PROVIDER = "google_ai"' in script
+    assert "GEMINI_API_KEY" in script
+    assert "gemini-3.5-flash-lite" not in script
+    assert script.index("gemini-3.8-flash") < script.index("gemma-4-31b-it")
     assert "review_evidence_real" not in script
     assert "region_mapping.json" not in script

@@ -1,8 +1,4 @@
-"""LLM 제공자 공통 계층 (6LLM참고의견계획.md 결정 ①·⑤).
-
-로컬 LLM만 구현한다. 클라우드는 여기 한 곳만 고치면 붙도록 자리를 남겨 둔다.
-실패는 예외로 올리고, 화면은 규칙 기반 흐름을 그대로 보여 준다.
-"""
+"""LLM 제공자 공통 계층. 실패해도 규칙 기반 흐름은 그대로 유지한다."""
 
 from __future__ import annotations
 
@@ -54,15 +50,9 @@ def get_provider(settings: Settings, model: str | None = None) -> LLMProvider | 
         return None
     if model is not None and model not in settings.llm_models:
         raise LLMError("선택할 수 없는 모델입니다")
-    if settings.llm_provider == "cloud":
-        # 확장 지점: cloud.py를 만들고 여기서 돌려주면 된다 (6LLM참고의견계획.md 결정 ①)
-        raise LLMError(
-            "클라우드 LLM은 아직 구현하지 않았습니다. PSM_LLM_PROVIDER를 none 또는 local로 설정하세요."
-        )
+    from .google_ai import GoogleAIProvider
 
-    from .local import LocalProvider
-
-    return LocalProvider(
-        base_url=settings.llm_base_url or "",
+    return GoogleAIProvider(
+        api_key=settings.llm_api_key or "",
         model=model or settings.llm_model or "",
     )

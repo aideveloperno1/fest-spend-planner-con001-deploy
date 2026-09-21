@@ -64,16 +64,15 @@ llm → review 결과·plan·labels·config만 사용
 |---|---|---|
 | `PSM_EVIDENCE_PATH` | `resources/evidence/review_evidence_demo_v1.json` | 읽을 분석 근거 파일. 실제 파일은 `private/`에 두고 이 값으로 지정. 바꾸면 서버 재시작 |
 | `PSM_REGION_MAPPING_PATH` | `private/region_mapping.json` | 분석 전달본 지역명과 서비스의 10자리 행정표준코드를 잇는 대응표. 바꾸면 서버 재시작 |
-| `PSM_LLM_PROVIDER` | `none` | `none` / `local` / `cloud`(설정 검증만 있고 호출 코드 없음 — 고르면 AI 의견이 오류) |
-| `PSM_LLM_BASE_URL` | 없음 | 로컬 LLM의 OpenAI 호환 주소 (예: `http://127.0.0.1:11434/v1`) |
-| `PSM_LLM_MODEL` | 없음 | 기본 모델 이름. 비우면 `PSM_LLM_MODELS`의 첫 모델 |
-| `PSM_LLM_MODELS` | 없음 | 3단계에서 담당자가 고를 수 있는 모델 목록(쉼표 구분). 비우면 `PSM_LLM_MODEL` 하나. `PSM_LLM_MODEL`이 목록에 없으면 `SettingsError` |
-| `PSM_LLM_API_KEY` | 없음 | 클라우드 API 키. `.env`에만 둔다 |
-| `PSM_LLM_TIMEOUT_S` | `120` (`DEFAULT_LLM_TIMEOUT_S`) | LLM 응답을 기다릴 초. 0보다 커야 함. 이유와 바꾸는 방법은 `config.py` 상수 위 주석 |
+| `PSM_LLM_PROVIDER` | `none` | `none` / `google_ai` |
+| `GEMINI_API_KEY` | 없음 | Google AI Studio API 키. 설정 객체의 문자열 표현에서도 제외 |
+| `PSM_LLM_MODEL` | Google 목록의 첫 모델 | 기본 모델 이름 |
+| `PSM_LLM_MODELS` | Google AI 모델 4개 | 3단계 선택 목록. 쉼표 순서를 화면에서 유지 |
+| `PSM_LLM_TIMEOUT_S` | `45` (`DEFAULT_LLM_TIMEOUT_S`) | Google AI 응답을 기다릴 초. 0보다 커야 함 |
 
 - 설정은 앱 시작 시 한 번 읽어 불변 객체(dataclass frozen)로 둔다. 빈 문자열은 설정하지 않은 것으로 본다.
-- cloud는 모델·키, local은 주소·모델이 없으면 `SettingsError`.
-- 실제 근거 파일 + `PSM_LLM_PROVIDER=cloud` 조합이면 오류. **실제 근거 파일 + `local`은 허용**한다 (사용자 결정 2026-09-17, `checks.md` 1장. 모델에는 수치 없이 규칙 결과와 상황 설명만 넘긴다).
+- `google_ai`는 API 키가 없으면 `SettingsError`다. API 키는 URL이나 브라우저 응답에 넣지 않는다.
+- 배포 프로젝트에는 공개 합성 근거만 두며 `scripts/check_public_bundle.py`가 이를 검사한다.
 - 실제 자료 여부는 `evidence/loader.py`의 `is_real_evidence`로 판단한다 (`private/` 경로, `_real_` 이름, `synthetic`이 아닌 `data_kind`). `uv run policy-signal-map`은 막힌 조합이면 서버를 켜지 않고, `uvicorn`을 직접 실행하면 `web/evidence_state.py`가 blocked 상태로 두어 2~5단계가 오류 화면이 된다.
 
 ### 지켜야 할 원칙

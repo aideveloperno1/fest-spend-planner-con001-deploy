@@ -29,8 +29,8 @@
 uv + Python 3.12, FastAPI + Jinja2.
 
 ```powershell
-ollama pull exaone3.5:7.8b                       # 최초 1회: 로컬 LLM 준비
-.\run_deploy.ps1                                 # 공개 데이터 + 로컬 LLM으로 실행
+$env:GEMINI_API_KEY="Google AI Studio에서 발급한 키" # 현재 PowerShell 창에만 설정
+.\run_deploy.ps1                                 # 공개 데이터 + Google AI로 실행
 .\run_deploy.ps1 -NoLlm                          # AI 의견 없이 실행
 uv run pytest                                    # 테스트
 uv run python scripts/check_public_bundle.py     # 공개 저장소 검사 (push 전)
@@ -50,10 +50,11 @@ uv run --env-file .env policy-signal-map
 |---|---|---|
 | `PSM_EVIDENCE_PATH` | 공개 합성 파일 `resources/evidence/review_evidence_public_v2.1.json` | 배포 서비스가 읽는 분석 근거 파일 |
 | `PSM_REGION_MAPPING_PATH` | 사용하지 않음 | 공개 합성 전달본은 가상 지역 키를 그대로 사용하므로 대응표가 필요 없다 |
-| `PSM_LLM_PROVIDER` | `none` | AI 참고 의견. `none` / `local`(Ollama 등 로컬 LLM) / `cloud`(설정만 있고 호출 코드 없음) |
-| `PSM_LLM_BASE_URL`, `PSM_LLM_MODEL`, `PSM_LLM_API_KEY` | 없음 | LLM 연결 정보 (local은 주소·모델, cloud는 모델·키 필수) |
-| `PSM_LLM_MODELS` | 없음 | 담당자가 3단계에서 고를 모델 목록(쉼표 구분). 비우면 `PSM_LLM_MODEL` 하나. `PSM_LLM_MODEL`을 비우면 목록의 첫 모델이 기본 |
-| `PSM_LLM_TIMEOUT_S` | `120` | LLM 응답을 기다릴 초. 모델을 바꾼 직후 첫 응답은 모델을 메모리에 올리느라 오래 걸린다 (기본값 위치: `config.py` `DEFAULT_LLM_TIMEOUT_S`) |
+| `PSM_LLM_PROVIDER` | `none` | AI 참고 의견. `none` 또는 `google_ai` |
+| `GEMINI_API_KEY` | 없음 | Google AI Studio API 키. `.env` 또는 배포 서비스의 Secret에만 저장 |
+| `PSM_LLM_MODEL` | 목록의 첫 모델 | 기본 모델. 배포 기본값은 `gemini-3.8-flash` |
+| `PSM_LLM_MODELS` | Google AI 모델 4개 | 3단계 선택 목록. 순서: Gemini 3.8 Flash, 3.6 Flash, 2.5 Pro, Gemma 4 31B IT |
+| `PSM_LLM_TIMEOUT_S` | `45` | Google AI 응답을 기다릴 최대 시간(초) |
 
 - 근거 파일은 서버가 처음 필요할 때 한 번 읽어 보관한다. **파일을 바꾸면 서버를 다시 시작한다** (`--reload`는 코드 변경에만 반응)
 - 화면 상단 칩에 불러온 파일의 종류와 버전이 표시된다 (`시연용 합성 수치 · demo-2.1-003`). 파일에 문제가 있으면 `근거 파일 오류`로 바뀌고, 2단계부터 안내 화면이 나온다
@@ -71,7 +72,7 @@ uv run --env-file .env policy-signal-map
 | `3검토질문계획.md` | 3번 작업(3단계 검토 질문 규칙)의 설계와 결정 이유 | 〃 |
 | `4보완선택계획.md` | 4번 작업(4단계 보완 선택)의 설계와 결정 이유 | 〃 |
 | `5보완기획안계획.md` | 5번 작업(5단계 보완 기획안과 저장)의 설계와 결정 이유 | 〃 |
-| `6LLM참고의견계획.md` | AI 참고 의견 기능의 설계, 실제 모델 측정 결과, 모델 선택 기능 기록 | AI 기능을 바꾸거나 모델을 새로 고를 때 |
+| `6LLM참고의견계획.md` | 배포용 Google AI 참고 의견 기능의 설계와 모델별 호출 설정 | AI 기능을 바꾸거나 모델을 새로 고를 때 |
 | `7지역확장계획.md` | 지역 소비 프로필·유사 지역·성과지표 점검·사업 유형별 질문을 **만들기 전에 정한 약속**(근거 파일 2.1 계약, 지역 대응표 서식, 새 질문이 문서 어느 장에 들어가는지) | 고도화 작업을 시작·이어갈 때, 근거 파일 형식을 데이터 담당과 맞출 때 |
 | `pyproject.toml` | 프로젝트 이름, **필요한 라이브러리 목록**, 실행 명령(`policy-signal-map`), 테스트 설정 | 라이브러리를 추가·변경할 때 |
 | `uv.lock` | 설치할 라이브러리의 **정확한 버전을 고정**한 파일. `uv sync`가 자동으로 만듦 | 직접 고치지 않음 |
@@ -92,7 +93,7 @@ uv run --env-file .env policy-signal-map
 | `  review/` | 검토 규칙(R07 등)을 실행해 담당자에게 던질 질문을 만듦 | [README](src/policy_signal_map/review/README.md) |
 | `  choices/` | 담당자가 고른 보완 방법을 저장·취소하고, 원안이 바뀌면 다시 확인하게 함 | [README](src/policy_signal_map/choices/README.md) |
 | `  document/` | 원안과 선택을 합쳐 보완 기획안 문서(Markdown)를 만듦 | [README](src/policy_signal_map/document/README.md) |
-| `  llm/` | AI 참고 의견: 로컬 AI 모델에 요청하고, 답을 검사하고, 모델 표시 이름을 관리 | [README](src/policy_signal_map/llm/README.md) |
+| `  llm/` | AI 참고 의견: Google AI에 요청하고, 답을 검사하고, 모델 표시 이름을 관리 | [README](src/policy_signal_map/llm/README.md) |
 | `  web/` | 화면: 주소별 처리, 세션, 폼 읽기, 화면용 데이터, AI 모델 선택 | [README](src/policy_signal_map/web/README.md) |
 | `    routes/` | 주소(`/`, `/step/1` 등)마다 무엇을 보여 줄지 정함 | [README](src/policy_signal_map/web/routes/README.md) |
 | `    templates/` (`steps/`, `partials/`) | 화면의 HTML 틀 | [README](src/policy_signal_map/web/templates/README.md) |

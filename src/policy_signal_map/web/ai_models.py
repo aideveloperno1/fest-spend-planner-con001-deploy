@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..config import Settings
-from ..llm import local
+from ..llm import google_ai
 from ..llm.catalog import model_info
 from .session import WorkState
 
@@ -18,8 +18,8 @@ class ModelOption:
     id: str
     label: str
     description: str
-    # True: 받아 둠 / False: 받아 두지 않음 / None: Ollama에 물어보지 못함
-    installed: bool | None
+    # True: API 키로 사용 가능 / False: 사용 불가 / None: Google에 확인하지 못함
+    available: bool | None
 
 
 def current_model(settings: Settings, state: WorkState) -> str:
@@ -29,16 +29,17 @@ def current_model(settings: Settings, state: WorkState) -> str:
     return settings.llm_model or ""
 
 
-def installed_models(settings: Settings) -> frozenset[str] | None:
-    if settings.llm_provider != "local" or not settings.llm_base_url:
+def available_models(settings: Settings) -> frozenset[str] | None:
+    if settings.llm_provider != "google_ai" or not settings.llm_api_key:
         return None
-    # 테스트에서 바꿔 끼울 수 있게 모듈 속성으로 부른다
-    return local.list_models(settings.llm_base_url)
+    return google_ai.list_models(settings.llm_api_key)
 
 
-def model_options(settings: Settings, installed: frozenset[str] | None) -> list[ModelOption]:
+def model_options(settings: Settings, available: frozenset[str] | None) -> list[ModelOption]:
     options = []
     for model_id in settings.llm_models:
         info = model_info(model_id)
-        options.append(ModelOption(model_id, info.label, info.description, local.is_installed(model_id, installed)))
+        options.append(
+            ModelOption(model_id, info.label, info.description, google_ai.is_available(model_id, available))
+        )
     return options

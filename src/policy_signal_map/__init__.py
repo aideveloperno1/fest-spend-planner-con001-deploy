@@ -1,8 +1,5 @@
 def main() -> None:
-    """로컬 실행: uv run policy-signal-map
-
-    서버를 켜기 전에 근거 파일 상태를 확인한다. 실제 분석 자료와 클라우드 LLM이 함께 설정돼 있으면 시작하지 않는다.
-    """
+    """로컬 실행: uv run policy-signal-map. 시작 전에 공개 근거 파일 상태를 확인한다."""
     import uvicorn
 
     from .web.evidence_state import get_evidence_state

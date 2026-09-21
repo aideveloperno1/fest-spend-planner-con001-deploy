@@ -1,6 +1,6 @@
 """3단계 AI 참고 의견 (6LLM참고의견계획.md C-5).
 
-화면과 따로 부른다. 로컬 모델은 느릴 수 있어 이 요청이 3단계 화면을 붙잡으면 안 된다.
+화면과 따로 부른다. 담당자가 버튼을 눌렀을 때만 외부 API 할당량을 사용한다.
 근거 파일에 문제가 있거나 설정 조합이 막힌 상태면 부르지 않는다.
 """
 
@@ -27,7 +27,7 @@ FAILED = {"state": "failed", "message": "AI 의견을 불러오지 못했습니�
 OFF = {"state": "off", "opinions": []}
 
 
-@router.get("/step/3/opinions")
+@router.post("/step/3/opinions")
 def opinions(session: Session, evidence: Evidence) -> Response:
     _, state = session
     if state.original is None or evidence.blocked or not evidence.ok or evidence.result is None:

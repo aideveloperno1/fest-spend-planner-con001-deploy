@@ -1,6 +1,6 @@
 """제출·사용법용 화면 캡처를 다시 만든다 (docs/screenshots/README.md 이름 규칙).
 
-실행: uv run python scripts/capture_screenshots.py            (AI 참고 의견 포함, Ollama 필요)
+실행: uv run python scripts/capture_screenshots.py            (AI 참고 의견 포함, GEMINI_API_KEY 필요)
       uv run python scripts/capture_screenshots.py --no-ai    (AI 영역 없이)
 
 - 합성 근거 파일로만 찍는다. 셸의 PSM_ 환경변수를 모두 비우고 서버를 따로 띄우며,
@@ -41,7 +41,7 @@ CHROME_CANDIDATES = (
 )
 WIDTH, HEIGHT = 1440, 900
 SYNTHETIC_BADGE = "시연용 합성 수치"
-DEFAULT_MODELS = "gemma4:26b-a4b-it-qat,exaone3.5:7.8b,exaone3.5:7.8b-instruct-q8_0"
+DEFAULT_MODELS = "gemini-3.8-flash,gemini-3.6-flash,gemini-2.5-pro,gemma-4-31b-it"
 # 4단계 캡처에 넣는 예시 입력 (사용자 확인 2026-09-17)
 OPTION_A_INPUT = {
     "collect_items": "쿠폰 사용 실적, 참여 점포 정산 자료",
@@ -249,16 +249,20 @@ async def capture_questions(page: Page, base: str, out: Path, saved: list[str], 
     await page.click_and_load("document.querySelector('button[value=submit]')")
     await page.go(base + "/step/3")
     if with_ai:
+        await page.js("document.querySelector('[data-ai-generate]').click()")
         started = time.time()
         while time.time() - started < 200:
             state = await page.js("""({n: document.querySelectorAll('.ai-opinion').length,
                 msg: document.querySelector('[data-ai-message]')?.hidden ? '' : (document.querySelector('[data-ai-message]')?.textContent || '')})""")
-            if state["n"] or "확인하는 중" not in state["msg"]:
+            if state["n"] or "생성하고 있습니다" not in state["msg"]:
                 break
             await asyncio.sleep(2)
         opinions = await page.js("[...document.querySelectorAll('.ai-opinion')].map(p => p.firstChild.textContent)")
         if not opinions:
-            raise SystemExit(f"AI 참고 의견을 받지 못했습니다({state['msg']!r}). Ollama 실행과 모델을 확인하거나 --no-ai로 찍으세요.")
+            raise SystemExit(
+                f"AI 참고 의견을 받지 못했습니다({state['msg']!r}). "
+                "GEMINI_API_KEY와 모델 사용 가능량을 확인하거나 --no-ai로 찍으세요."
+            )
         print("AI 참고 의견 (캡처에 들어간 문장):")
         for line in opinions:
             print("  -", line)
@@ -271,11 +275,12 @@ async def main() -> None:
                         help="Chrome 또는 Edge 실행 파일 경로")
     parser.add_argument("--no-ai", action="store_true", help="3단계를 AI 참고 의견 없이 찍는다")
     parser.add_argument("--models", default=DEFAULT_MODELS, help="3단계에 보일 모델 목록 (첫 모델로 의견을 받는다)")
-    parser.add_argument("--ollama", default="http://127.0.0.1:11434/v1", help="OpenAI 호환 로컬 LLM 주소")
     parser.add_argument("--out", type=Path, default=OUT_DIR)
     args = parser.parse_args()
     if not args.chrome:
         raise SystemExit("Chrome 실행 파일을 찾지 못했습니다. --chrome으로 경로를 지정하세요.")
+    if not args.no_ai and not os.environ.get("GEMINI_API_KEY", "").strip():
+        raise SystemExit("AI 포함 캡처에는 GEMINI_API_KEY 환경변수가 필요합니다. --no-ai로 생략할 수 있습니다.")
     args.out.mkdir(parents=True, exist_ok=True)
 
     saved: list[str] = []
@@ -293,7 +298,7 @@ async def main() -> None:
         server.terminate()
 
     if not args.no_ai:
-        server, base = start_server(PSM_LLM_PROVIDER="local", PSM_LLM_BASE_URL=args.ollama, PSM_LLM_MODELS=args.models)
+        server, base = start_server(PSM_LLM_PROVIDER="google_ai", PSM_LLM_MODELS=args.models)
         try:
             async with Page(args.chrome) as page:
                 await capture_questions(page, base, args.out, saved, with_ai=True)

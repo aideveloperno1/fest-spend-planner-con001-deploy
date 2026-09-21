@@ -16,7 +16,8 @@ from .base import Message
 TEMPLATE_PATH = RESOURCES_DIR / "prompts" / "opinion.txt"
 # 사용자가 길게 적어도 요청 문장이 흔들리지 않게 자른다
 MAX_FIELD_CHARS = 120
-MAX_TOKENS = 400
+# Google 사고 모델은 사고 토큰도 maxOutputTokens 안에서 쓴다. 화면 표시는 검사에서 최대 3줄로 제한한다.
+MAX_TOKENS = 2048
 
 KIND_WORDS = {
     "question": "질문",

@@ -62,13 +62,13 @@
 
 | 파일 | 개수 | 대상 |
 |---|---:|---|
-| `conftest.py` | — | 공통: `PSM_*` 환경변수 제거, 합성 근거 상태로 고정, `use_evidence(path, **env)` 픽스처, 받아 둔 모델 확인이 실제 Ollama에 닿지 않게 막음 |
+| `conftest.py` | — | 공통: `PSM_*`·`GEMINI_API_KEY` 환경변수 제거, 합성 근거 상태로 고정, `use_evidence(path, **env)` 픽스처, 모델 확인이 실제 Google API에 닿지 않게 막음 |
 | `helpers.py` | — | 공통: `VALID_FORM`, `parse()` |
 | `evidence_helpers.py` | — | 공통: 경계 사례 경로·목록(`fixture_path`), `base_data()` |
 | `document_helpers.py` | — | 공통: 원안·선택·문서 생성 준비 |
 | `test_plan_validation.py` | 11 | `plan/validation.py` |
 | `test_plan_changes.py` | 8 | `plan/changes.py` |
-| `test_config.py` | 15 | `config.py` (모델 목록 `PSM_LLM_MODELS` 포함) |
+| `test_config.py` | — | `config.py` (Google AI 제공자·키·고정 기본 모델 순서·타임아웃) |
 | `test_formatters.py` | 20 | `formatting.py` |
 | `test_evidence_loader.py` | 47 | `evidence/schema.py`, `loader.py`, 경계 사례 생성 일치 |
 | `test_evidence_compare.py` | 24 | `evidence/compare.py` |
@@ -80,7 +80,7 @@
 | `test_document_builder.py` | 21 | `document/builder.py` (고른 지역 프로필 요약·미연결 비대체 포함) |
 | `test_document_render.py` | 12 | `document/render.py` (공개 변경 순번·규칙 번호 비노출 포함) |
 | `test_document_filename.py` | 5 | `document/filename.py` |
-| `test_llm_provider.py` | 14 | `llm/base.py`, `llm/local.py`(받아 둔 모델 확인·`reasoning_effort`), `PSM_LLM_TIMEOUT_S` |
+| `test_llm_provider.py` | — | `llm/base.py`, `llm/google_ai.py`의 요청 형식·모델별 사고 설정·모델 확인·안전한 오류 처리 |
 | `test_llm_catalog.py` | 4 | `llm/catalog.py`, `resources/llm/models.json` |
 | `test_llm_prompt.py` | 12 | `llm/prompt.py` (프로필·순위·인구 수치 비포함 포함) |
 | `test_llm_guard.py` | 15 | `llm/guard.py` (한글 수량 표현 포함) |

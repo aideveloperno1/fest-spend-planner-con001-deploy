@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, Response
 
 from ...llm.catalog import model_info
-from ...llm.local import is_installed
+from ...llm.google_ai import is_available
 from ...review.engine import run_review
-from ..ai_models import current_model, installed_models, model_options
+from ..ai_models import available_models, current_model, model_options
 from ..dependencies import evidence_state_dep, session_dep
 from ..evidence_state import EvidenceState
 from ..session import WorkState
@@ -28,23 +28,23 @@ KIND_LABELS = {
 
 
 MODEL_NOT_ALLOWED = "선택할 수 없는 모델입니다."
-MODEL_NOT_INSTALLED = "이 PC의 Ollama에 받아 두지 않은 모델입니다. 받은 뒤 다시 고르세요."
+MODEL_UNAVAILABLE = "이 API 키의 Google AI 프로젝트에서 사용할 수 없는 모델입니다."
 
 
 def _context(state: WorkState, evidence: EvidenceState, model_error: str | None = None) -> dict[str, Any]:
     assert evidence.result is not None and state.original is not None
     # 검토 결과는 저장하지 않고 요청마다 다시 계산한다 (같은 입력이면 같은 결과)
     result = run_review(state.original, evidence.result)
-    # AI 의견은 화면을 그린 뒤 /step/3/opinions로 따로 받는다 (로컬 모델이 느려도 화면이 기다리지 않게)
+    # AI 의견은 담당자가 버튼을 누를 때 /step/3/opinions로 따로 받는다.
     settings = evidence.settings
     ai_enabled = settings is not None and settings.llm_provider != "none"
     context: dict[str, Any] = {"result": result, "kind_labels": KIND_LABELS, "ai_enabled": ai_enabled}
     if ai_enabled and settings is not None:
         model = current_model(settings, state)
-        # 고를 모델이 둘 이상일 때만 받아 둔 모델을 Ollama에 묻는다 (하나면 선택 칸이 없다)
-        installed = installed_models(settings) if len(settings.llm_models) > 1 else None
+        # 목록 확인 실패는 선택을 막지 않는다. 실제 생성 요청에서 다시 결과를 안내한다.
+        available = available_models(settings) if len(settings.llm_models) > 1 else None
         context.update(
-            ai_models=model_options(settings, installed),
+            ai_models=model_options(settings, available),
             ai_current=model,
             ai_current_info=model_info(model),
             ai_model_error=model_error,
@@ -79,9 +79,15 @@ async def choose_model(request: Request, session: Session, evidence: Evidence) -
     model = str(form.get("model", "")).strip()
     if settings is None or settings.llm_provider == "none" or model not in settings.llm_models:
         return render(request, "steps/questions.html", _context(state, evidence, MODEL_NOT_ALLOWED), status_code=422, **common)
-    # 받아 두지 않은 것이 확실할 때만 막는다. Ollama에 묻지 못했으면(None) 고르게 두고 호출 때 안내한다
-    if is_installed(model, installed_models(settings)) is False:
-        return render(request, "steps/questions.html", _context(state, evidence, MODEL_NOT_INSTALLED), status_code=422, **common)
+    # 사용할 수 없는 것이 확실할 때만 막는다. 확인 실패(None)는 생성 요청에서 처리한다.
+    if is_available(model, available_models(settings)) is False:
+        return render(
+            request,
+            "steps/questions.html",
+            _context(state, evidence, MODEL_UNAVAILABLE),
+            status_code=422,
+            **common,
+        )
 
     state.llm_model = model
     return redirect("/step/3", session_id)

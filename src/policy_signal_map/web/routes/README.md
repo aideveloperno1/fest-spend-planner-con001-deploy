@@ -16,7 +16,7 @@
 | `input.py` | **1단계 기획 입력**: 처음 화면, 예시 채우기·모두 지우기·검토 시작, 처음부터 다시 | 1단계 버튼 동작을 바꿀 때 |
 | `evidence.py` | **2단계 근거 확인** 화면 | 2단계로 넘기는 데이터를 바꿀 때 |
 | `questions.py` | **3단계 검토 질문** 화면과 **AI 모델 고르기** 저장 | 3단계 화면이나 모델 선택 규칙을 바꿀 때 |
-| `opinions.py` | 3단계 화면이 뜬 뒤 따로 부르는 **AI 참고 의견 받기** (화면이 AI를 기다리지 않게 분리) | AI 의견 응답 내용을 바꿀 때 |
+| `opinions.py` | 3단계에서 버튼을 눌렀을 때 부르는 **AI 참고 의견 받기** | AI 의견 응답 내용을 바꿀 때 |
 | `choices.py` | **4단계 보완 선택**: 선택 저장·취소, 입력 오류 표시 | 4단계 저장 흐름을 바꿀 때 |
 | `draft.py` | **5단계 보완 기획안**: 화면, 전체 문서 보기, 요청서 초안 보기, 파일 내려받기 | 5단계 화면이나 저장 파일을 바꿀 때 |
 
@@ -33,7 +33,7 @@
 | `input.py` | `GET·POST /step/1`, `POST /reset` | `steps/input.html` |
 | `evidence.py` | `GET /step/2` (원안 없으면 `/step/1`, 근거 오류면 `error.html` 503) | `steps/evidence.html` |
 | `questions.py` | `GET /step/3` (원안 없으면 `/step/1`, 근거 오류면 503), `POST /step/3/ai-model` (AI 모델 선택: 목록 밖·받아 두지 않은 모델 422, 저장 후 303) | `steps/questions.html` |
-| `opinions.py` | `GET /step/3/opinions` (JSON, AI 참고 의견. 고른 모델로 호출, `model_label` 포함) | — (`static/js/opinions.js`가 채움) |
+| `opinions.py` | `POST /step/3/opinions` (JSON, AI 참고 의견. 고른 모델로 호출, `model_label` 포함) | — (`static/js/opinions.js`가 채움) |
 | `choices.py` | `GET·POST /step/4`, `POST /step/4/cancel` (저장 후 303, 검증 실패는 422) | `steps/choices.html` |
 | `draft.py` | `GET /step/5`, `GET /step/5/document`, `GET /step/5/download`, `GET /step/5/request` | `steps/draft.html`, `steps/document.html`, `steps/request.html` |
 
@@ -67,11 +67,11 @@
 - `review_result.outcomes`를 kind별로 표시: 질문 / 안내 / 추가 확정 필요 / 보류
 - 오른쪽 패널: 검토하지 않은 항목 (R06 분석 예시, R02 향후 기능)
 - 각 질문의 근거 ID 칩 → 5단계 근거 추적 또는 2단계로 이동
-- `PSM_LLM_PROVIDER`가 `none`이 아니면 "AI 참고 의견" 영역(모델이 2개 이상이면 모델 선택 칸 포함)을 두고, 화면이 뜬 뒤 `static/js/opinions.js`가 `/step/3/opinions`에서 받아 채운다 (아래 `opinions.py`)
+- `PSM_LLM_PROVIDER`가 `none`이 아니면 "AI 참고 의견" 영역과 모델 선택 칸을 둔다. 사용자가 생성 버튼을 누르면 `static/js/opinions.js`가 `/step/3/opinions`에서 받아 채운다
 
 #### `opinions.py` — 3단계 AI 참고 의견 (JSON)
 
-- `GET /step/3/opinions` → `{"state": "off", "opinions": []}`(원안 없음·근거 오류·blocked·설정 none) / `{"state": "ok", "opinions": [{text, rule_ids}], "model", "model_label", "created_at", "dropped_count"}` / `{"state": "failed", "message": "AI 의견을 불러오지 못했습니다"}`
+- `POST /step/3/opinions` → `{"state": "off", "opinions": []}`(원안 없음·근거 오류·설정 none) / `{"state": "ok", "opinions": [{text, rule_ids}], "model", "model_label", "created_at", "dropped_count"}` / `{"state": "failed", "message": "AI 의견을 불러오지 못했습니다"}`
 - 호출 전 `blocked`·`ok`를 여기서 확인한다 (`llm/`은 `web/`을 부르지 않음)
 - 고른 모델은 `web/ai_models.current_model()`. **모델별로** 세션 캐시를 두어 같은 원안·같은 모델이면 다시 부르지 않는다. 응답을 기다리는 동안 원안이 다시 제출되면(요청 시작 원안 `asked_for`와 다르면) 결과를 보관하지 않는다 (6-5c)
 - 응답 `ok`에는 `model_label`(모델 이름표)도 담는다

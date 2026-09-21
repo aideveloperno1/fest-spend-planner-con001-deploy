@@ -95,9 +95,9 @@ HTTP 요청을 받아 하위 로직(`plan/`·`evidence/`·`review/`·`choices/`�
 #### `ai_models.py`
 
 - `current_model(settings, state)`: 담당자가 고른 모델(`state.llm_model`)이 목록에 있으면 그것, 아니면 기본 모델
-- `installed_models(settings)`: local일 때 `llm/local.list_models()`로 받아 둔 모델 이름. 확인 실패면 None("모름")
-- `model_options(settings, installed) -> list[ModelOption(id, label, description, installed)]`: `PSM_LLM_MODELS` 순서대로 이름표·설명(`llm/catalog`)과 설치 여부
-- 모델 선택 칸은 모델이 2개 이상일 때만 보이고, 그때만 Ollama에 받아 둔 모델을 묻는다. 받아 두지 않은 것이 확실한 모델은 "(받아 두지 않음)"으로 비활성 표시하고 저장 요청도 422. 확인하지 못했으면(None) 고를 수 있게 둔다
+- `available_models(settings)`: Google Models API에서 `generateContent`를 지원하는 모델을 확인. 실패하면 None("모름")
+- `model_options(settings, available) -> list[ModelOption(id, label, description, available)]`: `PSM_LLM_MODELS` 순서대로 이름표·설명과 사용 가능 여부
+- 모델 선택 칸은 모델이 2개 이상일 때 보인다. 사용할 수 없는 것이 확실한 모델은 비활성 표시하고 저장 요청도 422. 확인하지 못했으면(None) 고를 수 있게 둔다
 - 설정이 바뀌어 고른 모델이 목록에서 빠지면 기본 모델로 돌아간다
 
 #### `evidence_view.py`
