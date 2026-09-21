@@ -27,7 +27,7 @@
   observeReveals();
   bindFlow();
 
-  // Ribbon lights, card highlights and scaling share a six-second cycle.
+  // The soft light crossing the dashed process connector runs only while visible.
   // Pause offscreen and in hidden tabs; respect the reduced-motion preference.
   function bindFlow() {
     const flow = document.querySelector(".lp-flow");
