@@ -35,6 +35,7 @@ except ImportError:  # pragma: no cover - 설치 환경 안내
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "docs" / "screenshots"
+LANDING_SCREENSHOT = ROOT / "src" / "policy_signal_map" / "web" / "static" / "images" / "screenshot-evidence-region.png"
 CHROME_CANDIDATES = (
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
@@ -305,6 +306,9 @@ async def main() -> None:
                 errors += page.console_errors
         finally:
             server.terminate()
+
+    # 랜딩 화면 자산은 설치 패키지에도 들어가야 하므로 같은 캡처 한 장을 정적 폴더에 둔다.
+    shutil.copy2(args.out / "02_evidence_region.png", LANDING_SCREENSHOT)
 
     print("저장:", args.out)
     for line in saved:

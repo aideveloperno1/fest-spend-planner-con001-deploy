@@ -1,0 +1,68 @@
+# Vercel 배포 안내
+
+> 기준: 2026-09-21
+
+이 저장소는 Vercel의 Python 3.12 FastAPI 런타임과 Upstash Redis 세션을 사용한다.
+`run_deploy.ps1`은 로컬 실행용이며 Vercel에서는 실행하지 않는다.
+
+## 1. 프로젝트 연결
+
+Vercel에서 `aideveloperno1/fest-spend-planner-con001-deploy` 저장소를 가져온다.
+Root Directory는 저장소 루트(`.`), Framework Preset은 FastAPI 자동 감지를 사용한다.
+`pyproject.toml`의 `[tool.vercel]`이 `policy_signal_map.app:app`을 진입점으로 지정한다.
+
+## 2. Redis 연결
+
+Vercel Marketplace에서 **Upstash Redis**를 이 프로젝트에 연결한다. 연결 뒤 Preview와 Production에
+다음 Secret이 들어왔는지 확인한다.
+
+```text
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+```
+
+브라우저 쿠키에는 무작위 세션 ID만 저장한다. 기획안·보완 선택·AI 의견은 Redis에 JSON으로 저장하며
+마지막 이용 뒤 기본 24시간이 지나면 만료된다.
+
+## 3. 환경변수
+
+Preview와 Production에 다음 값을 등록한다.
+
+```text
+PSM_SESSION_BACKEND=redis
+PSM_SESSION_TTL_S=86400
+PSM_LLM_PROVIDER=google_ai
+GEMINI_API_KEY=<Google AI Studio에서 발급한 키>
+PSM_LLM_TIMEOUT_S=45
+```
+
+모델 목록과 기본 모델은 코드의 고정 기본값을 사용한다. 직접 지정하려면 다음 값을 그대로 쓴다.
+
+```text
+PSM_LLM_MODELS=gemini-3.8-flash,gemini-3.6-flash,gemini-2.5-pro,gemma-4-31b-it
+PSM_LLM_MODEL=gemini-3.8-flash
+```
+
+`PSM_EVIDENCE_PATH`는 설정하지 않아도 저장소의 공개 합성 파일을 사용한다.
+`PSM_REGION_MAPPING_PATH`는 공개 배포에 등록하지 않는다.
+
+## 4. 배포 확인
+
+Preview 배포가 끝나면 다음을 확인한다.
+
+1. `GET /health`가 HTTP 200과 `status: ok`, `session_backend: redis`를 반환한다.
+2. 랜딩 화면의 CSS·JS·이미지가 표시된다.
+3. 1단계 예시 기획부터 5단계 문서 다운로드까지 이어진다.
+4. 새로고침하거나 다음 요청이 다른 인스턴스로 전달돼도 입력과 선택이 유지된다.
+5. 3단계에서 모델을 고르고 **AI 의견 생성**을 눌렀을 때 Google AI 응답이 표시된다.
+6. Vercel 로그에 API 키·Redis 토큰·전체 세션 JSON이 출력되지 않는다.
+
+코드 검증 명령은 다음과 같다.
+
+```powershell
+uv run pytest -q
+uv run python scripts/check_public_bundle.py
+vercel build
+```
+
+Preview 검증이 끝난 배포만 Production으로 승격한다.

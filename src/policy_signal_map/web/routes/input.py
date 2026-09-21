@@ -13,7 +13,7 @@ from ..dependencies import evidence_state_dep, session_dep
 from ..evidence_state import EvidenceState
 from ..forms import parse_plan_form
 from ..profile_view import option_catalog
-from ..session import WorkState, store
+from ..session import WorkState
 from ..templating import redirect, render
 
 router = APIRouter()
@@ -105,6 +105,6 @@ async def submit(request: Request, session: Session, evidence: Evidence) -> Resp
 
 @router.post("/reset")
 def reset(session: Session) -> Response:
-    session_id, _ = session
-    store.reset(session_id)
+    session_id, state = session
+    state.reset()
     return redirect("/step/1", session_id)

@@ -6,6 +6,11 @@
 - 제목, 내비게이션, 버튼, 다섯 단계는 `templates/landing.html`의 실제 HTML이며, 배치는 `css/landing-hero.css`에서 관리한다.
 - 생성 이미지이므로 원본 문서 그림의 글자 등 세부 묘사는 시안과 차이가 있다.
 
+## 랜딩 서비스 화면
+
+- `screenshot-evidence-region.png`: 랜딩 아래쪽에 보여 주는 2단계 합성 화면. 원본은
+  `docs/screenshots/02_evidence_region.png`이며 `scripts/capture_screenshots.py`가 캡처를 마친 뒤 이 파일도 갱신한다.
+
 ## 사용한 프롬프트
 
 ### 후속 수정: 장갑 제거 (내장 image_gen)

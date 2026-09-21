@@ -5,15 +5,16 @@
 ## 이 폴더는 무엇인가
 
 담당자가 브라우저로 보는 **1~5단계 화면**을 만드는 곳입니다. 주소(`/step/1` 같은)로 요청이 오면 아래 폴더의 계산 코드를 불러 결과를 받고, 화면 틀에 채워 돌려줍니다.
-사용자마다 작업 중인 기획안과 선택을 **서버 메모리에 잠시 보관**하고, 입력 폼 값을 읽고, 숫자를 보기 좋게 표시하는 일도 여기서 합니다.
-**계산이나 규칙 판단은 여기서 하지 않습니다.** 서버를 다시 켜면 보관하던 작업 상태는 사라집니다.
+사용자마다 작업 중인 기획안과 선택을 보관하고, 입력 폼 값을 읽고, 숫자를 보기 좋게 표시하는 일도 여기서 합니다.
+로컬은 서버 메모리, Vercel은 Upstash Redis를 사용합니다. **계산이나 규칙 판단은 여기서 하지 않습니다.**
 
 ## 파일 목록
 
 | 파일 | 하는 일 (쉬운 말) | 언제 보거나 고치나 |
 |---|---|---|
 | `__init__.py` | 이 폴더를 파이썬 묶음으로 인식시키는 빈 파일 | 고칠 일 없음 |
-| `session.py` | **사용자별 작업 상태 보관함.** 입력한 원안, 바뀐 칸, 고른 보완 방법, 고른 AI 모델, 모델별 AI 의견을 브라우저 쿠키 하나로 찾아 보관 | 단계 사이에 기억해야 할 정보가 늘어날 때 |
+| `session.py` | **사용자별 작업 상태 보관함.** 로컬 메모리와 Vercel Redis 저장소, 동시 저장 검사, 만료 시간, 보안 쿠키 설정 | 단계 사이에 기억할 정보나 배포 저장 방식을 바꿀 때 |
+| `session_codec.py` | 기획 원안·보완 선택·AI 의견을 버전 있는 JSON으로 바꾸고 복원 | 세션 상태 구조가 바뀔 때 |
 | `profile_view.py` | 2단계 **지역 소비 프로필 카드**에 넘길 데이터 조립과, 1단계에서 고를 수 있는 **업종·연령 목록**(`option_catalog`). **고른 지역 자료만 쓰고 범위를 넓히지 않음**, 준비됐다고 적히지 않은 묶음은 이유만 표시 | 프로필 카드에 담을 내용을 바꿀 때 |
 | `forms.py` | 화면에서 보낸 **입력 폼 값을 읽어** 기획안·선택 데이터로 바꿈. 목록에 없는 값은 버림 | 입력 칸을 추가했을 때 |
 | `templating.py` | **모든 화면을 그리는 공통 함수**와 숫자 표시 규칙 등록, 쿠키·페이지 이동 도우미 | 모든 화면에 공통으로 넘길 정보가 늘어날 때 |
@@ -23,7 +24,7 @@
 | `ai_models.py` | 3단계 **AI 모델 선택 칸에 필요한 데이터**: 지금 쓰는 모델, 고를 수 있는 모델, 컴퓨터에 받아 둔 모델인지 | 모델 선택 칸을 바꿀 때 |
 | `routes/` | **주소마다 무엇을 할지** 정한 파일들 (단계별 1개씩) | [README](routes/README.md) |
 | `templates/` | 화면의 **HTML 틀** | [README](templates/README.md) |
-| `static/` | 화면 **모양(CSS)과 즉시 반응(JS)** | [README](static/README.md) |
+| `static/` | 화면 **모양(CSS), 즉시 반응(JS), 패키지에 포함할 랜딩 이미지** | [README](static/README.md) |
 
 ---
 
@@ -49,11 +50,12 @@ HTTP 요청을 받아 하위 로직(`plan/`·`evidence/`·`review/`·`choices/`�
 - `start_review()`: 원안 보관, 바뀐 항목 계산, AI 의견 캐시 비움, 선택 정리 표시(`choices_synced`) 초기화
 - `sync_choices(result, evidence)`: 원안 제출 때 또는 자료·운영 기준 버전이 달라졌을 때 재확인 표시·사라진 질문 보관(`choices/recheck.sync_after_review`). 원안 변경 필드는 제출 직후 한 번만 적용하고, 자료 버전만 달라진 호출에는 예전 원안 변경을 다시 적용하지 않는다
 - `cached_opinions(model)`·`remember_opinions(model, opinions, plan)`: 원안이 같을 때만 그 모델의 캐시 사용, 원안이 바뀌면 모든 모델 캐시를 비움. `plan`(요청을 시작한 원안)이 지금 원안과 다르면 보관하지 않음(6-5c). 모델 선택은 원안이 바뀌어도 유지
-- 쿠키 `psm_session` (httponly, samesite=lax). 여러 프로세스로 띄우면 세션이 공유되지 않는다
+- 쿠키 `psm_session`에는 무작위 ID만 둔다 (`httponly`, `samesite=lax`, Vercel에서는 `secure`). 기획 내용은 넣지 않는다
 - 검토 결과는 저장하지 않고 요청마다 다시 계산한다 (같은 입력이면 같은 결과)
-- `SessionStore`: 메모리 dict + 락. 서버 재시작 시 초기화
-- 공개 배포 호스팅 결정(checks.md 미정)에 따라 이 파일만 교체할 수 있게 `get_or_create`·`reset` 인터페이스를 유지한다
-- 오래된 세션 정리: **아직 구현하지 않았다.** 공개 배포를 하게 되면 필요하다 (`작업진행.md` 7-2)
+- `SessionStore`: 로컬·시험용 메모리 dict + 락. 서버 재시작 시 초기화
+- `RedisSessionStore`: Vercel용 Upstash Redis. `psm:session:{ID}`에 JSON을 저장하고 기본 24시간 뒤 만료
+- 저장된 `revision`을 Lua CAS로 비교해 두 요청이 같은 상태를 조용히 덮어쓰지 않게 한다. 충돌하면 409로 다시 시도하도록 알린다
+- `session_codec.py`: 중첩 enum·tuple·보관 선택·모델별 AI 의견까지 명시적으로 JSON 왕복. 지원하지 않는 버전이나 손상된 값은 새 세션으로 교체
 
 #### `forms.py`
 
@@ -107,7 +109,7 @@ HTTP 요청을 받아 하위 로직(`plan/`·`evidence/`·`review/`·`choices/`�
 
 #### `dependencies.py`
 
-- `session_dep` : 쿠키 → `(session_id, WorkState)`
+- `session_dep` : 쿠키 → 환경에 맞는 저장소 → `(session_id, WorkState)`. 응답 직전 `app.py` middleware가 변경 상태를 확정
 - `evidence_state_dep` : `get_evidence_state()`. 테스트는 `app.dependency_overrides`로 교체 (`tests/conftest.py`)
 - 단계 잠금은 각 라우트에서 명시적으로 확인한다
   - 2~5단계: `original` 있음 (없으면 `/step/1`), 근거 파일 정상 (아니면 `error.html` 503)

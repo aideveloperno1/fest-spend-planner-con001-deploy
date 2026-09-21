@@ -86,8 +86,8 @@ def test_landing_serves_its_own_styles_and_script():
 
 
 def test_screenshots_are_served_for_the_landing():
-    """캡처는 docs/screenshots를 그대로 내보낸다 (static으로 복사하지 않는다)."""
-    assert client().get("/shots/02_evidence_region.png").status_code == 200
+    """랜딩용 합성 캡처는 설치 패키지의 정적 파일에서도 제공한다."""
+    assert client().get("/static/images/screenshot-evidence-region.png").status_code == 200
 
 
 def test_brand_on_every_step_goes_to_the_landing():

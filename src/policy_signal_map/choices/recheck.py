@@ -45,8 +45,8 @@ def mark_evidence_recheck(
     """자료나 운영 기준 버전이 달라진 값 기반 선택만 재확인 대상으로 바꾼다."""
     marked = []
     for key, choice in list(choice_set.choices.items()):
-        # 버전 문맥을 저장하기 전 선택은 비교할 기준이 없다. 서버 메모리 방식인 현재
-        # 서비스에서는 새 선택에 항상 값이 들어가며, 기본값은 옛 호출부 호환용이다.
+        # 버전 문맥을 저장하기 전 선택은 비교할 기준이 없다. 새 선택에는 항상 값이
+        # 들어가며, 기본값은 옛 호출부와 저장된 세션 형식의 호환용이다.
         if choice.evidence_dataset_version is None:
             continue
         dataset_changed = (

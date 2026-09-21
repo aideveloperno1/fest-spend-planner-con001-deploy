@@ -14,6 +14,7 @@ from policy_signal_map.app import app
 from policy_signal_map.config import LEGACY_DEMO_EVIDENCE_PATH
 from policy_signal_map.web.dependencies import evidence_state_dep
 from policy_signal_map.web.evidence_state import EvidenceState, get_evidence_state, load_evidence_state
+from policy_signal_map.web.session import store
 
 
 @pytest.fixture(autouse=True)
@@ -27,6 +28,9 @@ def isolated_evidence(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     for key in list(os.environ):
         if key.startswith("PSM_") or key == "GEMINI_API_KEY":
             monkeypatch.delenv(key)
+    # Vercel CI에서 테스트해도 실제 Redis를 사용하지 않는다.
+    monkeypatch.setenv("PSM_SESSION_BACKEND", "memory")
+    store.clear()
     get_evidence_state.cache_clear()
     saved = dict(app.dependency_overrides)
     demo = load_evidence_state(
@@ -37,6 +41,7 @@ def isolated_evidence(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     app.dependency_overrides.clear()
     app.dependency_overrides.update(saved)
     get_evidence_state.cache_clear()
+    store.clear()
 
 
 @pytest.fixture

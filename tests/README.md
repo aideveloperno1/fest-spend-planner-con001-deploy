@@ -32,6 +32,8 @@
 | `test_landing.py` | **랜딩 화면** 확인: 시안에 있던 규칙 번호·행정코드·실제 자료 버전이 따라 들어오지 않았는지, 세션을 만들지 않는지 | 랜딩을 바꿨을 때 |
 | `test_routes.py`, `test_evidence_routes.py`, `test_question_routes.py`, `test_opinion_routes.py`, `test_choice_routes.py`, `test_draft_routes.py` | **1~5단계 화면 주소** 확인: 단계 잠금, 화면 내용, 저장·내려받기, AI 의견·모델 선택 | 화면 흐름을 바꿨을 때 |
 | `test_public_bundle.py` | **공개 저장소 검사 도구**가 실제 자료를 제대로 잡는지 확인 | 공개 저장소 검사 규칙을 바꿨을 때 |
+| `test_session_persistence.py` | **Vercel 세션** 확인: 전체 상태 JSON 왕복, Redis 인스턴스 간 유지, 만료, 동시 저장 충돌 | 세션 상태나 Redis 저장 방식을 바꿀 때 |
+| `test_vercel_deploy.py` | **Vercel 설정** 확인: FastAPI 진입점, 실행 시간·지역, 상태 확인 경로, 보안 쿠키 | 배포 설정을 바꿀 때 |
 | `test_season_checks.py` | **시기 확인과 외국인 대상 기반 확인**: 기간에 든 달 세기, 자료 기간 밖 처리, 작은 지역 기준, 외국인 대상 판단 | 두 질문의 조건을 바꿨을 때 |
 | `test_industry_checks.py` | **사용처 업종 확인(R02)과 대상·고객 구성(R08)**: 결제 0원과 자료 없음 구분, 업종×연령 조합 선택, 기준값·순위 분모가 없으면 보류 | 업종·대상 연령 확인 조건을 바꿨을 때 |
 | `test_capacity_checks.py` | **규모와 수용 여건(R11)**: 목표 방문객 수와 외부 인구 비교, 미연결 보류, 서로 다른 집단이라는 한계 표시 | 목표 규모·외부 인구 조건을 바꿨을 때 |
@@ -58,7 +60,7 @@
 
 ### 파일별 테스트 개수
 
-개수는 매개변수화한 경우를 포함한 수집 기준이다(2026-09-21, 전체 674개). 바뀌면 `uv run pytest --collect-only -q`로 다시 센다.
+개수는 매개변수화한 경우를 포함한 수집 기준이다(2026-09-21, 전체 700개). 바뀌면 `uv run pytest --collect-only -q`로 다시 센다.
 
 | 파일 | 개수 | 대상 |
 |---|---:|---|
@@ -107,6 +109,8 @@
 | `test_evidence_profiles.py` | 29 | `evidence/profile_schema.py`, `evidence/loader.py`의 2.1 부분 |
 | `test_plan_inputs.py` | 28 | `plan/models.py`의 새 입력, `plan/validation.py`, `web/forms.py`, 1단계 화면 |
 | `test_question_split.py` | 10 | `review/outcome.py`의 `question_key_of`, `review/rules.py`의 `related_fields_for`, `choices/recheck.py` |
+| `test_session_persistence.py` | 11 | 세션 JSON 왕복, Redis 인스턴스 간 유지·만료·동시 저장 충돌, Vercel 설정 요구사항 |
+| `test_vercel_deploy.py` | 4 | Vercel 진입점·함수 설정, `/health`, 보안 쿠키, Redis 없는 Vercel의 안전한 실패 |
 | `test_boundaries.py` | 3 | 패키지 의존 방향 (직접 import) |
 
 ### 워크플로우 12장 시험 항목 대응

@@ -17,4 +17,5 @@ private/
 
 .vscode/*
 .idea/
+.vercel/
 .DS_Store

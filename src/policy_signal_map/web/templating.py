@@ -8,7 +8,7 @@ from .. import formatting, labels
 from ..paths import WEB_DIR
 from ..plan.regions import region_label
 from .evidence_state import EvidenceState
-from .session import COOKIE_NAME, WorkState
+from .session import COOKIE_NAME, WorkState, cookie_max_age, cookie_secure
 
 def _asset_version() -> str:
     """정적 파일 주소 뒤에 붙일 버전. 파일이 바뀌면 주소가 바뀌어 브라우저가 새로 받는다.
@@ -26,7 +26,14 @@ templates.env.filters.update(formatting.FILTERS)
 
 
 def with_cookie(response: Response, session_id: str) -> Response:
-    response.set_cookie(COOKIE_NAME, session_id, httponly=True, samesite="lax")
+    response.set_cookie(
+        COOKIE_NAME,
+        session_id,
+        httponly=True,
+        secure=cookie_secure(),
+        samesite="lax",
+        max_age=cookie_max_age(),
+    )
     return response
 
 

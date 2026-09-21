@@ -38,6 +38,12 @@ uv run python scripts/capture_screenshots.py     # 제출용 화면 캡처 다�
 uv run python scripts/build_regions.py           # 지역 선택 목록 다시 만들기
 ```
 
+### Vercel 배포
+
+이 저장소는 Vercel FastAPI 진입점과 Upstash Redis 세션 저장소가 준비되어 있습니다.
+Vercel에서는 `run_deploy.ps1`을 사용하지 않습니다. GitHub 저장소를 연결하고 Upstash Redis를 설치한 뒤
+Google AI와 Redis Secret을 등록합니다. 전체 순서는 [Vercel 배포 안내](docs/vercel_deployment.md)에 있습니다.
+
 ### 설정 (환경변수)
 
 설정하지 않으면 **합성 근거 파일, AI 의견 없음**으로 실행됩니다. 바꿀 때는 `.env.example`을 `.env`로 복사해 값을 채우고 `--env-file`로 실행합니다. `.env`는 git에 올라가지 않습니다.
@@ -50,6 +56,10 @@ uv run --env-file .env policy-signal-map
 |---|---|---|
 | `PSM_EVIDENCE_PATH` | 공개 합성 파일 `resources/evidence/review_evidence_public_v2.1.json` | 배포 서비스가 읽는 분석 근거 파일 |
 | `PSM_REGION_MAPPING_PATH` | 사용하지 않음 | 공개 합성 전달본은 가상 지역 키를 그대로 사용하므로 대응표가 필요 없다 |
+| `PSM_SESSION_BACKEND` | 로컬 `memory`, Vercel `redis` | 작업 중인 기획과 선택을 저장할 곳 |
+| `PSM_SESSION_TTL_S` | `86400` | Redis 세션의 마지막 이용 후 유지 시간(초) |
+| `UPSTASH_REDIS_REST_URL` | 없음 | Vercel Marketplace가 넣는 Redis REST 주소. Secret으로만 관리 |
+| `UPSTASH_REDIS_REST_TOKEN` | 없음 | Vercel Marketplace가 넣는 Redis REST 토큰. Secret으로만 관리 |
 | `PSM_LLM_PROVIDER` | `none` | AI 참고 의견. `none` 또는 `google_ai` |
 | `GEMINI_API_KEY` | 없음 | Google AI Studio API 키. `.env` 또는 배포 서비스의 Secret에만 저장 |
 | `PSM_LLM_MODEL` | 목록의 첫 모델 | 기본 모델. 배포 기본값은 `gemini-3.8-flash` |
@@ -78,6 +88,7 @@ uv run --env-file .env policy-signal-map
 | `uv.lock` | 설치할 라이브러리의 **정확한 버전을 고정**한 파일. `uv sync`가 자동으로 만듦 | 직접 고치지 않음 |
 | `.python-version` | 사용할 파이썬 버전(3.12) | 파이썬 버전을 바꿀 때 |
 | `.env.example` | 설정 파일 **예시**. 복사해서 `.env`를 만들어 씀 | 새 환경변수를 추가할 때 |
+| `vercel.json` | Vercel 실행 지역·최대 실행 시간·함수 번들 제외 항목 | Vercel 실행 조건을 바꿀 때 |
 | `.gitignore` | git에 올리지 않을 파일 목록. **private 폴더, 이름에 real이 들어간 근거 파일과 비밀 설정 파일을 막음** | 올리면 안 되는 파일 종류가 늘어날 때 |
 | `.gitattributes` | 줄바꿈을 LF로 맞추고 이미지를 바이너리로 다루는 규칙 | 거의 고칠 일 없음 |
 
@@ -129,4 +140,4 @@ llm → review 결과·plan·labels·config만 사용 (evidence·web 직접 사�
 코드와 문서의 모든 권리는 작성자에게 있고, 사전 허락 없이 사용·복제·수정·배포할 수 없다.
 공모전 수상 시 산출물의 권리는 공모전 규정에 따른다.
 
-사용한 외부 라이브러리와 글꼴은 각자의 라이선스를 따른다 (FastAPI·Chart.js: MIT, Jinja2·uvicorn: BSD, Pretendard: SIL OFL).
+사용한 외부 라이브러리와 글꼴은 각자의 라이선스를 따른다 (FastAPI·Chart.js·Upstash Redis Python SDK: MIT, Jinja2·uvicorn: BSD, Pretendard: SIL OFL).
