@@ -20,7 +20,7 @@
   <body class="landing">
     <header class="lp-nav">
       <div class="lp-nav-inner">
-        <a class="brand" href="/"><span class="brand-mark"></span><span>콕콕</span></a>
+        <a class="brand brand-box" href="/" aria-label="콕콕 KOKKOK 홈">{% include "partials/brand_logo.html" %}</a>
         <nav class="lp-nav-links" aria-label="서비스 소개">
           {% for href, label in c.nav %}<a href="{{ href }}">{{ label }}</a>{% endfor %}
         </nav>

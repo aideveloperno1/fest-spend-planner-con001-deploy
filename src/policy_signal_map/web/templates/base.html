@@ -15,19 +15,19 @@
   <body>
     <header class="topbar">
       <div class="topbar-inner">
-        <a class="brand" href="/"><span class="brand-mark"></span><span>콕콕</span></a>
+        <a class="brand" href="/" aria-label="콕콕 KOKKOK 홈">{% include "partials/brand_logo.html" %}</a>
         <span class="tag {{ 'tag-error' if not evidence.ok }}" data-evidence-badge>{{ evidence.badge }}</span>
         <span class="spacer"></span>
         <form method="post" action="/reset">
           <button type="submit" class="btn btn-ghost">처음으로</button>
         </form>
       </div>
-      <nav class="rail">
+      <nav class="rail" aria-label="기획 검토 단계">
         {% for label in labels.STEP_LABELS %}
           {% set num = loop.index %}
           {% set cls = "active" if num == step else ("done" if num < step else "") %}
           {% if num == 1 or state.original %}
-            <a class="rail-item {{ cls }}" href="/step/{{ num }}">
+            <a class="rail-item {{ cls }}" href="/step/{{ num }}"{% if num == step %} aria-current="step"{% endif %}>
               <span class="rail-num">{{ "✓" if num < step else num }}</span><span>{{ label }}</span>
             </a>
           {% else %}

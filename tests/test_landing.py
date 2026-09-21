@@ -96,4 +96,4 @@ def test_brand_on_every_step_goes_to_the_landing():
     c.post("/step/1", data={"action": "sample"}, follow_redirects=True)
     for step in (1, 2, 3):
         html = c.get(f"/step/{step}").text
-        assert '<a class="brand" href="/">' in html, step
+        assert re.search(r'<a\b[^>]*class="brand"[^>]*href="/"(?:\s[^>]*)?>', html), step
