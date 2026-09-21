@@ -19,7 +19,8 @@
 {% block content %}
 {% set region = plan.region %}
 {% set level = region.level.value if region else "" %}
-<div class="layout-main-side">
+<div class="plan-input-page">
+<div class="plan-input-layout">
   <form class="card card-lg" id="plan-form" method="post" action="/step/1" novalidate>
     <div class="card-head">
       <div>
@@ -232,44 +233,36 @@
 
     <div class="form-foot">
       <p class="muted small">작업 내용은 서버에 임시로만 보관되며, 서버가 다시 시작되면 초기화됩니다.</p>
-      <button type="submit" class="btn btn-primary" name="action" value="submit">검토 시작 →</button>
     </div>
   </form>
+</div>
 
-  <aside class="side">
-    <div class="card">
-      <h2 class="side-title">입력 상태</h2>
-      {% set missing = summary.errors | length %}
-      <div class="summary-row">
-        <span>필수 항목</span>
-        <b data-summary="required" class="{{ 'text-warn' if missing and plan_touched else 'text-ok' }}">
-          {%- if not plan_touched -%}입력 전
-          {%- elif missing -%}{{ missing }}개 확인 필요
-          {%- else -%}모두 입력됨{%- endif -%}
-        </b>
+<section class="plan-sticky-bar" aria-label="입력 상태 및 주요 작업">
+  <div class="plan-sticky-inner">
+    <div class="plan-status">
+      <div class="plan-status-label">입력 상태</div>
+      <p class="plan-status-summary">
+        필수 항목: 완료
+        <strong data-summary="required-completed" class="{{ 'text-ok' if required_completed == required_total else 'text-warn' }}">{{ required_completed }}</strong>/{{ required_total }}
+        <span aria-hidden="true">·</span>
+        추가 확정 필요: <strong data-summary="pending-count">{{ pending_labels | length }}</strong>건
+        <span data-summary="pending-wrap"{{ " hidden" if not pending_labels }}>(<span data-summary="pending-names">{{ pending_labels | join(', ') }}</span>)</span>
+      </p>
+      <div
+        class="plan-progress"
+        role="progressbar"
+        aria-label="필수 항목 입력 완성도"
+        aria-valuemin="0"
+        aria-valuemax="{{ required_total }}"
+        aria-valuenow="{{ required_completed }}"
+        data-summary="progress-track"
+      >
+        <span data-summary="progress" style="width: {{ (required_completed / required_total * 100) | round(1) }}%"></span>
       </div>
-      <div class="summary-row">
-        <span>추가 확정 필요로 남을 항목</span>
-        <b data-summary="pending-count">{{ summary.pending | length }}개</b>
-      </div>
-      <div class="pending-list" data-summary="pending-list"{{ " hidden" if not summary.pending }}>
-        {% for item in summary.pending %}<span class="badge-warn">{{ item }}</span>{% endfor %}
-      </div>
-      <p class="side-foot" data-summary="foot">입력하는 대로 바로 세어 보여 줍니다. [검토 시작]을 누르면 이 내용으로 2단계 근거 확인으로 넘어갑니다.</p>
     </div>
-    <div class="card">
-      <h2 class="side-title">검토 예정 규칙</h2>
-      <div class="rule-list">
-        {% for rule in rules %}
-          <div class="rule rule-{{ rule.scope }}">
-            <div class="rule-id">{{ rule.scope_label }}</div>
-            <div class="rule-text">{{ rule.summary }}</div>
-          </div>
-        {% endfor %}
-      </div>
-      <p class="side-foot">‘문제없음’과 ‘검토하지 않음’을 구분해 결과 화면에 표시합니다.</p>
-    </div>
-  </aside>
+    <button type="submit" class="btn btn-primary plan-submit" name="action" value="submit" form="plan-form">검토 시작 →</button>
+  </div>
+</section>
 </div>
 {% endblock %}
 

@@ -14,12 +14,11 @@ def test_later_steps_locked_until_review_starts():
     assert response.headers["location"] == "/step/1"
 
 
-def test_input_page_lists_rules_from_catalog():
+def test_input_page_does_not_render_the_removed_rules_panel():
     response = client().get("/step/1")
     assert response.status_code == 200
-    # 1단계 예정 목록은 범위 라벨과 설명만 보여 준다 (관리 번호는 화면에 쓰지 않음, 9/18)
-    assert "검토 구현" in response.text and "기본 검토" in response.text and "분석 예시" in response.text
-    assert "R07" not in response.text and "R02" not in response.text
+    assert "검토 예정 규칙" not in response.text
+    assert "검토 구현" not in response.text and "기본 검토" not in response.text and "분석 예시" not in response.text
 
 
 def test_static_files_are_served():

@@ -67,82 +67,63 @@
     }),
   );
 
-  // 입력 상태 패널: 입력하는 즉시 다시 센다.
+  // 하단 입력 상태 바: 입력하는 즉시 다시 센다.
   // 서버 검증(plan/validation.py)을 대신하지 않으며, 저장은 [검토 시작]을 눌러야 된다.
   // 항목 이름과 판단 기준은 validation.py와 같게 유지한다 (다르면 제출 후 숫자가 달라 보인다).
   const summary = {
-    required: form.parentElement.querySelector('[data-summary="required"]'),
-    count: form.parentElement.querySelector('[data-summary="pending-count"]'),
-    list: form.parentElement.querySelector('[data-summary="pending-list"]'),
+    required: document.querySelector('[data-summary="required-completed"]'),
+    count: document.querySelector('[data-summary="pending-count"]'),
+    pendingWrap: document.querySelector('[data-summary="pending-wrap"]'),
+    pendingNames: document.querySelector('[data-summary="pending-names"]'),
+    progress: document.querySelector('[data-summary="progress"]'),
+    progressTrack: document.querySelector('[data-summary="progress-track"]'),
   };
 
   const value = (name) => (form.elements.namedItem(name)?.value ?? "").trim();
   const checkedValues = (name) => [...form.querySelectorAll(`input[name="${name}"]:checked`)].map((i) => i.value);
-  const dataStatusLabel = () => {
-    const select = form.elements.namedItem("data_status");
-    return select.value ? select.options[select.selectedIndex].text : "";
-  };
-
-  function requiredMissing() {
+  function requiredChecks() {
     const goals = checkedValues("goals");
     const metrics = checkedValues("metrics");
     const lv = level();
     const start = value("period_start");
     const end = value("period_end");
-    const digits = value("budget_krw").replaceAll(",", "");
     return [
-      !value("name"),
-      goals.length === 0 || (goals.includes("other") && !value("goal_other")),
-      !value("target"),
-      !lv || (lv !== "national" && !sido.value) || (lv === "sigungu" && !sigungu.value),
-      !start || !end || end < start,
-      metrics.length === 0 || (metrics.includes("other") && !value("metric_other")),
-      checkedValues("indicator_use").length === 0,
-      !undecided.checked && digits !== "" && !/^\d+$/.test(digits),
-      undecided.checked && digits !== "",
-    ].filter(Boolean).length;
+      Boolean(value("name")),
+      checkedValues("business_type").length > 0,
+      goals.length > 0 && (!goals.includes("other") || Boolean(value("goal_other"))),
+      Boolean(value("target")),
+      Boolean(lv) && (lv === "national" || Boolean(sido.value)) && (lv !== "sigungu" || Boolean(sigungu.value)),
+      Boolean(start && end && end >= start),
+      metrics.length > 0 && (!metrics.includes("other") || Boolean(value("metric_other"))),
+      checkedValues("indicator_use").length > 0,
+    ];
   }
 
   function pendingItems() {
     const items = [];
     const digits = value("budget_krw").replaceAll(",", "");
-    if (undecided.checked) items.push("예산 (미정)");
-    else if (digits === "") items.push("예산 (미입력)");
-    if (!value("usage_place")) items.push("쿠폰 사용처");
+    if (undecided.checked || digits === "") items.push("예산");
+    if (!value("usage_place")) items.push("사용처");
+    if (checkedValues("business_type").includes("festival") && !value("visitor_goal")) items.push("방문객 목표");
     const status = form.elements.namedItem("data_status").value;
-    if (!status) items.push("자료 확보 상태 (선택 안 함)");
-    else if (status !== "secured") items.push(`성과 자료 확보 (${dataStatusLabel()})`);
+    if (status !== "secured") items.push("자료 확보");
     return items;
-  }
-
-  function touched() {
-    return (
-      Boolean(value("name") || value("target") || value("usage_place") || value("goal_other") ||
-              value("metric_other") || value("fixed_conditions") || value("period_start") || value("period_end") ||
-              value("budget_krw") || form.elements.namedItem("data_status").value || level()) ||
-      undecided.checked || checkedValues("goals").length > 0 || checkedValues("metrics").length > 0 ||
-      checkedValues("indicator_use").length > 0
-    );
   }
 
   function syncSummary() {
     if (!summary.required) return;
-    const missing = requiredMissing();
-    summary.required.textContent = !touched() ? "입력 전" : missing ? `${missing}개 확인 필요` : "모두 입력됨";
-    summary.required.classList.toggle("text-warn", touched() && missing > 0);
-    summary.required.classList.toggle("text-ok", !touched() || missing === 0);
+    const checks = requiredChecks();
+    const completed = checks.filter(Boolean).length;
+    summary.required.textContent = completed;
+    summary.required.classList.toggle("text-warn", completed < checks.length);
+    summary.required.classList.toggle("text-ok", completed === checks.length);
+    summary.progress.style.width = `${(completed / checks.length) * 100}%`;
+    summary.progressTrack.setAttribute("aria-valuenow", completed);
 
     const items = pendingItems();
-    summary.count.textContent = `${items.length}개`;
-    summary.list.replaceChildren(
-      ...items.map((item) => {
-        const badge = document.createElement("span");
-        badge.className = "badge-warn";
-        badge.textContent = item;
-        return badge;
-      }),
-    );
-    summary.list.hidden = items.length === 0;
+    summary.count.textContent = items.length;
+    summary.pendingNames.textContent = items.join(", ");
+    summary.pendingWrap.hidden = items.length === 0;
   }
 
   form.addEventListener("input", syncSummary);

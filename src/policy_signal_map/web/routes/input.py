@@ -8,7 +8,6 @@ from fastapi.responses import HTMLResponse, Response
 from ...plan.models import BudgetStatus, PlanInput, Region, RegionLevel, sample_plan
 from ...plan.regions import load_regions, sido_list
 from ...plan.validation import ValidationResult, validate_plan
-from ...review.rules import load_rule_catalog
 from ..dependencies import evidence_state_dep, session_dep
 from ..evidence_state import EvidenceState
 from ..forms import parse_plan_form
@@ -19,6 +18,41 @@ from ..templating import redirect, render
 router = APIRouter()
 Session = Annotated[tuple[str, WorkState], Depends(session_dep)]
 Evidence = Annotated[EvidenceState, Depends(evidence_state_dep)]
+
+REQUIRED_ERROR_GROUPS = (
+    {"name"},
+    {"business_type"},
+    {"goals", "goal_other"},
+    {"target"},
+    {"region"},
+    {"period"},
+    {"metrics", "metric_other"},
+    {"indicator_use"},
+)
+
+
+def _required_completed(result: ValidationResult) -> int:
+    """하단 상태 바에서 보여 줄 필수 입력 8개 묶음의 완료 수."""
+    return sum(not (group & result.errors.keys()) for group in REQUIRED_ERROR_GROUPS)
+
+
+def _pending_labels(items: list[str]) -> list[str]:
+    """검증의 상세 문구를 좁은 하단 바에 맞는 짧은 항목명으로 바꾼다."""
+    labels: list[str] = []
+    for item in items:
+        if item.startswith("예산"):
+            label = "예산"
+        elif item == "쿠폰 사용처":
+            label = "사용처"
+        elif item.startswith("목표 방문객 수"):
+            label = "방문객 목표"
+        elif "자료 확보" in item:
+            label = "자료 확보"
+        else:
+            label = item
+        if label not in labels:
+            labels.append(label)
+    return labels
 
 
 def sample_plan_for(evidence: EvidenceState) -> PlanInput:
@@ -41,19 +75,20 @@ def _render(
 ) -> Response:
     session_id, state = session
     plan = state.plan
+    summary = result or validate_plan(plan)
     context = {
         "plan": plan,
         # 제출 전에는 오류를 보여주지 않고, 요약만 현재 입력 기준으로 보여준다
         "errors": result.errors if result else {},
-        "summary": result or validate_plan(plan),
+        "summary": summary,
+        "required_total": len(REQUIRED_ERROR_GROUPS),
+        "required_completed": _required_completed(summary),
+        "pending_labels": _pending_labels(summary.pending),
         "sido_list": sido_list(),
         "regions_json": load_regions(),
-        "rules": load_rule_catalog(),
         "budget_status": BudgetStatus,
         # 고를 수 있는 업종·연령은 근거 파일이 알려 준다. 없으면 그 입력칸을 두지 않는다
         "catalog": option_catalog(evidence.result),
-        # 아직 아무것도 입력하지 않았으면 필수 항목을 "확인 필요"로 겁주지 않는다 (9/18)
-        "plan_touched": plan != PlanInput(),
     }
     return render(
         request,

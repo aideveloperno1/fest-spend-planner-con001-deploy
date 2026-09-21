@@ -133,6 +133,25 @@ def test_입력_화면에_새_칸이_보인다():
     assert "카드 자료에 없어 별도 자료가 필요한 지표" in text and "방문객 수" in text
 
 
+def test_입력_화면은_단일_컬럼과_하단_고정_상태_바를_쓴다():
+    text = client().get("/step/1").text
+    assert 'class="plan-input-layout"' in text
+    assert 'class="plan-sticky-bar"' in text
+    assert 'data-summary="progress-track"' in text
+    assert 'form="plan-form"' in text and "검토 시작 →" in text
+    assert "검토 예정 규칙" not in text
+    assert '<aside class="side">' not in text
+
+
+def test_예시_기획의_고정_바는_완료_8개와_확정_필요_2건을_보인다():
+    c = client()
+    response = c.post("/step/1", data={"action": "sample"}, follow_redirects=True)
+    text = response.text
+    assert 'data-summary="required-completed" class="text-ok">8</strong>/8' in text
+    assert 'data-summary="pending-count">2</strong>건' in text
+    assert 'data-summary="pending-names">예산, 자료 확보</span>' in text
+
+
 def test_예시_기획에도_사업_유형이_들어_있다():
     assert sample_plan().business_type is not None
     assert validate_plan(sample_plan()).ok
