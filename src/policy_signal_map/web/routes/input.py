@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, Response
 
-from ...plan.models import BudgetStatus, PlanInput, Region, RegionLevel, sample_plan
+from ...plan.models import BusinessType, BudgetStatus, PlanInput, Region, RegionLevel, sample_plan
 from ...plan.regions import load_regions, sido_list
 from ...plan.validation import ValidationResult, validate_plan
 from ..dependencies import evidence_state_dep, session_dep
@@ -87,6 +87,7 @@ def _render(
         "sido_list": sido_list(),
         "regions_json": load_regions(),
         "budget_status": BudgetStatus,
+        "business_type": BusinessType,
         # 고를 수 있는 업종·연령은 근거 파일이 알려 준다. 없으면 그 입력칸을 두지 않는다
         "catalog": option_catalog(evidence.result),
     }

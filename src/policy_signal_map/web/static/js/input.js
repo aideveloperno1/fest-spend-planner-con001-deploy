@@ -14,6 +14,24 @@
     }
   });
 
+  // 쿠폰 사용처는 쿠폰·지역화폐 사업에서만 받는다.
+  const couponField = form.querySelector('[data-business-field="coupon"]');
+  const usagePlace = form.elements.namedItem("usage_place");
+
+  function isCouponBusiness() {
+    return checkedValues("business_type").includes("coupon");
+  }
+
+  function syncBusinessFields() {
+    const showCouponField = isCouponBusiness();
+    couponField.hidden = !showCouponField;
+    usagePlace.disabled = !showCouponField;
+  }
+
+  form.querySelectorAll('input[name="business_type"]').forEach((radio) =>
+    radio.addEventListener("change", syncBusinessFields),
+  );
+
   // 지역: 범위에 따라 시도·시군구 선택 표시, 시도에 맞춰 시군구 목록 갱신
   const sido = form.elements.namedItem("sido");
   const sigungu = form.elements.namedItem("sigungu");
@@ -103,7 +121,7 @@
     const items = [];
     const digits = value("budget_krw").replaceAll(",", "");
     if (undecided.checked || digits === "") items.push("예산");
-    if (!value("usage_place")) items.push("사용처");
+    if (isCouponBusiness() && !value("usage_place")) items.push("사용처");
     if (checkedValues("business_type").includes("festival") && !value("visitor_goal")) items.push("방문객 목표");
     const status = form.elements.namedItem("data_status").value;
     if (status !== "secured") items.push("자료 확보");
@@ -128,6 +146,7 @@
 
   form.addEventListener("input", syncSummary);
   form.addEventListener("change", syncSummary);
+  syncBusinessFields();
   syncSummary();
 
   // 잘못된 항목이 있으면 첫 오류로 이동

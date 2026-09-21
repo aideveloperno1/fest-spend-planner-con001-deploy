@@ -136,13 +136,17 @@
     </div>
 
     <div class="grid-fields">
-      {{ text_field("usage_place", "쿠폰 사용처", false, "예: 관내 참여 점포", plan.usage_place) }}
       <label class="field {{ 'has-error' if errors.get('visitor_goal') }}">
         <span class="label">목표 방문객 수 {{ req(false) }}</span>
         <input class="input" type="text" inputmode="numeric" name="visitor_goal"
                value="{{ plan.visitor_goal_raw }}" placeholder="예: 30000" />
         <p class="note">축제·행사에서 적지 않으면 기획안에 ‘추가 확정 필요’로 남습니다. 0명이라고 적은 것과 다르게 기록됩니다.</p>
         {{ error("visitor_goal") }}
+      </label>
+      <label class="field" data-business-field="coupon"{{ " hidden" if plan.business_type != business_type.COUPON }}>
+        <span class="label">쿠폰 사용처 {{ req(false) }}</span>
+        <input class="input" type="text" name="usage_place" value="{{ plan.usage_place }}"
+               placeholder="예: 관내 참여 점포"{{ " disabled" if plan.business_type != business_type.COUPON }} />
       </label>
     </div>
 

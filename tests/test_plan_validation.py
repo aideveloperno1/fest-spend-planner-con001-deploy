@@ -38,7 +38,7 @@ def test_invalid_budget_text_is_error_not_zero():
 
 def test_pending_items_for_empty_optional_fields():
     pending = validate_plan(parse(VALID_FORM)).pending
-    assert pending == ["예산 (미입력)", "쿠폰 사용처", "자료 확보 상태 (선택 안 함)"]
+    assert pending == ["예산 (미입력)", "자료 확보 상태 (선택 안 함)"]
 
 
 def test_other_goal_requires_description():

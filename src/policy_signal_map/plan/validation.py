@@ -83,7 +83,7 @@ def validate_plan(plan: PlanInput) -> ValidationResult:
         pending.append("예산 (미입력)")
     elif plan.budget.status is BudgetStatus.UNDECIDED:
         pending.append("예산 (미정)")
-    if not plan.usage_place:
+    if plan.business_type is BusinessType.COUPON and not plan.usage_place:
         pending.append("쿠폰 사용처")
     if plan.business_type is BusinessType.FESTIVAL and plan.visitor_goal is None:
         # 축제·행사에서만 묻는다. 다른 유형에서는 없어도 빠진 항목이 아니다

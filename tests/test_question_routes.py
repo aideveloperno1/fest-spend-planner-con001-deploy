@@ -47,7 +47,7 @@ def test_step_three_shows_pending_items():
     text = text_of(reviewed_client().get("/step/3").text)
     assert "빠진 운영 조건 확인" in text and "추가 확정 필요" in text
     # 예시 폼은 예산을 비워 두므로 "미입력"이다 ([미정] 체크 시에는 "미정")
-    assert "예산 (미입력), 쿠폰 사용처, 자료 확보 상태" in text
+    assert "예산 (미입력), 자료 확보 상태" in text
 
 
 def test_step_three_does_not_preview_options():

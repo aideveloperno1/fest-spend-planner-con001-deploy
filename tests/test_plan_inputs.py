@@ -123,6 +123,13 @@ def test_방문객_목표가_바뀌면_재확인_대상이_된다():
     assert diff_plan(before, after) == {"visitor_goal"}
 
 
+def test_쿠폰_유형에서만_사용처가_추가_확정_필요로_남는다():
+    coupon = validate_plan(parse({**VALID_FORM, "business_type": "coupon"}))
+    tourism = validate_plan(parse({**VALID_FORM, "business_type": "foreign_tourism"}))
+    assert "쿠폰 사용처" in coupon.pending
+    assert "쿠폰 사용처" not in tourism.pending
+
+
 # ---------------------------------------------------------------- 화면
 
 
@@ -131,6 +138,17 @@ def test_입력_화면에_새_칸이_보인다():
     assert "사업 유형" in text and "축제·행사" in text
     assert "목표 방문객 수" in text
     assert "카드 자료에 없어 별도 자료가 필요한 지표" in text and "방문객 수" in text
+
+
+def test_방문객_수가_사용처보다_먼저_나오고_사용처는_쿠폰_유형에만_보인다():
+    c = client()
+    empty = c.get("/step/1").text
+    assert empty.index("목표 방문객 수") < empty.index("쿠폰 사용처")
+    assert 'data-business-field="coupon" hidden' in empty
+    assert 'name="usage_place"' in empty and " disabled" in empty
+
+    coupon = c.post("/step/1", data={**VALID_FORM, "business_type": "coupon", "target": ""})
+    assert 'data-business-field="coupon" hidden' not in coupon.text
 
 
 def test_입력_화면은_단일_컬럼과_하단_고정_상태_바를_쓴다():
