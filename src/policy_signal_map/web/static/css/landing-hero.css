@@ -103,18 +103,23 @@
   border: 2px solid #b5ecff;
   border-radius: 0;
   clip-path: inherit;
-  box-shadow: 0 0 12px #68baff99, inset 0 0 12px #b7eaff80;
+  background:
+    radial-gradient(circle at 27% 24%, rgba(255,255,255,.98) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 72% 34%, rgba(210,244,255,.95) 0 1px, transparent 2px),
+    linear-gradient(112deg, transparent 28%, rgba(255,255,255,.7) 47%, transparent 65%);
+  background-size: auto, auto, 220% 100%;
+  background-position: center, center, 130% 0;
+  box-shadow: 0 0 12px #68baff80, inset 0 0 12px #b7eaff66;
   opacity: 0;
   pointer-events: none;
 }
 .lp-flow-ready .lp-step::after {
-  animation: lp-card-arrival 6s ease-in-out infinite;
+  animation: lp-card-shimmer 6s ease-in-out infinite;
   animation-delay: calc(var(--i) * 1.35s);
 }
 .lp-flow-ready .lp-step {
-  animation: lp-card-grow 6s ease-in-out infinite;
+  animation: lp-card-brighten 6s ease-in-out infinite;
   animation-delay: calc(var(--i) * 1.35s);
-  transform-origin: center;
 }
 .lp-flow:not(.lp-flow-running) .lp-flow-light,
 .lp-flow:not(.lp-flow-running) .lp-step,
@@ -125,19 +130,21 @@
   90% { stroke-dashoffset: -97; opacity: 1; }
   100% { stroke-dashoffset: -100; opacity: 0; }
 }
-@keyframes lp-card-arrival {
+@keyframes lp-card-shimmer {
   0%, 25%, 100% { opacity: 0; }
-  11%, 14% { opacity: .8; }
+  9% { opacity: .15; background-position: center, center, 130% 0; }
+  12%, 15% { opacity: .78; }
+  18% { opacity: 0; background-position: center, center, -130% 0; }
 }
-@keyframes lp-card-grow {
-  0%, 25%, 100% { transform: scale(1); }
-  11%, 14% { transform: scale(1.06); }
+@keyframes lp-card-brighten {
+  0%, 25%, 100% { filter: drop-shadow(0 10px 11px rgba(47, 91, 145, .22)) brightness(1); }
+  11%, 15% { filter: drop-shadow(0 12px 14px rgba(74, 144, 210, .28)) brightness(1.07); }
 }
-.lp-intro .lp-steps { position: relative; grid-template-columns: repeat(5, 148px); justify-content: space-between; gap: 0; margin: 0; }
+.lp-intro .lp-steps { position: relative; grid-template-columns: repeat(5, 164px); justify-content: space-between; gap: 0; margin: 0; }
 .lp-intro .lp-step {
   position: relative;
-  width: 148px;
-  height: 148px;
+  width: 164px;
+  height: 190px;
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -183,8 +190,8 @@
   .lp-intro .lp-hero { min-height: 475px; padding-top: 58px; }
   .lp-intro .lp-lead { max-width: 470px; }
   .lp-intro .lp-title { font-size: 34px; }
-  .lp-intro .lp-steps { grid-template-columns: repeat(5, 126px); gap: 8px; }
-  .lp-intro .lp-step { width: 126px; height: 126px; padding: 15px 10px; }
+  .lp-intro .lp-steps { grid-template-columns: repeat(5, 138px); gap: 8px; }
+  .lp-intro .lp-step { width: 138px; height: 159px; padding: 15px 10px; }
   .lp-step-icon { width: 23px; height: 23px; margin-bottom: 2px; }
   .lp-flow-ribbon { height: 126px; }
 }
@@ -205,7 +212,7 @@
   .lp-intro .lp-h2 { font-size: 21px; margin-bottom: 23px; }
   .lp-flow-ribbon { display: none; }
   .lp-intro .lp-steps { grid-template-columns: repeat(6, 1fr); gap: 24px 8px; justify-items: center; }
-  .lp-intro .lp-step { grid-column: span 2; width: 140px; height: 140px; }
+  .lp-intro .lp-step { grid-column: span 2; width: 148px; height: 171px; }
   .lp-intro .lp-step:nth-child(4) { grid-column: 2 / span 2; }
   .lp-intro .lp-step:nth-child(5) { grid-column: 4 / span 2; }
 }
