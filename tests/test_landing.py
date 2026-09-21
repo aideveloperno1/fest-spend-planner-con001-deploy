@@ -79,6 +79,17 @@ def test_every_section_is_readable_without_javascript():
     assert LANDING.evidence_summary in text
 
 
+def test_process_cards_are_hexagons_with_step_icons():
+    c = client()
+    html = c.get("/").text
+    css = c.get("/static/css/landing-hero.css").text
+
+    assert html.count('class="lp-step-icon"') == 5
+    for icon in ("file-edit", "bar-chart-3", "help-circle", "mouse-pointer-click", "file-check-2"):
+        assert f'data-icon="{icon}"' in html
+    assert "clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" in css
+
+
 def test_landing_serves_its_own_styles_and_script():
     c = client()
     assert c.get("/static/css/landing.css").status_code == 200
