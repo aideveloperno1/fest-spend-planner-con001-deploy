@@ -15,7 +15,7 @@ dependencies = [
 policy-signal-map = "policy_signal_map:main"
 
 [tool.vercel]
-entrypoint = "policy_signal_map.app:app"
+entrypoint = "main:app"
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]

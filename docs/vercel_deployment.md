@@ -9,7 +9,7 @@
 
 Vercel에서 `aideveloperno1/fest-spend-planner-con001-deploy` 저장소를 가져온다.
 Root Directory는 저장소 루트(`.`), Framework Preset은 FastAPI 자동 감지를 사용한다.
-`pyproject.toml`의 `[tool.vercel]`이 `policy_signal_map.app:app`을 진입점으로 지정한다.
+`pyproject.toml`의 `[tool.vercel]`이 저장소 루트의 `main.py`에 있는 FastAPI 객체(`main:app`)를 진입점으로 지정한다.
 
 ## 2. Redis 연결
 

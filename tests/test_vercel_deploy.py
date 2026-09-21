@@ -1,6 +1,7 @@
 """Vercel이 앱을 찾는 설정과 공개 상태 확인 경로."""
 
 import json
+import runpy
 import tomllib
 
 from fastapi.testclient import TestClient
@@ -12,10 +13,16 @@ from policy_signal_map.web.session import COOKIE_NAME
 
 def test_vercel_entrypoint_and_function_settings_are_declared():
     pyproject = tomllib.loads((PROJECT_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    assert pyproject["tool"]["vercel"]["entrypoint"] == "policy_signal_map.app:app"
+    entrypoint = pyproject["tool"]["vercel"]["entrypoint"]
+    assert entrypoint == "main:app"
+
+    module_name, object_name = entrypoint.split(":", maxsplit=1)
+    module_path = (PROJECT_ROOT / f"{module_name.replace('.', '/')}").with_suffix(".py")
+    assert module_path.is_file()
+    assert runpy.run_path(module_path)[object_name] is app
 
     config = json.loads((PROJECT_ROOT / "vercel.json").read_text(encoding="utf-8"))
-    function = config["functions"]["policy_signal_map.app:app"]
+    function = config["functions"]["main.py"]
     assert function["maxDuration"] >= 45
     assert config["regions"] == ["icn1"]
 
