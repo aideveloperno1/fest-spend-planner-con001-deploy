@@ -144,3 +144,10 @@ def test_step_two_shows_who_wrote_each_limitation():
     assert "자료의 한계 분석 담당 작성" in text
     assert "서비스 해석 원칙" in text
     assert text.index("자료의 한계") < text.index("서비스 해석 원칙")
+
+
+def test_step_two_uses_the_shared_sticky_navigation():
+    html = reviewed_client().get("/step/2").text
+    assert 'class="stack step-with-sticky"' in html
+    assert 'class="workflow-sticky-bar"' in html
+    assert 'href="/step/1"' in html and 'href="/step/3"' in html

@@ -109,7 +109,7 @@ def test_step_three_has_no_warning_classes():
 def test_step_three_uses_single_column_collapsed_inactive_rules():
     html = reviewed_client().get("/step/3").text
 
-    assert '<div class="questions-page">' in html
+    assert '<div class="questions-page step-with-sticky">' in html
     assert "layout-main-side" not in html
     assert '<aside class="side">' not in html
 
@@ -126,4 +126,5 @@ def test_step_three_uses_single_column_collapsed_inactive_rules():
     assert count is not None
     listed_rules = re.findall(r'class="rule(?:\s|\")', details.group(2))
     assert int(count.group(1)) == len(listed_rules)
-    assert html.index('class="card review-accordion"') < html.index('class="form-foot questions-nav"')
+    assert html.index('class="card review-accordion"') < html.index('class="workflow-sticky-bar questions-nav"')
+    assert 'href="/step/2"' in html and 'href="/step/4"' in html

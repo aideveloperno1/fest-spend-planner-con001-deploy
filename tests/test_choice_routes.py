@@ -155,6 +155,13 @@ def test_step_four_has_no_score_or_warning_wording():
         assert word not in text_of(html).replace("성공 확률이나 점수를 표시하지 않습니다", "")
 
 
+def test_step_four_uses_the_shared_sticky_navigation():
+    html = reviewed_client().get("/step/4").text
+    assert 'class="stack step-with-sticky"' in html
+    assert 'class="workflow-sticky-bar"' in html
+    assert 'href="/step/3"' in html
+
+
 # ---------------------------------------------------------------- 원안 변경 후 선택 정리 (6-5a)
 
 CHANGED_FORM = {**VALID_FORM, "metrics": ["foreign_amount"]}

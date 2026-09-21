@@ -21,6 +21,12 @@
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --radius-lg: 22px;
   --radius: 14px;
+  --service-content-width: 1024px;
+  --service-shell-width: 1072px;
+  --brand-pen-fill: #92e5e0;
+  --brand-pen-outline: #e4fff8;
+  --brand-pen-detail: #98eee3;
+  --brand-pen-underline: #78ead6;
 }
 
 * {
@@ -61,7 +67,7 @@ textarea {
 .topbar-inner,
 .rail,
 .page {
-  max-width: 1280px;
+  max-width: var(--service-shell-width);
   margin: 0 auto;
   padding-inline: 24px;
 }
@@ -88,6 +94,23 @@ textarea {
   flex: 0 0 auto;
   width: 32px;
   height: 32px;
+}
+
+.brand-pen-fill {
+  fill: var(--brand-pen-fill);
+  fill-opacity: 0.24;
+}
+
+.brand-pen-outline {
+  stroke: var(--brand-pen-outline);
+}
+
+.brand-pen-detail {
+  stroke: var(--brand-pen-detail);
+}
+
+.brand-pen-underline {
+  stroke: var(--brand-pen-underline);
 }
 
 .brand-wordmark {
@@ -155,7 +178,7 @@ a {
 }
 
 .site-foot {
-  max-width: 1280px;
+  max-width: var(--service-shell-width);
   margin: 0 auto;
   padding: 0 24px 40px;
   font-size: 12.5px;
@@ -267,7 +290,7 @@ a {
 
 .plan-input-layout {
   width: 100%;
-  max-width: 1024px;
+  max-width: var(--service-content-width);
   margin-inline: auto;
 }
 
@@ -289,7 +312,7 @@ a {
   align-items: center;
   gap: 32px;
   width: 100%;
-  max-width: 1024px;
+  max-width: var(--service-shell-width);
   min-height: 88px;
   margin-inline: auto;
   padding: 13px 24px 15px;
@@ -341,6 +364,44 @@ a {
   padding-inline: 24px;
 }
 
+/* 2~4단계: 1단계와 같은 본문 폭 + 공통 하단 고정 내비게이션 */
+.step-with-sticky {
+  padding-bottom: 96px;
+}
+
+.workflow-sticky-bar {
+  position: fixed;
+  z-index: 50;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.98);
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -8px 28px rgba(30, 60, 120, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.workflow-sticky-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: var(--service-shell-width);
+  min-height: 76px;
+  margin-inline: auto;
+  padding: 14px 24px;
+}
+
+.workflow-sticky-note {
+  margin-left: auto;
+  color: var(--text-3);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: right;
+}
+
 @media (max-width: 640px) {
   .plan-input-page {
     padding-bottom: 156px;
@@ -356,6 +417,27 @@ a {
 
   .plan-submit {
     width: 100%;
+  }
+
+  .step-with-sticky {
+    padding-bottom: 144px;
+  }
+
+  .workflow-sticky-inner {
+    align-items: stretch;
+    min-height: 0;
+    padding: 12px 18px max(12px, env(safe-area-inset-bottom));
+    flex-direction: column;
+  }
+
+  .workflow-sticky-inner .btn {
+    width: 100%;
+  }
+
+  .workflow-sticky-note {
+    order: -1;
+    margin-left: 0;
+    text-align: center;
   }
 }
 
@@ -1108,9 +1190,8 @@ textarea.input {
 
 .questions-page {
   width: 100%;
-  max-width: 896px;
+  max-width: var(--service-content-width);
   margin-inline: auto;
-  padding-bottom: 64px;
 }
 
 .review-accordion {
@@ -1472,6 +1553,7 @@ textarea.input {
   .head-actions,
   .form-foot,
   .plan-sticky-bar,
+  .workflow-sticky-bar,
   .btn,
   .print-note,
   [data-save-note] {

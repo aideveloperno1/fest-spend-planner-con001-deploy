@@ -6,7 +6,7 @@
 
 {% block content %}
 {% set main = view.main %}
-<div class="stack">
+<div class="stack step-with-sticky">
   {{ profile_card(profile) }}
 
   <section class="card card-lg">
@@ -110,11 +110,14 @@
     </details>
   {% endif %}
 
-  <div class="form-foot">
+</div>
+
+<nav class="workflow-sticky-bar" aria-label="근거 확인 단계 이동">
+  <div class="workflow-sticky-inner">
     <a class="btn btn-ghost" href="/step/1">← 기획 입력으로</a>
     <a class="btn btn-primary" href="/step/3">검토 질문 보기 →</a>
   </div>
-</div>
+</nav>
 {% endblock %}
 
 {% block scripts %}

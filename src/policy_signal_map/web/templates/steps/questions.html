@@ -3,7 +3,7 @@
 
 {% block content %}
 {% set inactive_count = (result.no_finding | length) + (result.not_applicable | length) + (result.not_reviewed | length) %}
-<div class="questions-page">
+<div class="questions-page step-with-sticky">
   <div class="stack">
     {# 질문마다 상자를 나누지 않고 한 상자 안에 문서처럼 이어 붙인다 (사용자 확인 2026-09-19) #}
     <section class="card card-lg review-doc">
@@ -114,12 +114,15 @@
       </div>
     </details>
 
-    <nav class="form-foot questions-nav" aria-label="검토 단계 이동">
-      <a class="btn btn-ghost" href="/step/2">← 근거 확인으로</a>
-      <a class="btn btn-primary" href="/step/4">보완 방법 고르기 →</a>
-    </nav>
   </div>
 </div>
+
+<nav class="workflow-sticky-bar questions-nav" aria-label="검토 질문 단계 이동">
+  <div class="workflow-sticky-inner">
+    <a class="btn btn-ghost" href="/step/2">← 근거 확인으로</a>
+    <a class="btn btn-primary" href="/step/4">보완 방법 고르기 →</a>
+  </div>
+</nav>
 {% endblock %}
 
 {% block scripts %}

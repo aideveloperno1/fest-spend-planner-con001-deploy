@@ -97,3 +97,17 @@ def test_brand_on_every_step_goes_to_the_landing():
     for step in (1, 2, 3):
         html = c.get(f"/step/{step}").text
         assert re.search(r'<a\b[^>]*class="brand"[^>]*href="/"(?:\s[^>]*)?>', html), step
+
+
+def test_landing_and_service_share_the_same_pencil_palette():
+    c = client()
+    landing = c.get("/").text
+    service = c.get("/step/1").text
+    for class_name in (
+        "brand-pen-fill",
+        "brand-pen-outline",
+        "brand-pen-detail",
+        "brand-pen-underline",
+    ):
+        assert f'class="{class_name}"' in landing
+        assert f'class="{class_name}"' in service
