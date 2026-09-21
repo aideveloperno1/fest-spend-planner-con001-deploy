@@ -2,7 +2,8 @@
 {% from "partials/rule_card.html" import rule_card %}
 
 {% block content %}
-<div class="layout-main-side">
+{% set inactive_count = (result.no_finding | length) + (result.not_applicable | length) + (result.not_reviewed | length) %}
+<div class="questions-page">
   <div class="stack">
     {# 질문마다 상자를 나누지 않고 한 상자 안에 문서처럼 이어 붙인다 (사용자 확인 2026-09-19) #}
     <section class="card card-lg review-doc">
@@ -12,7 +13,7 @@
         <p class="notice">원안이 바뀌어 검토를 다시 실행했습니다. 앞서 고른 보완 방법이 있으면 다시 확인해 주세요.</p>
       {% endif %}
       {% if not result.outcomes %}
-        <p class="notice">이번 입력에서 확인할 질문이 없습니다. 오른쪽 목록에서 무엇을 확인했고 무엇을 검토하지 않았는지 볼 수 있습니다.</p>
+        <p class="notice">이번 입력에서 확인할 질문이 없습니다. 하단 목록에서 무엇을 확인했고 무엇을 검토하지 않았는지 볼 수 있습니다.</p>
       {% endif %}
 
       {% for outcome in result.outcomes %}
@@ -58,53 +59,66 @@
       </section>
     {% endif %}
 
-    <div class="form-foot">
+    <details class="card review-accordion">
+      <summary class="review-accordion-summary">
+        <span>확인했으나 해당 없음 및 미적용 규칙 (총 {{ inactive_count }}건)</span>
+        <span class="review-accordion-chevron" aria-hidden="true">⌵</span>
+      </summary>
+
+      <div class="review-accordion-body">
+        <section class="review-accordion-section">
+          <h2 class="side-title">확인했으나 해당 없음</h2>
+          {% if result.no_finding %}
+            <div class="rule-list">
+              {% for item in result.no_finding %}
+                <div class="rule"><div class="rule-text">{{ item.title }}</div></div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="side-foot">없음</p>
+          {% endif %}
+          <p class="side-foot">조건을 확인했고 이번 입력에서는 물을 것이 없는 규칙입니다.</p>
+        </section>
+
+        {# 사업 유형이 달라 실행하지 않은 질문. "물을 것이 없음"과도, "이번 범위에서 만들지 않음"과도 다르다 #}
+        <section class="review-accordion-section">
+          <h2 class="side-title">사업 유형이 달라 확인하지 않음</h2>
+          {% if result.not_applicable %}
+            <div class="rule-list">
+              {% for item in result.not_applicable %}
+                <div class="rule"><div class="rule-text">{{ item.title }}</div></div>
+              {% endfor %}
+            </div>
+            <p class="side-foot">{{ result.not_applicable[0].reason }} 사업 유형을 바꾸면 다시 확인합니다.</p>
+          {% else %}
+            <p class="side-foot">없음</p>
+          {% endif %}
+        </section>
+
+        <section class="review-accordion-section">
+          <h2 class="side-title">검토하지 않음</h2>
+          {% if result.not_reviewed %}
+            <div class="rule-list">
+              {% for item in result.not_reviewed %}
+                <div class="rule rule-{{ 'example' if item.scope_label == '분석 예시' else 'future' }}">
+                  <div class="rule-id">{{ item.scope_label }}</div>
+                  <div class="rule-text">{{ item.reason }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="side-foot">없음</p>
+          {% endif %}
+          <p class="side-foot">‘문제없음’과 ‘검토하지 않음’은 다릅니다. 이번 범위에서 실행하지 않은 규칙입니다.</p>
+        </section>
+      </div>
+    </details>
+
+    <nav class="form-foot questions-nav" aria-label="검토 단계 이동">
       <a class="btn btn-ghost" href="/step/2">← 근거 확인으로</a>
       <a class="btn btn-primary" href="/step/4">보완 방법 고르기 →</a>
-    </div>
+    </nav>
   </div>
-
-  <aside class="side">
-    <div class="card">
-      <h2 class="side-title">확인했으나 해당 없음</h2>
-      {% if result.no_finding %}
-        <div class="rule-list">
-          {% for item in result.no_finding %}
-            <div class="rule"><div class="rule-text">{{ item.title }}</div></div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p class="side-foot">없음</p>
-      {% endif %}
-      <p class="side-foot">조건을 확인했고 이번 입력에서는 물을 것이 없는 규칙입니다.</p>
-    </div>
-
-    {# 사업 유형이 달라 실행하지 않은 질문. "물을 것이 없음"과도, "이번 범위에서 만들지 않음"과도 다르다 #}
-    {% if result.not_applicable %}
-      <div class="card">
-        <h2 class="side-title">사업 유형이 달라 확인하지 않음</h2>
-        <div class="rule-list">
-          {% for item in result.not_applicable %}
-            <div class="rule"><div class="rule-text">{{ item.title }}</div></div>
-          {% endfor %}
-        </div>
-        <p class="side-foot">{{ result.not_applicable[0].reason }} 사업 유형을 바꾸면 다시 확인합니다.</p>
-      </div>
-    {% endif %}
-
-    <div class="card">
-      <h2 class="side-title">검토하지 않음</h2>
-      <div class="rule-list">
-        {% for item in result.not_reviewed %}
-          <div class="rule rule-{{ 'example' if item.scope_label == '분석 예시' else 'future' }}">
-            <div class="rule-id">{{ item.scope_label }}</div>
-            <div class="rule-text">{{ item.reason }}</div>
-          </div>
-        {% endfor %}
-      </div>
-      <p class="side-foot">‘문제없음’과 ‘검토하지 않음’은 다릅니다. 이번 범위에서 실행하지 않은 규칙입니다.</p>
-    </div>
-  </aside>
 </div>
 {% endblock %}
 

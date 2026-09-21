@@ -104,3 +104,26 @@ def test_step_three_has_no_warning_classes():
     html = reviewed_client().get("/step/3").text
     for word in ("danger", "text-warn", "error-red"):
         assert word not in html
+
+
+def test_step_three_uses_single_column_collapsed_inactive_rules():
+    html = reviewed_client().get("/step/3").text
+
+    assert '<div class="questions-page">' in html
+    assert "layout-main-side" not in html
+    assert '<aside class="side">' not in html
+
+    details = re.search(
+        r'<details class="card review-accordion"([^>]*)>(.*?)</details>',
+        html,
+        re.S,
+    )
+    assert details is not None
+    assert "open" not in details.group(1)
+    assert details.group(2).count('class="review-accordion-section"') == 3
+
+    count = re.search(r"미적용 규칙 \(총 (\d+)건\)", details.group(2))
+    assert count is not None
+    listed_rules = re.findall(r'class="rule(?:\s|\")', details.group(2))
+    assert int(count.group(1)) == len(listed_rules)
+    assert html.index('class="card review-accordion"') < html.index('class="form-foot questions-nav"')
