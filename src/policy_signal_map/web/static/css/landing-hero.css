@@ -96,45 +96,17 @@
   filter: url(#flow-soft-glow);
 }
 .lp-flow-ready .lp-flow-light { animation: lp-light-travel 6s linear infinite; }
-.lp-intro .lp-step::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border: 2px solid #b5ecff;
-  border-radius: 0;
-  clip-path: inherit;
-  background:
-    radial-gradient(circle at 27% 24%, rgba(255,255,255,.98) 0 1.5px, transparent 2.5px),
-    radial-gradient(circle at 72% 34%, rgba(210,244,255,.95) 0 1px, transparent 2px),
-    linear-gradient(112deg, transparent 28%, rgba(255,255,255,.7) 47%, transparent 65%);
-  background-size: auto, auto, 220% 100%;
-  background-position: center, center, 130% 0;
-  box-shadow: 0 0 12px #68baff80, inset 0 0 12px #b7eaff66;
-  opacity: 0;
-  pointer-events: none;
-}
-.lp-flow-ready .lp-step::after {
-  animation: lp-card-shimmer 6s ease-in-out infinite;
-  animation-delay: calc(var(--i) * 1.35s);
-}
 .lp-flow-ready .lp-step {
   animation: lp-card-brighten 6s ease-in-out infinite;
   animation-delay: calc(var(--i) * 1.35s);
 }
 .lp-flow:not(.lp-flow-running) .lp-flow-light,
-.lp-flow:not(.lp-flow-running) .lp-step,
-.lp-flow:not(.lp-flow-running) .lp-step::after { animation-play-state: paused; }
+.lp-flow:not(.lp-flow-running) .lp-step { animation-play-state: paused; }
 @keyframes lp-light-travel {
   0% { stroke-dashoffset: 3; opacity: 0; }
   3% { opacity: 1; }
   90% { stroke-dashoffset: -97; opacity: 1; }
   100% { stroke-dashoffset: -100; opacity: 0; }
-}
-@keyframes lp-card-shimmer {
-  0%, 25%, 100% { opacity: 0; }
-  9% { opacity: .15; background-position: center, center, 130% 0; }
-  12%, 15% { opacity: .78; }
-  18% { opacity: 0; background-position: center, center, -130% 0; }
 }
 @keyframes lp-card-brighten {
   0%, 25%, 100% { filter: drop-shadow(0 10px 11px rgba(47, 91, 145, .22)) brightness(1); }
@@ -230,9 +202,8 @@
   .lp-intro .lp-steps { display: flex; flex-wrap: wrap; gap: 10px; }
   .lp-intro .lp-step { animation: none; transform: none; box-shadow: none; border: 1px solid #c8d0dd; }
   .lp-flow-ribbon { display: none; }
-  .lp-intro .lp-step::after { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .lp-flow-ready .lp-step { animation: none; transform: none; }
-  .lp-flow-ready .lp-flow-light, .lp-flow-ready .lp-step::after { animation: none; opacity: 0; }
+  .lp-flow-ready .lp-flow-light { animation: none; opacity: 0; }
 }
