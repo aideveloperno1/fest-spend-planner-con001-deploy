@@ -546,6 +546,47 @@ a {
   font-weight: 400;
 }
 
+.metric-custom-list {
+  display: grid;
+  gap: 8px;
+}
+
+.metric-custom-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 8px;
+  align-items: center;
+}
+
+.metric-row-button {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--primary-line);
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.metric-row-button:hover {
+  background: #dce9ff;
+  border-color: var(--primary);
+}
+
+.metric-row-button:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.25);
+  outline-offset: 2px;
+}
+
+.metric-remove {
+  border-color: var(--line-2);
+  background: var(--field);
+  color: var(--muted);
+}
+
 .input {
   width: 100%;
   padding: 11px 14px;

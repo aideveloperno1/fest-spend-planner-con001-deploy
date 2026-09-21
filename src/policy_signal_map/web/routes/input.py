@@ -26,7 +26,7 @@ REQUIRED_ERROR_GROUPS = (
     {"target"},
     {"region"},
     {"period"},
-    {"metrics", "metric_other"},
+    {"metrics"},
     {"indicator_use"},
 )
 
@@ -124,7 +124,7 @@ async def submit(request: Request, session: Session, evidence: Evidence) -> Resp
     single = {k: v for k, v in form.items() if isinstance(v, str)}
     multi = {
         k: [v for v in form.getlist(k) if isinstance(v, str)]
-        for k in ("goals", "metrics", "usage_industries", "target_ages")
+        for k in ("goals", "metrics", "metric_others", "usage_industries", "target_ages")
     }
     catalog = option_catalog(evidence.result)
     state.plan = parse_plan_form(

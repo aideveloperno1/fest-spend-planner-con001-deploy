@@ -14,7 +14,7 @@ COMPARERS: dict[str, Callable[[PlanInput], object]] = {
     "name": lambda plan: plan.name,
     "business_type": lambda plan: plan.business_type,
     "goals": lambda plan: (tuple(plan.goals), plan.goal_other),
-    "metrics": lambda plan: (tuple(plan.metrics), plan.metric_other),
+    "metrics": lambda plan: (tuple(plan.metrics), tuple(plan.metric_others)),
     "indicator_use": lambda plan: plan.indicator_use,
     "target": lambda plan: plan.target,
     "region": lambda plan: plan.region,

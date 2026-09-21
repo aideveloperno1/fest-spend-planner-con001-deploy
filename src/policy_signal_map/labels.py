@@ -52,7 +52,6 @@ METRIC_GROUPS: list[tuple[str, list[Metric]]] = [
         ],
     ),
     ("카드 자료에 없어 별도 자료가 필요한 지표", [Metric.VISITORS, Metric.PARTICIPANTS, Metric.CUSTOMERS]),
-    ("그 밖", [Metric.COUPON_USAGE, Metric.OTHER]),
 ]
 
 INDICATOR_USE_LABELS: dict[IndicatorUse, str] = {

@@ -32,6 +32,25 @@
     radio.addEventListener("change", syncBusinessFields),
   );
 
+  // 선택지에 없는 성과지표는 필요한 만큼 입력 행을 더할 수 있다.
+  const customMetricList = form.querySelector("[data-metric-custom-list]");
+  const customMetricTemplate = document.getElementById("metric-custom-row-template");
+
+  form.addEventListener("click", (event) => {
+    const add = event.target.closest("[data-metric-add]");
+    if (add) {
+      const row = customMetricTemplate.content.firstElementChild.cloneNode(true);
+      customMetricList.append(row);
+      row.querySelector("input").focus();
+      return;
+    }
+    const remove = event.target.closest("[data-metric-remove]");
+    if (remove) {
+      remove.closest(".metric-custom-row").remove();
+      syncSummary();
+    }
+  });
+
   // 지역: 범위에 따라 시도·시군구 선택 표시, 시도에 맞춰 시군구 목록 갱신
   const sido = form.elements.namedItem("sido");
   const sigungu = form.elements.namedItem("sigungu");
@@ -99,6 +118,10 @@
 
   const value = (name) => (form.elements.namedItem(name)?.value ?? "").trim();
   const checkedValues = (name) => [...form.querySelectorAll(`input[name="${name}"]:checked`)].map((i) => i.value);
+  const customMetricValues = () =>
+    [...form.querySelectorAll('input[name="metric_others"]')]
+      .map((input) => input.value.trim())
+      .filter(Boolean);
   function requiredChecks() {
     const goals = checkedValues("goals");
     const metrics = checkedValues("metrics");
@@ -112,7 +135,7 @@
       Boolean(value("target")),
       Boolean(lv) && (lv === "national" || Boolean(sido.value)) && (lv !== "sigungu" || Boolean(sigungu.value)),
       Boolean(start && end && end >= start),
-      metrics.length > 0 && (!metrics.includes("other") || Boolean(value("metric_other"))),
+      metrics.length > 0 || customMetricValues().length > 0,
       checkedValues("indicator_use").length > 0,
     ];
   }

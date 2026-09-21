@@ -64,7 +64,7 @@ def _plan_data(plan: PlanInput | None) -> dict[str, Any] | None:
         "usage_industries": list(plan.usage_industries),
         "target_ages": list(plan.target_ages),
         "metrics": [value.value for value in plan.metrics],
-        "metric_other": plan.metric_other,
+        "metric_others": list(plan.metric_others),
         "indicator_use": plan.indicator_use.value if plan.indicator_use else None,
         "data_status": plan.data_status.value if plan.data_status else None,
         "fixed_conditions": plan.fixed_conditions,
@@ -103,6 +103,20 @@ def _plan_from(data: Any) -> PlanInput | None:
         budget_krw = budget_data.get("krw")
         if budget_krw is not None and (not isinstance(budget_krw, int) or isinstance(budget_krw, bool)):
             raise SessionDataError("예산 금액 형식이 올바르지 않습니다.")
+        metrics = [Metric(value) for value in data.get("metrics", [])]
+        metrics = [metric for metric in metrics if metric is not Metric.OTHER]
+        raw_metric_others = data.get("metric_others")
+        if raw_metric_others is not None and not isinstance(raw_metric_others, list):
+            raise SessionDataError("직접 입력 성과지표 형식이 올바르지 않습니다.")
+        metric_others = (
+            [str(value).strip() for value in raw_metric_others if str(value).strip()]
+            if raw_metric_others is not None
+            else []
+        )
+        legacy_metric_other = str(data.get("metric_other", "")).strip()
+        if legacy_metric_other and legacy_metric_other not in metric_others:
+            metric_others.append(legacy_metric_other)
+        metric_others = list(dict.fromkeys(metric_others))
         return PlanInput(
             name=str(data.get("name", "")),
             business_type=business_type,
@@ -120,8 +134,8 @@ def _plan_from(data: Any) -> PlanInput | None:
             usage_place=str(data.get("usage_place", "")),
             usage_industries=[str(value) for value in data.get("usage_industries", [])],
             target_ages=[str(value) for value in data.get("target_ages", [])],
-            metrics=[Metric(value) for value in data.get("metrics", [])],
-            metric_other=str(data.get("metric_other", "")),
+            metrics=metrics,
+            metric_others=metric_others,
             indicator_use=indicator_use,
             data_status=data_status,
             fixed_conditions=str(data.get("fixed_conditions", "")),

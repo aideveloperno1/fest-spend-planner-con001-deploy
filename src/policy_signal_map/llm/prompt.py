@@ -54,9 +54,9 @@ def _plan_lines(plan: PlanInput) -> str:
     goals = ", ".join(
         plan.goal_other if goal is Goal.OTHER else GOAL_LABELS[goal] for goal in plan.goals
     )
-    metrics = ", ".join(
-        plan.metric_other if metric is Metric.OTHER else METRIC_LABELS[metric] for metric in plan.metrics
-    )
+    metric_names = [METRIC_LABELS[metric] for metric in plan.metrics if metric is not Metric.OTHER]
+    metric_names.extend(plan.metric_others)
+    metrics = ", ".join(metric_names)
     use = INDICATOR_USE_LABELS[plan.indicator_use] if plan.indicator_use else "정하지 않음"
     return "\n".join(
         [

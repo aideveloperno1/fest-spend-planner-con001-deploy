@@ -102,7 +102,8 @@ class PlanInput:
     usage_industries: list[str] = field(default_factory=list)
     target_ages: list[str] = field(default_factory=list)
     metrics: list[Metric] = field(default_factory=list)
-    metric_other: str = ""
+    # 선택지에 없는 성과지표. 입력 행을 추가할 수 있으므로 순서를 지킨 목록으로 보관한다.
+    metric_others: list[str] = field(default_factory=list)
     indicator_use: IndicatorUse | None = None
     data_status: DataStatus | None = None
     fixed_conditions: str = ""

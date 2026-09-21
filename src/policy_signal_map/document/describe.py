@@ -22,9 +22,8 @@ def goal_labels(plan: PlanInput, exclude: Goal | None = None) -> str:
 
 
 def metric_labels(plan: PlanInput) -> str:
-    labels = [
-        plan.metric_other if metric is Metric.OTHER else METRIC_LABELS[metric] for metric in plan.metrics
-    ]
+    labels = [METRIC_LABELS[metric] for metric in plan.metrics if metric is not Metric.OTHER]
+    labels.extend(plan.metric_others)
     return ", ".join(label for label in labels if label) or NOT_IN_PLAN
 
 

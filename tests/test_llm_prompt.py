@@ -121,3 +121,10 @@ def test_plan_fields_are_labels_not_codes():
     text = user_text()
     assert "외국인 결제 비중 확대" in text
     assert "foreign_share" not in text
+
+
+def test_prompt_includes_multiple_directly_typed_metrics():
+    plan = sample_plan()
+    plan.metric_others = ["점포 만족도", "재방문 의향"]
+    text = user_text(plan)
+    assert "성과지표: 외국인 결제 비중, 점포 만족도, 재방문 의향" in text

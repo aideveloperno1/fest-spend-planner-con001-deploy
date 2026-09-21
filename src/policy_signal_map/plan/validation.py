@@ -66,10 +66,9 @@ def validate_plan(plan: PlanInput) -> ValidationResult:
         # 금액과 [미정]이 함께 오면 금액을 조용히 버리지 않고 물어본다 (9/18)
         errors["budget"] = "금액과 [미정] 중 하나만 남겨 주세요. 금액을 쓰려면 [미정] 체크를 풀어 주세요."
 
-    if not plan.metrics:
-        errors["metrics"] = "현재 성과지표를 하나 이상 골라 주세요."
-    elif Metric.OTHER in plan.metrics and not plan.metric_other:
-        errors["metric_other"] = "기타 지표의 내용을 적어 주세요."
+    selected_metrics = [metric for metric in plan.metrics if metric is not Metric.OTHER]
+    if not selected_metrics and not plan.metric_others:
+        errors["metrics"] = "현재 성과지표를 고르거나 직접 입력해 주세요."
 
     if plan.indicator_use is None:
         errors["indicator_use"] = "지표를 어떻게 쓰는지 골라 주세요."

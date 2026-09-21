@@ -47,6 +47,11 @@ def _codes(values: Sequence[str], allowed: Sequence[str]) -> list[str]:
     return list(dict.fromkeys(value for value in values if value in known))
 
 
+def _texts(values: Sequence[str]) -> list[str]:
+    """반복 자유 입력에서 빈칸과 중복을 없애고 입력 순서를 지킨다."""
+    return list(dict.fromkeys(value.strip() for value in values if value.strip()))
+
+
 def parse_plan_form(
     single: Mapping[str, str],
     multi: Mapping[str, Sequence[str]],
@@ -81,6 +86,13 @@ def parse_plan_form(
     # 빈칸은 적지 않은 것(None), 숫자로 읽지 못하면 원문만 남겨 화면에서 고치게 한다
     visitor_goal = int(raw_visitors) if raw_visitors.isdigit() else None
 
+    metrics = [metric for metric in _many(Metric, multi.get("metrics", [])) if metric is not Metric.OTHER]
+    metric_others = _texts(multi.get("metric_others", []))
+    # 배포 전 저장된 폼이나 직접 요청의 단일 기타 지표도 새 목록으로 옮긴다.
+    legacy_metric_other = text("metric_other")
+    if legacy_metric_other and legacy_metric_other not in metric_others:
+        metric_others.append(legacy_metric_other)
+
     return PlanInput(
         name=text("name"),
         business_type=_one(BusinessType, single.get("business_type")),
@@ -94,8 +106,8 @@ def parse_plan_form(
         usage_place=text("usage_place"),
         usage_industries=_codes(multi.get("usage_industries", []), industry_codes),
         target_ages=_codes(multi.get("target_ages", []), age_codes),
-        metrics=_many(Metric, multi.get("metrics", [])),
-        metric_other=text("metric_other"),
+        metrics=metrics,
+        metric_others=metric_others,
         indicator_use=_one(IndicatorUse, single.get("indicator_use")),
         data_status=_one(DataStatus, single.get("data_status")),
         fixed_conditions=text("fixed_conditions"),

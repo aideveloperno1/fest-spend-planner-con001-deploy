@@ -195,23 +195,42 @@
     </div>
 
     <div class="emphasis">
-      <fieldset class="field {{ 'has-error' if errors.get('metrics') or errors.get('metric_other') }}">
+      <fieldset class="field {{ 'has-error' if errors.get('metrics') }}">
         <legend class="label-strong"><span class="dot"></span>현재 성과지표 {{ req(true) }} <span class="hint">여러 개 선택 가능</span></legend>
         {% for group, metrics in labels.METRIC_GROUPS %}
           <p class="hint">{{ group }}</p>
           <div class="chips">
             {% for key in metrics %}
               <label class="chip">
-                <input type="checkbox" name="metrics" value="{{ key.value }}" {{ "checked" if key in plan.metrics }} data-toggle-other="metric" />
+                <input type="checkbox" name="metrics" value="{{ key.value }}" {{ "checked" if key in plan.metrics }} />
                 <span>{{ labels.METRIC_LABELS[key] }}</span>
               </label>
             {% endfor %}
           </div>
         {% endfor %}
-        <div data-other="metric" {{ "hidden" if "other" not in plan.metrics }}>
-          <input class="input" name="metric_other" value="{{ plan.metric_other }}" placeholder="기타 지표를 적어 주세요" />
+        <p class="hint">그 밖</p>
+        <div class="metric-custom-list" data-metric-custom-list>
+          {% set custom_metrics = plan.metric_others if plan.metric_others else [""] %}
+          {% for item in custom_metrics %}
+            <div class="metric-custom-row">
+              <input class="input" name="metric_others" value="{{ item }}" maxlength="80"
+                     placeholder="성과지표를 직접 입력해 주세요" aria-label="직접 입력 성과지표 {{ loop.index }}" />
+              {% if loop.first %}
+                <button type="button" class="metric-row-button metric-add" data-metric-add aria-label="성과지표 입력칸 추가">+</button>
+              {% else %}
+                <button type="button" class="metric-row-button metric-remove" data-metric-remove aria-label="이 성과지표 입력칸 삭제">−</button>
+              {% endif %}
+            </div>
+          {% endfor %}
         </div>
-        {{ error("metrics") }}{{ error("metric_other") }}
+        <template id="metric-custom-row-template">
+          <div class="metric-custom-row">
+            <input class="input" name="metric_others" maxlength="80"
+                   placeholder="추가 성과지표를 입력해 주세요" aria-label="추가 직접 입력 성과지표" />
+            <button type="button" class="metric-row-button metric-remove" data-metric-remove aria-label="이 성과지표 입력칸 삭제">−</button>
+          </div>
+        </template>
+        {{ error("metrics") }}
       </fieldset>
 
       <fieldset class="field {{ 'has-error' if errors.get('indicator_use') }}">

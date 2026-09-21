@@ -73,9 +73,24 @@ def test_모든_지표에_한글_이름이_있다():
         assert METRIC_LABELS[key]
 
 
-def test_지표_묶음이_모든_지표를_한_번씩_담는다():
+def test_지표_선택지는_카드와_별도_자료로_분류된_지표만_한_번씩_담는다():
     listed = [metric for _, metrics in METRIC_GROUPS for metric in metrics]
-    assert sorted(listed, key=lambda m: m.value) == sorted(Metric, key=lambda m: m.value)
+    expected = set(CARD_DERIVABLE_METRICS | NON_CARD_METRICS)
+    assert len(listed) == len(set(listed))
+    assert set(listed) == expected
+
+
+def test_직접_입력_지표는_빈칸과_중복을_없애고_순서를_지킨다():
+    plan = parse(
+        {
+            **VALID_FORM,
+            "metrics": [],
+            "metric_others": [" 점포 만족도 ", "", "점포 만족도", "재방문 의향"],
+        }
+    )
+    assert plan.metrics == []
+    assert plan.metric_others == ["점포 만족도", "재방문 의향"]
+    assert validate_plan(plan).ok
 
 
 # ---------------------------------------------------------------- 목표 방문객 수
@@ -138,6 +153,15 @@ def test_입력_화면에_새_칸이_보인다():
     assert "사업 유형" in text and "축제·행사" in text
     assert "목표 방문객 수" in text
     assert "카드 자료에 없어 별도 자료가 필요한 지표" in text and "방문객 수" in text
+
+
+def test_그_밖에는_선택지_대신_추가할_수_있는_직접_입력칸이_보인다():
+    text = client().get("/step/1").text
+    assert "그 밖" in text
+    assert 'name="metrics" value="coupon_usage"' not in text
+    assert 'name="metrics" value="other"' not in text
+    assert 'name="metric_others"' in text
+    assert 'data-metric-add' in text and 'data-metric-remove' in text
 
 
 def test_방문객_수가_사용처보다_먼저_나오고_사용처는_쿠폰_유형에만_보인다():

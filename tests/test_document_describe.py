@@ -22,9 +22,9 @@ def test_empty_goals_are_marked_not_in_plan():
     assert metric_labels(plan_with(metrics=[])) == NOT_IN_PLAN
 
 
-def test_metric_other_uses_typed_text():
-    plan = plan_with(metrics=[Metric.OTHER], metric_other="점포 만족도")
-    assert metric_labels(plan) == "점포 만족도"
+def test_directly_typed_metrics_are_listed_in_order():
+    plan = plan_with(metrics=[Metric.PAYMENT_AMOUNT], metric_others=["점포 만족도", "재방문 의향"])
+    assert metric_labels(plan) == "결제금액, 점포 만족도, 재방문 의향"
 
 
 def test_budget_text_by_status():

@@ -35,6 +35,7 @@ def test_each_field_is_detected():
     assert changed(goals=[Goal.FOREIGN_AMOUNT]) == {"goals"}
     assert changed(goal_other="기타 설명") == {"goals"}
     assert changed(metrics=[Metric.COUPON_USAGE]) == {"metrics"}
+    assert changed(metric_others=["점포 만족도"]) == {"metrics"}
     assert changed(indicator_use=IndicatorUse.REFERENCE) == {"indicator_use"}
     assert changed(target="방한 관광객") == {"target"}
     assert changed(region=Region(RegionLevel.NATIONAL)) == {"region"}
@@ -76,6 +77,6 @@ def test_plan_fields_are_all_compared():
     for name in CHANGE_FIELDS:
         compared.add(name)
     plan_fields = {f for f in PlanInput.__dataclass_fields__}
-    # goal_other·metric_other는 goals·metrics와 함께 비교하고, period_start/end는 period로 묶는다
-    covered = compared | {"goal_other", "metric_other", "period_start", "period_end", "visitor_goal_raw"}
+    # goal_other·metric_others는 goals·metrics와 함께 비교하고, period_start/end는 period로 묶는다
+    covered = compared | {"goal_other", "metric_others", "period_start", "period_end", "visitor_goal_raw"}
     assert plan_fields <= covered, plan_fields - covered

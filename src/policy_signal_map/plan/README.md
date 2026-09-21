@@ -43,7 +43,7 @@
 ### `validation.py`
 
 - `validate_plan(plan) -> ValidationResult(errors, pending)`
-- errors 키: `name, business_type, goals, goal_other, target, region, period, budget, metrics, metric_other, indicator_use, visitor_goal`
+- errors 키: `name, business_type, goals, goal_other, target, region, period, budget, metrics, indicator_use, visitor_goal`
 - `business_type`은 필수다. 고르지 않은 기획을 서비스가 한 유형으로 분류하지 않는다
 - `visitor_goal`은 선택이다. 빈칸은 넘어가고 숫자로 읽지 못한 값만 묻는다. 축제·행사에서 적지 않으면 '추가 확정 필요'로 남는다
 - pending: 비어 있는 선택 항목 → 보완 기획안 "추가 확정 필요"로 넘어갈 이름 (`예산 (미입력)`, `예산 (미정)`, 쿠폰·지역화폐 유형의 `쿠폰 사용처`, `자료 확보 상태 (선택 안 함)`, `성과 자료 확보 (협의 중)`, `성과 자료 확보 (미정)`). 고른 값을 이름에 함께 넣는다 — 고르기 전과 고른 뒤가 같아 보이면 "선택했는데 왜 남지?"가 된다 (9/18). 변경 불가 조건은 비어도 pending에 넣지 않는다 (없을 수 있는 항목)

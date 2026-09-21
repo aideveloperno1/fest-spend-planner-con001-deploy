@@ -70,6 +70,7 @@ def rich_state() -> WorkState:
     plan.business_type = BusinessType.FOREIGN_TOURISM
     plan.goals = [Goal.FOREIGN_SHARE, Goal.OTHER]
     plan.goal_other = "체류 경험 개선"
+    plan.metric_others = ["점포 만족도", "재방문 의향"]
     plan.indicator_use = IndicatorUse.REFERENCE
     state = WorkState(plan=plan, original=replace(plan), changed_fields=frozenset({"goals"}))
     choice = Choice(
@@ -120,6 +121,17 @@ def test_work_state_json_round_trip_preserves_all_nested_values():
     assert revision == 7
     assert restored == state
     assert "시연용 선택" in raw
+
+
+def test_legacy_single_custom_metric_is_loaded_as_a_list():
+    payload = json.loads(encode_session(rich_state(), 1))
+    plan = payload["state"]["plan"]
+    plan.pop("metric_others")
+    plan["metrics"].append("other")
+    plan["metric_other"] = "점포 만족도"
+    restored, _ = decode_session(json.dumps(payload, ensure_ascii=False))
+    assert restored.plan.metric_others == ["점포 만족도"]
+    assert all(metric.value != "other" for metric in restored.plan.metrics)
 
 
 def test_session_json_rejects_unknown_schema_and_bad_values():
