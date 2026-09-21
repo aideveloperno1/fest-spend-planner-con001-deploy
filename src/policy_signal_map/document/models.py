@@ -18,7 +18,7 @@ SECTION_TITLES = {
     8: "추가 확인사항",
 }
 
-# 표시 마크업(Markdown 굵게)은 넣지 않는다. 문서로 내보낼 때 render.py가 강조로 바꾼다
+# 표시 마크업은 넣지 않는다. 화면과 Word 문서가 각각 알맞은 모양으로 강조한다.
 PENDING_MARK = "[추가 확정 필요]"
 NOT_IN_PLAN = f"원안에 기재 없음 {PENDING_MARK}"
 

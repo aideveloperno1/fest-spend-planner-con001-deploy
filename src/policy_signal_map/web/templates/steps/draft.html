@@ -1,105 +1,102 @@
 {% extends "base.html" %}
 {% from "partials/evidence_trace.html" import evidence_trace %}
-{% from "partials/pending_badge.html" import pending_badge %}
 
 {% block content %}
-<div class="stack">
-  <section class="card card-lg">
-    <div class="card-head">
-      <div>
-        <h1 class="title">{{ document.title }}</h1>
-        <p class="subtitle">{{ document.created_on }} · {{ document.data_notice }} · 담당자 확인 전 초안입니다.</p>
+<div class="report-shell">
+  <nav class="report-toolbar" aria-label="문서 작업">
+    <a class="btn btn-ghost" href="/step/4">← 보완 선택으로</a>
+    <span class="report-toolbar-actions">
+      {% if document.request_draft %}<a class="btn btn-ghost" href="/step/5/request">정밀 분석 요청서</a>{% endif %}
+      <button type="button" class="btn btn-ghost" data-print-button>인쇄 / PDF 저장</button>
+      <button type="button" class="btn btn-primary" data-save-button data-url="/step/5/download" data-filename="{{ filename }}">Word 문서 저장</button>
+    </span>
+  </nav>
+  <p class="report-save-note" data-save-note hidden></p>
+
+  <article class="report-paper">
+    <header class="report-header">
+      <p class="report-kicker">보완 기획안</p>
+      <h1>{{ document.title }}</h1>
+      <dl class="report-meta">
+        <div><dt>작성일</dt><dd>{{ document.created_on }}</dd></div>
+        <div><dt>자료</dt><dd>{{ document.data_notice }}</dd></div>
+        <div><dt>상태</dt><dd>담당자 확인 전 초안입니다.</dd></div>
+      </dl>
+      <div class="report-summary" aria-label="문서 요약">
+        <span class="report-chip report-chip-blue">보완 반영 {{ document.changes | length }}건</span>
+        <a class="report-chip report-chip-amber" href="#section-8">추가 확정 필요 {{ document.pending | length }}건</a>
+        <span class="report-chip report-chip-gray">원안 유지 {{ document.unchanged_sections }}개 장</span>
       </div>
-      <span class="head-actions">
-        <a class="btn btn-ghost" href="/step/5/document">전체 문서 보기</a>
-        {% if document.request_draft %}
-          <a class="btn btn-ghost" href="/step/5/request">정밀 분석 요청서 초안</a>
-        {% endif %}
-        <button type="button" class="btn btn-ghost" data-print-button>PDF로 저장</button>
-        <button type="button" class="btn btn-primary" data-save-button data-url="/step/5/download" data-filename="{{ filename }}">결과 저장</button>
-      </span>
+    </header>
+
+    <div class="report-body">
+      {% for section in document.sections %}
+        <section class="report-section" id="section-{{ section.number }}">
+          <h2>{{ section.number }}. {{ section.title }}</h2>
+          {% if section.lines %}
+            <ul class="report-lines">
+              {% for line in section.lines %}
+                <li class="report-line report-line-{{ line.state }}">
+                  <div class="report-line-copy">
+                    <span>{{ line.text | replace("[추가 확정 필요]", "") }}</span>
+                    {% if "[추가 확정 필요]" in line.text %}<span class="report-pending">추가 확정 필요</span>{% endif %}
+                  </div>
+                  {% if line.state in ("changed", "added") %}
+                    <div class="report-line-meta">
+                      <span>{{ "변경" if line.state == "changed" else "추가" }}</span><span>{{ line.change_id }}</span>
+                      {% for evidence_id in line.evidence_ids %}<a href="#trace-{{ evidence_id }}" data-trace-link="{{ evidence_id }}">근거 {{ evidence_id }}</a>{% endfor %}
+                    </div>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}<p class="report-empty">해당 사항 없음</p>{% endif %}
+          {% if section.number == 8 and document.pending %}<p class="report-footnote">서비스가 값을 채우지 않습니다. 담당자가 정해야 하는 항목입니다.</p>{% endif %}
+        </section>
+      {% endfor %}
     </div>
-    <p class="summary-sentence">
-      변경 {{ document.changes | length }}건 · 추가 확정 필요 {{ document.pending | length }}건 · 원안 유지 {{ document.unchanged_sections }}개 장
-    </p>
-    <p class="note" data-save-note hidden></p>
-    <p class="print-note">[결과 저장]은 고쳐 쓸 수 있는 Markdown 파일, [PDF로 저장]은 그대로 공유하는 사본입니다. PDF는 인쇄 창에서 대상을 ‘PDF로 저장’으로 고르세요.</p>
-  </section>
 
-  {% for section in document.sections %}
-    <section class="card">
-      <div class="rule-card-head">
-        <span class="rule-card-id">{{ section.number }}. {{ section.title }}</span>
-        {% if section.changed %}<span class="rule-card-kind">보완함</span>{% endif %}
-      </div>
-      {% if section.lines %}
-        <ul class="doc-lines">
-          {% for line in section.lines %}
-            <li class="doc-line doc-line-{{ line.state }}">
-              <span class="doc-text">{{ line.text }}</span>
-              {% if line.state in ("changed", "added") %}
-                <span class="badge-row">
-                  <span class="scope-badge">{{ "변경" if line.state == "changed" else "추가" }}</span>
-                  <span class="scope-badge">{{ line.change_id }}</span>
-                  {% for evidence_id in line.evidence_ids %}
-                    <a class="scope-badge evidence-chip" href="#trace-{{ evidence_id }}" data-trace-link="{{ evidence_id }}">근거 {{ evidence_id }}</a>
-                  {% endfor %}
-                </span>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="note">해당 사항 없음</p>
-      {% endif %}
+    <hr class="report-appendix-rule" />
+    <section class="report-appendix" id="change-appendix">
+      <h2>부록 1. 변경 전후 {{ document.changes | length }}건</h2>
+      {% if document.changes %}
+        <div class="report-table-scroll">
+          <table class="report-change-table">
+            <thead><tr><th>장·변경</th><th>변경 전</th><th>변경 후</th></tr></thead>
+            <tbody>
+              {% for change in document.changes %}
+                <tr>
+                  <td><strong>{{ change.section }}장</strong><br />{{ change.change_id }}</td>
+                  <td>{{ change.before or "(추가)" }}</td>
+                  <td><strong>{{ change.after }}</strong><span class="report-change-detail">검토: {{ change.rule_title }}{% if change.option_id %} · 대안 {{ change.option_id }}{% endif %}<br />선택: {{ change.decision_label }} · 근거: {{ change.evidence_ids | join(", ") or "-" }}</span></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}<p class="report-empty">변경한 항목이 없습니다. 원안을 그대로 유지했습니다.</p>{% endif %}
     </section>
-  {% endfor %}
 
-  {% if document.pending %}
-    <section class="card">
-      <h2 class="section-title">추가 확정 필요 {{ document.pending | length }}건</h2>
-      <div class="pending-list">{% for item in document.pending %}{{ pending_badge(item) }}{% endfor %}</div>
-      <p class="side-foot">서비스가 값을 채우지 않습니다. 담당자가 정해야 하는 항목입니다.</p>
-    </section>
-  {% endif %}
+    {{ evidence_trace(document) }}
 
-  {% if document.changes %}
-    <section class="card">
-      <h2 class="section-title">변경 전후 {{ document.changes | length }}건</h2>
-      <div class="table-scroll">
-        <table class="data-table">
-          <thead>
-            <tr><th>장</th><th>원안</th><th>보완안</th><th>검토 질문·대안</th><th>담당자 선택</th><th>근거</th></tr>
-          </thead>
-          <tbody>
-            {% for change in document.changes %}
-              <tr>
-                <td>{{ change.section }}</td>
-                {% if change.before %}
-                  <td>{{ change.before }}</td>
-                {% else %}
-                  <td class="cell-add">(추가)</td>
-                {% endif %}
-                <td>{{ change.after }}</td>
-                <td>{{ change.change_id }} · {{ change.rule_title }}{% if change.option_id %} · 대안 {{ change.option_id }}{% endif %}</td>
-                <td>{{ change.decision_label }}</td>
-                <td>{{ change.evidence_ids | join(", ") or "-" }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  {% endif %}
+    {% if document.request_draft %}
+      <section class="report-appendix" id="request-appendix">
+        <h2>부록 3. 정밀 분석 요청서 초안</h2>
+        <p class="report-caution">초안이며 계약이나 자료 제공이 확정된 것이 아닙니다.</p>
+        <dl class="report-request-grid">
+          <div><dt>요청 목적</dt><dd>{{ document.request_draft.purpose }}</dd></div>
+          <div><dt>분석 대상</dt><dd>{{ document.request_draft.targets | replace("[추가 확정 필요]", "") }} <span class="report-pending">추가 확정 필요</span></dd></div>
+          <div><dt>대상 기간</dt><dd>{{ document.request_draft.period }}</dd></div>
+          <div><dt>필요 지표</dt><dd>{{ document.request_draft.metrics }}</dd></div>
+        </dl>
+        <h3>보내기 전에 확인할 것</h3>
+        <ul>{% for item in document.request_draft.to_confirm %}<li>{{ item }}</li>{% endfor %}</ul>
+      </section>
+    {% endif %}
 
-  {{ evidence_trace(document) }}
-
-  <section class="card">
-    <div class="form-foot">
-      <a class="btn btn-ghost" href="/step/4">← 보완 선택으로</a>
-      <span class="muted small">저장 버튼을 누르면 저장 위치를 고를 수 있습니다. 서비스는 파일을 서버에 남기지 않습니다.</span>
-    </div>
-  </section>
+    <footer class="report-document-foot">{% if document.profile_summary.data_kind == "synthetic" %}화면과 문서의 수치는 시연용 합성 수치입니다. {% endif %}BC카드 공식 서비스가 아닌 공모전 제안용 결과물입니다.</footer>
+  </article>
+  <p class="report-help">Word 문서는 편집 가능한 결과물입니다. PDF는 인쇄 창에서 대상을 ‘PDF로 저장’으로 선택하세요. 파일은 서버에 남지 않습니다.</p>
 </div>
 {% endblock %}
 

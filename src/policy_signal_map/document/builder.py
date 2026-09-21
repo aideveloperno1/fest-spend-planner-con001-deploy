@@ -92,7 +92,7 @@ def _apply_choice(
 
     for index, text in enumerate(lines):
         # 문서 안에서 변경 문장과 별첨 표를 잇는 공개용 번호다. 내부 규칙 번호는
-        # Change.rule_id에만 보관하고 화면·Markdown에는 내보내지 않는다.
+        # Change.rule_id에만 보관하고 화면·Word 문서에는 내보내지 않는다.
         change_id = f"변경 {len(changes) + 1:03d}"
         replace_at = section.find(document.replace_key) if document.mode == "replace" and index == 0 else None
 

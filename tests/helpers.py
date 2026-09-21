@@ -1,3 +1,7 @@
+from io import BytesIO
+
+from docx import Document
+
 from policy_signal_map.plan.models import PlanInput
 from policy_signal_map.web.forms import parse_plan_form
 
@@ -21,3 +25,10 @@ def parse(form: dict) -> PlanInput:
     single = {k: v for k, v in form.items() if isinstance(v, str)}
     multi = {k: v for k, v in form.items() if isinstance(v, list)}
     return parse_plan_form(single, multi)
+
+
+def docx_text(content: bytes) -> str:
+    document = Document(BytesIO(content))
+    paragraphs = [paragraph.text for paragraph in document.paragraphs]
+    cells = [cell.text for table in document.tables for row in table.rows for cell in row.cells]
+    return " ".join([*paragraphs, *cells])

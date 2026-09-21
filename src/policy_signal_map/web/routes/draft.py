@@ -10,7 +10,7 @@ from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 from ...document.builder import build_document
 from ...document.filename import document_filename, request_filename
 from ...document.models import DocumentBlocked, PlanDocument
-from ...document.render import render_markdown, render_request
+from ...document.docx import render_docx, render_request_docx
 from ...review.engine import run_review
 from ..dependencies import evidence_state_dep, session_dep
 from ..evidence_state import EvidenceState
@@ -29,12 +29,12 @@ def _document(state: WorkState, evidence: EvidenceState) -> PlanDocument | Docum
     return build_document(state.original, result, state.choices, evidence.result, date.today())
 
 
-def _attachment(text: str, filename: str) -> Response:
-    # 한글 파일 이름은 filename*(RFC 5987)로 보낸다. 옛 브라우저용 이름도 함께 둔다
-    disposition = f"attachment; filename=\"plan.md\"; filename*=UTF-8''{quote(filename)}"
-    return PlainTextResponse(
-        text,
-        media_type="text/markdown; charset=utf-8",
+def _attachment(content: bytes, filename: str) -> Response:
+    # 한글 파일 이름은 filename*(RFC 5987)로 보낸다. 옛 브라우저용 이름도 함께 둔다.
+    disposition = f"attachment; filename=\"document.docx\"; filename*=UTF-8''{quote(filename)}"
+    return Response(
+        content,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         headers={"Content-Disposition": disposition},
     )
 
@@ -62,26 +62,9 @@ def show(request: Request, session: Session, evidence: Evidence) -> Response:
 
 @router.get("/step/5/document", response_class=HTMLResponse)
 def full_document(request: Request, session: Session, evidence: Evidence) -> Response:
-    session_id, state = session
-    common = {"step": 5, "session_id": session_id, "state": state, "evidence": evidence}
-    if state.original is None:
-        return redirect("/step/1", session_id)
-    if not evidence.ok or evidence.result is None:
-        return render(request, "error.html", {}, status_code=503, **common)
-
-    document = _document(state, evidence)
-    if isinstance(document, DocumentBlocked):
-        return redirect("/step/4", session_id)
-    return render(
-        request,
-        "steps/document.html",
-        {
-            "document": document,
-            "markdown": render_markdown(document),
-            "filename": document_filename(state.original.name, date.today()),
-        },
-        **common,
-    )
+    # Step 5 자체가 전체 보고서다. 이전 Markdown 원문 주소는 보고서로 돌려보낸다.
+    session_id, _ = session
+    return redirect("/step/5", session_id)
 
 
 @router.get("/step/5/request", response_class=HTMLResponse)
@@ -102,7 +85,6 @@ def request_draft(request: Request, session: Session, evidence: Evidence) -> Res
         {
             "document": document,
             "draft": document.request_draft,
-            "markdown": render_request(document),
             "filename": request_filename(state.original.name, date.today()),
         },
         **common,
@@ -125,5 +107,5 @@ def download(session: Session, evidence: Evidence, kind: str = "plan") -> Respon
     if kind == "request":
         if document.request_draft is None:
             return PlainTextResponse("정밀 분석 요청서 초안이 없습니다.", status_code=404)
-        return _attachment(render_request(document), request_filename(state.original.name, today))
-    return _attachment(render_markdown(document), document_filename(state.original.name, today))
+        return _attachment(render_request_docx(document), request_filename(state.original.name, today))
+    return _attachment(render_docx(document), document_filename(state.original.name, today))

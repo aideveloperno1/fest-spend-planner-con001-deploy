@@ -24,7 +24,7 @@
 | `test_demo_evidence.py` | **시연용 가짜 근거 파일**이 도구 결과와 같고 가상 규모인지 확인 | 가짜 근거 파일을 다시 만들었을 때 |
 | `test_review_rules.py` | **검토 규칙** 확인: 언제 질문이 나오는지, 문장에 판정 단어·숫자가 없는지 | 규칙 조건이나 문장을 바꿨을 때 |
 | `test_choices.py` | **보완 선택** 확인: 저장·취소, 다시 확인 표시, 쓰지 않는 실행 조건 정리 | 선택 규칙을 바꿨을 때 |
-| `test_document_describe.py`, `test_document_builder.py`, `test_document_render.py`, `test_document_filename.py` | **보완 기획안 문서** 확인: 원안 문장, 선택 반영, Markdown 모양, 파일 이름 | 문서 생성을 바꿨을 때 |
+| `test_document_describe.py`, `test_document_builder.py`, `test_document_docx.py`, `test_document_filename.py` | **보완 기획안 문서** 확인: 원안 문장, 선택 반영, Word 문서 내용·서식, 파일 이름 | 문서 생성을 바꿨을 때 |
 | `test_llm_provider.py`, `test_llm_prompt.py`, `test_llm_guard.py`, `test_llm_catalog.py` | **AI 참고 의견** 확인: 연결·모델 목록, 요청문에 수치 없음, 답 검사, 모델 이름표 파일 | AI 기능을 바꿨을 때 |
 | `test_evidence_state.py`, `test_evidence_view.py`, `test_top_badge.py` | **근거 상태와 2단계 화면 데이터**, 상단 자료 표시 확인 | 2단계 화면이나 상단 표시를 바꿨을 때 |
 | `test_region_evidence.py` | **지역(시도) 근거 선택** 확인: 시군구→시도→전국 사다리, 넓힌 이유 밝히기, 표본 부족·기간 안 겹침 | 지역 선택 규칙을 바꿨을 때 |
@@ -40,7 +40,7 @@
 | `test_packs.py` | **사업 유형별로 켜지는 질문** 확인: 공통 질문은 항상, 유형 미지정은 모두, 켜지 않은 질문은 '유형이 달라 확인하지 않음'으로 남는지 | 유형에 질문을 더하거나 뺄 때 |
 | `test_metric_checks.py` | **성과지표와 자료 범위 확인(R10)**: 사람 수 지표를 고르면 묻고, 카드로 잴 수 있는 지표만 고르면 묻지 않음 | 지표 점검 조건이나 문구를 바꿨을 때 |
 | `test_festival_flow.py` | **축제 시나리오 전체 흐름**: 입력 → 프로필 → 지표 질문 → 선택 → 보완 기획안까지 한 번에 | 단계 사이 연결이 끊겼는지 볼 때 |
-| `test_coupon_flow.py` | **쿠폰 시나리오 전체 흐름**: 업종·대상 구성 질문 → 선택 → 프로필 별첨과 저장용 Markdown까지 한 번에 | 단계 사이 연결이 끊겼는지 볼 때 |
+| `test_coupon_flow.py` | **쿠폰 시나리오 전체 흐름**: 업종·대상 구성 질문 → 선택 → 프로필 부록과 저장용 Word 문서까지 한 번에 | 단계 사이 연결이 끊겼는지 볼 때 |
 | `test_profile_view.py` | **2단계 지역 소비 프로필 카드** 확인: 고른 지역 자료만 쓰는지(넓히지 않는지), 자료가 없거나 부족할 때 이유를 적는지 | 프로필 카드를 바꿨을 때 |
 | `test_evidence_profiles.py` | **근거 파일 2.1 지역 프로필** 확인: 2.0 호환, 업종별 연령 구성·외부 인구, 고장 난 기능만 끄기, 준비 상태·운영 기준 | 프로필 형식이나 읽는 방식을 바꿨을 때 |
 | `test_plan_inputs.py` | **1단계에 더한 입력** 확인: 사업 유형(필수·목록 밖 값), 성과지표 묶음, 목표 방문객 수의 빈칸·0·잘못된 값 | 입력 칸을 더하거나 바꿀 때 |
@@ -104,7 +104,7 @@
 | `test_packs.py` | 16 | `review/packs.py`, 3단계 화면의 상태 구분 |
 | `test_metric_checks.py` | 12 | `review/metric_checks.py`, 3단계 화면 |
 | `test_festival_flow.py` | 6 | 1~5단계 전체 흐름 (축제 시나리오) |
-| `test_coupon_flow.py` | 1 | 1~5단계 전체 흐름 (쿠폰 시나리오, 저장용 Markdown 포함) |
+| `test_coupon_flow.py` | 1 | 1~5단계 전체 흐름 (쿠폰 시나리오, 저장용 Word 문서 포함) |
 | `test_profile_view.py` | 13 | `web/profile_view.py`, 2단계 프로필 카드 |
 | `test_evidence_profiles.py` | 29 | `evidence/profile_schema.py`, `evidence/loader.py`의 2.1 부분 |
 | `test_plan_inputs.py` | 28 | `plan/models.py`의 새 입력, `plan/validation.py`, `web/forms.py`, 1단계 화면 |
@@ -131,7 +131,7 @@
 | 자료 수집 미정 | test_review_rules, test_choices, test_document_builder |
 | 목표 유지·대안 취소 | test_choices, test_document_builder |
 | 목표·지역 변경 | test_plan_changes, test_choices, test_choice_routes |
-| Markdown 내보내기 | test_document_render, test_draft_routes (다운로드) + 외부 편집기 수동 확인 (미실시) |
+| Word 문서 저장 | test_document_docx, test_draft_routes (다운로드) + DOCX 렌더링 확인 |
 | 공개 배포 | test_public_bundle |
 
 ### 파일별 핵심

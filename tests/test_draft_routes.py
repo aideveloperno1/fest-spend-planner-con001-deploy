@@ -2,8 +2,10 @@
 
 import re
 from datetime import date
+from io import BytesIO
 from urllib.parse import quote
 
+from docx import Document
 from evidence_helpers import fixture_path
 from fastapi.testclient import TestClient
 from helpers import VALID_FORM
@@ -27,6 +29,13 @@ TODAY = date.today().strftime("%Y%m%d")
 
 def text_of(html: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
+
+
+def docx_text(content: bytes) -> str:
+    document = Document(BytesIO(content))
+    paragraphs = [paragraph.text for paragraph in document.paragraphs]
+    cells = [cell.text for table in document.tables for row in table.rows for cell in row.cells]
+    return " ".join([*paragraphs, *cells])
 
 
 def answered_client(form: dict | None = None, choice: dict | None = None) -> TestClient:
@@ -56,7 +65,7 @@ def test_draft_screen_shows_summary_and_changed_lines():
     assert "보완 기획안 — 하반기 외국인 소비지원 쿠폰" in text
     assert "시연용 합성 수치 · 자료 버전 demo-001" in text
     assert "담당자 확인 전 초안입니다" in text
-    assert "변경 5건" in text and "원안 유지" in text
+    assert "보완 반영 5건" in text and "원안 유지" in text
     assert "주요 지표: 쿠폰 사용 실적" in text
     assert "1. 사업 개요" in text and "8. 추가 확인사항" in text
 
@@ -84,20 +93,21 @@ def test_change_table_lists_rule_and_decision():
     assert "금액·비중과 성과지표 확인 · 대안 A" in text and "채택" in text
 
 
-def test_full_document_screen_shows_markdown_source():
-    text = answered_client().get("/step/5/document").text
-    assert "# 보완 기획안 — 하반기 외국인 소비지원 쿠폰" in text
-    assert "## 별첨 1. 변경 전후" in text
+def test_old_full_document_url_redirects_to_report():
+    response = answered_client().get("/step/5/document", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/step/5"
 
 
-def test_download_sends_markdown_with_korean_filename():
+def test_download_sends_docx_with_korean_filename():
     response = answered_client().get("/step/5/download")
     assert response.status_code == 200
-    assert response.headers["content-type"].startswith("text/markdown")
-    expected = quote(f"보완기획안_하반기_외국인_소비지원_쿠폰_{TODAY}.md")
+    assert response.headers["content-type"].startswith("application/vnd.openxmlformats-officedocument")
+    expected = quote(f"보완기획안_하반기_외국인_소비지원_쿠폰_{TODAY}.docx")
     assert f"filename*=UTF-8''{expected}" in response.headers["content-disposition"]
-    assert response.text.startswith("# 보완 기획안")
-    assert "별첨 2. 근거와 해석 한계" in response.text
+    text = docx_text(response.content)
+    assert "보완 기획안 — 하반기 외국인 소비지원 쿠폰" in text
+    assert "부록 2 데이터 분석 근거 및 한계" in text
 
 
 def test_download_is_blocked_while_questions_remain():
@@ -125,8 +135,8 @@ def test_request_download_uses_its_own_filename():
     c = answered_client(choice={"question_key": "R07", "decision": "adopt", "option_id": "D"})
     response = c.get("/step/5/download?kind=request")
     assert response.status_code == 200
-    assert quote(f"정밀분석요청서_하반기_외국인_소비지원_쿠폰_{TODAY}.md") in response.headers["content-disposition"]
-    assert response.text.startswith("# 정밀 분석 요청서 (초안)")
+    assert quote(f"정밀분석요청서_하반기_외국인_소비지원_쿠폰_{TODAY}.docx") in response.headers["content-disposition"]
+    assert "정밀 분석 요청서 초안" in docx_text(response.content)
 
 
 def test_request_download_without_option_d_is_not_found():
@@ -139,7 +149,7 @@ def test_pdf_button_is_on_every_result_screen():
     for path in ("/step/5", "/step/5/document", "/step/5/request"):
         html = c.get(path).text
         assert "data-print-button" in html, path
-        assert "PDF로 저장" in html, path
+        assert "PDF 저장" in html, path
         assert "js/print.js" in html, path
 
 
@@ -148,7 +158,16 @@ def test_print_stylesheet_hides_screen_only_parts():
     print_block = css[css.index("@media print") :]
     for selector in (".topbar", ".rail", ".head-actions", ".btn"):
         assert selector in print_block
-    assert ".site-foot" in print_block  # 합성 수치·공모전 고지는 인쇄본에도 남는다
+    assert ".site-foot" in print_block  # 서비스 푸터는 숨기고 보고서 안 고지만 남긴다
+    assert "size: A4" in print_block and "margin: 20mm" in print_block
+    assert "display: table-header-group" in print_block
+
+
+def test_report_has_mobile_layout_rules():
+    css = (STATIC_DIR / "css" / "style.css").read_text(encoding="utf-8")
+    mobile = css[css.index("@media (max-width: 720px)") : css.index(".doc-lines")]
+    assert ".report-paper" in mobile and ".report-meta" in mobile
+    assert "grid-template-columns: 1fr" in mobile
 
 
 def test_step_five_error_page_when_evidence_fails(use_evidence):
@@ -174,39 +193,39 @@ STALE = "참여 실적 자료: 수집 담당자"
 def test_disappeared_question_leaves_no_execution_pending():
     c = answered_client(choice=PARTIAL_A)
     c.post("/step/1", data={**VALID_FORM, "metrics": ["coupon_usage"]})
-    assert STALE not in c.get("/step/5/download").text
+    assert STALE not in docx_text(c.get("/step/5/download").content)
 
 
 def test_keep_original_after_adopt_leaves_no_execution_pending():
     c = answered_client(choice=PARTIAL_A)
-    assert STALE in c.get("/step/5/download").text
+    assert STALE in docx_text(c.get("/step/5/download").content)
     c.post("/step/4", data={"question_key": "R07", "decision": "keep_original"})
-    assert STALE not in c.get("/step/5/download").text
+    assert STALE not in docx_text(c.get("/step/5/download").content)
 
 
 def test_switching_a_to_b_leaves_no_execution_pending():
     c = answered_client(choice=PARTIAL_A)
     c.post("/step/4", data={"question_key": "R07", "decision": "adopt", "option_id": "B"})
-    assert STALE not in c.get("/step/5/download").text
+    assert STALE not in docx_text(c.get("/step/5/download").content)
 
 
 def test_shared_execution_stays_while_another_question_adopts_a():
     c = answered_client({**VALID_FORM, "target": "외국인 관광객"}, PARTIAL_A)
     c.post("/step/4", data={**PARTIAL_A, "question_key": "R03"})
     c.post("/step/4", data={"question_key": "R03", "decision": "keep_original"})
-    assert STALE in c.get("/step/5/download").text
+    assert STALE in docx_text(c.get("/step/5/download").content)
 
 
 def test_r04_b_keeps_entered_cycle_after_r07_is_kept_original():
     c = answered_client({**VALID_FORM, "period_start": "2026-10-01", "period_end": "2026-10-20"})
     c.post("/step/4", data={"question_key": "R04-period", "decision": "adopt", "option_id": "B"})
     c.post("/step/4", data={"question_key": "R07", "decision": "keep_original"})
-    text = c.get("/step/5/download").text
+    text = docx_text(c.get("/step/5/download").content)
     assert "사업 기간 성과는 월 1회 주기로 별도 확인" in text
 
 
 def test_save_script_does_not_download_recheck_response():
-    # 5단계를 연 뒤 원안이 바뀌면 내려받기가 409다. 오류 문장을 .md로 저장하지 않고 안내만 한다 (6-5d)
+    # 5단계를 연 뒤 원안이 바뀌면 내려받기가 409다. 오류 응답을 문서로 저장하지 않고 안내만 한다 (6-5d)
     script = (STATIC_DIR / "js" / "save.js").read_text(encoding="utf-8")
     assert "response.status === 409" in script
     assert "4단계 보완 선택으로 가서 확인한 뒤 저장해 주세요" in script

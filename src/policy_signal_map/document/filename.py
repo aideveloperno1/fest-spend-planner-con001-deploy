@@ -1,4 +1,4 @@
-"""저장 파일 이름 (checks.md 결정: 보완기획안_{사업명}_{날짜}.md)."""
+"""저장 파일 이름 (보완기획안_{사업명}_{날짜}.docx)."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ def _stem(plan_name: str) -> str:
 def _named(prefix: str, plan_name: str, today: date) -> str:
     stem = _stem(plan_name)
     stamp = today.strftime("%Y%m%d")
-    return f"{prefix}_{stem}_{stamp}.md" if stem else f"{prefix}_{stamp}.md"
+    return f"{prefix}_{stem}_{stamp}.docx" if stem else f"{prefix}_{stamp}.docx"
 
 
 def document_filename(plan_name: str, today: date) -> str:

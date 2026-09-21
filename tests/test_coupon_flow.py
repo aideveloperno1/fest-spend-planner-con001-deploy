@@ -1,9 +1,9 @@
-"""쿠폰 시나리오를 입력부터 저장용 Markdown까지 한 번에 통과시킨다."""
+"""쿠폰 시나리오를 입력부터 저장용 Word 문서까지 한 번에 통과시킨다."""
 
 import re
 
 from fastapi.testclient import TestClient
-from helpers import VALID_FORM
+from helpers import VALID_FORM, docx_text
 
 from policy_signal_map.app import app
 
@@ -57,7 +57,7 @@ def test_coupon_flow_reaches_document_with_both_value_based_choices():
     assert "쿠폰 참여자 연령 확인 자료" in text
     assert "지역 소비 프로필" in text
 
-    markdown = client.get("/step/5/download").text
-    assert "변경 001" in markdown and "변경 002" in markdown
-    assert "R02-A" not in markdown and "R08-C" not in markdown
-    assert "지역 소비 프로필" in markdown
+    document = docx_text(client.get("/step/5/download").content)
+    assert "변경 001" in document and "변경 002" in document
+    assert "R02-A" not in document and "R08-C" not in document
+    assert "지역 소비 프로필" in document

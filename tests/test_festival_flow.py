@@ -7,7 +7,7 @@
 import re
 
 from fastapi.testclient import TestClient
-from helpers import VALID_FORM
+from helpers import VALID_FORM, docx_text
 
 from policy_signal_map.app import app
 
@@ -85,13 +85,13 @@ def test_문서_본문에_해석_조건이_적힌다():
     c.post("/step/4", data=ANSWER_R10)
     c.post("/step/4", data=ANSWER_R02)
     c.post("/step/4", data=ANSWER_SEASON)
-    text = text_of(c.get("/step/5/document").text)
+    text = text_of(c.get("/step/5").text)
     assert "사람 수" in text
     assert "협의 중" in text  # 자료 확보 여부를 확정으로 바꾸지 않는다
 
 
 def test_화면에는_규칙_번호가_나오지_않는다():
-    """3~5단계 화면과 저장할 Markdown에 규칙 관리 번호를 쓰지 않는다."""
+    """3~5단계 화면과 저장할 Word 문서에 규칙 관리 번호를 쓰지 않는다."""
     c = festival_client()
     c.post("/step/4", data=ANSWER_R10)
     c.post("/step/4", data=ANSWER_R02)
@@ -99,6 +99,6 @@ def test_화면에는_규칙_번호가_나오지_않는다():
     for path in ("/step/3", "/step/4", "/step/5", "/step/5/document"):
         text = text_of(c.get(path).text)
         assert "R10" not in text, path
-    markdown = c.get("/step/5/download").text
-    assert "변경 001" in markdown
-    assert "R10-A" not in markdown
+    document = docx_text(c.get("/step/5/download").content)
+    assert "변경 001" in document
+    assert "R10-A" not in document

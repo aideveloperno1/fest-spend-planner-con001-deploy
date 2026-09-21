@@ -37,7 +37,7 @@
 | `questions.py` | `GET /step/3` (원안 없으면 `/step/1`, 근거 오류면 503), `POST /step/3/ai-model` (AI 모델 선택: 목록 밖·받아 두지 않은 모델 422, 저장 후 303) | `steps/questions.html` |
 | `opinions.py` | `POST /step/3/opinions` (JSON, AI 참고 의견. 고른 모델로 호출, `model_label` 포함) | — (`static/js/opinions.js`가 채움) |
 | `choices.py` | `GET·POST /step/4`, `POST /step/4/cancel` (저장 후 303, 검증 실패는 422) | `steps/choices.html` |
-| `draft.py` | `GET /step/5`, `GET /step/5/document`, `GET /step/5/download`, `GET /step/5/request` | `steps/draft.html`, `steps/document.html`, `steps/request.html` |
+| `draft.py` | `GET /step/5`, `GET /step/5/document`, `GET /step/5/download`, `GET /step/5/request` | `steps/draft.html`, `steps/request.html` |
 
 임시 화면(`steps.py`·`placeholder.html`)은 5단계 구현과 함께 삭제했다. 단계 주소는 모두 전용 라우터가 받으므로 `/step/{step}` 같은 포괄 규칙을 다시 만들지 않는다 (만들면 `/step/2` 등 전용 주소를 가로챈다).
 
@@ -92,12 +92,12 @@
 
 #### `draft.py` — 5단계 보완 기획안
 
-- `GET /step/5`: 보완 기획안 화면 (문서 순번 `변경 001`로 본문과 변경표 연결, 별첨 2 고른 지역 프로필 요약, 근거 추적 패널 포함)
-- `GET /step/5/document`: 전체 문서 보기 (저장될 Markdown 원문을 `<pre>`로)
-- `GET /step/5/download`: `document/render.py` 결과를 `text/markdown; charset=utf-8`로 응답, `Content-Disposition`에 `document/filename.py` 파일명 (RFC 5987 `filename*=UTF-8''` 인코딩으로 한글 파일명)
-  - 화면의 [결과 저장]은 `static/js/save.js`가 이 주소를 받아 저장 위치 선택 창을 연다
+- `GET /step/5`: 1~8장과 검증 부록을 한 시트에 이어 보여 주는 반응형 보고서
+- `GET /step/5/document`: 옛 Markdown 원문 주소. `/step/5`로 303 이동
+- `GET /step/5/download`: `document/docx.py`가 만든 DOCX를 응답. `Content-Disposition`은 RFC 5987로 한글 파일명을 전달한다
+  - 화면의 [Word 문서 저장]은 `static/js/save.js`가 바이너리 응답을 받아 저장 위치 선택 창을 연다
 - `GET /step/5/request`: 옵션 D 선택 시 정밀 분석 요청서 초안. 선택하지 않았으면 `/step/5`로 되돌린다
-- `GET /step/5/download?kind=request`: 요청서 초안 파일 (`정밀분석요청서_...md`)
+- `GET /step/5/download?kind=request`: 요청서 초안 DOCX (`정밀분석요청서_...docx`)
 - 문서 생성 차단 상태면 4단계로 리다이렉트 (다운로드는 409와 사유 목록)
 
 ### 공통 원칙
