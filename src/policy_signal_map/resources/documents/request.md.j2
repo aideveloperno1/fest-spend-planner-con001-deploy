@@ -1,0 +1,29 @@
+# 정밀 분석 요청서 (초안) — {{ doc.title | replace("보완 기획안 — ", "") }}
+
+> 작성일 {{ doc.created_on }} · 초안입니다. 계약·자료 제공이 확정된 것이 아닙니다.
+
+- 요청 목적: {{ draft.purpose }}
+- 분석 대상: {{ draft.targets | mark_pending }}
+- 대상 기간: {{ draft.period }}
+- 필요 지표: {{ draft.metrics }}
+
+## 보내기 전에 확인할 것
+
+{% for item in draft.to_confirm %}
+- {{ item | md_escape }}
+{% endfor %}
+
+## 지금 자료로 답할 수 없는 것
+
+- 참여 점포·참여자의 결제 실적은 현재 제공 자료로 조회할 수 없습니다.
+- 카드 자료는 외국인 전체 기준이며 관광객과 거주 외국인을 구분하지 않습니다.
+
+## 참고한 근거
+
+{% if doc.evidence_refs %}
+{% for ref in doc.evidence_refs %}
+- {{ ref.evidence_id }} · {{ ref.scope_label }} · {{ ref.period_label }} · {{ "합성" if ref.data_kind == "synthetic" else "실제" }} 자료 {{ ref.dataset_version }}
+{% endfor %}
+{% else %}
+- 없음
+{% endif %}

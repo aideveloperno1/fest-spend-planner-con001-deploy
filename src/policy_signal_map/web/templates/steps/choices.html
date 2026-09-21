@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% from "partials/option_card.html" import option_card %}
+{% from "partials/pending_badge.html" import pending_badge %}
+
+{% block content %}
+<div class="stack">
+  <section class="card card-lg">
+    <h1 class="title">보완 방법 고르기</h1>
+    <p class="subtitle">서비스는 정답을 고르지 않습니다. 성공 확률이나 점수를 표시하지 않습니다.</p>
+
+    {% set recheck_keys = choice_set.needs_recheck_keys %}
+    {% if recheck_keys %}
+      <p class="notice">기획 또는 근거 자료가 바뀌어 다시 확인이 필요한 선택이 {{ recheck_keys | length }}건 있습니다: {% for key in recheck_keys %}{{ rule_titles.get(key, key) }}{{ ", " if not loop.last }}{% endfor %}</p>
+    {% endif %}
+    {% if choice_set.last_archived %}
+      <p class="notice">기획 또는 근거 변경으로 더 이상 해당하지 않는 선택 {{ choice_set.last_archived | length }}건을 보관했습니다:
+        {% for item in choice_set.last_archived %}{{ rule_titles.get(item.choice.rule_id, item.choice.rule_id) }}{{ ", " if not loop.last }}{% endfor %} (보완 기획안에는 반영하지 않습니다)</p>
+    {% endif %}
+    {% if not result.outcomes %}
+      <p class="notice">고를 질문이 없습니다. 바로 보완 기획안을 만들 수 있습니다.</p>
+    {% endif %}
+  </section>
+
+  {% for outcome in result.outcomes %}
+    {% set choice = choice_set.get(outcome.question_key) %}
+    {% set shared = choice_set.execution_for(outcome.merge_group) %}
+    {# 저장에 실패해 다시 그릴 때는 방금 적은 값을 되살린다. 그러지 않으면 고른 것이 사라지고
+       실행 조건 칸이 접혀, 그 안의 오류 문구까지 감춰진다 (사용자 확인 2026-09-19) #}
+    {% set mine = submitted if error_key == outcome.question_key else {} %}
+    {% set on_decision = mine.get("decision") or (choice.decision if choice else "") %}
+    {% set on_option = mine.get("option_id") or (choice.option_id if choice else "") %}
+    {% set on_modified = mine.get("modified_text") or (choice.modified_text if choice else "") %}
+    {% set on_items = mine.get("collect_items") or (shared.collect_items | join("\n") if shared else "") %}
+    {% set on_availability = mine.get("availability") or (shared.availability if shared else "") %}
+    {% set on_owner = mine.get("owner") or (shared.owner if shared else "") %}
+    {% set on_cycle = mine.get("cycle") or (shared.cycle if shared else "") %}
+    {% set on_reason = mine.get("reason") or (choice.reason if choice else "") %}
+    <section class="card choice-card" id="q-{{ outcome.question_key }}">
+      <div class="rule-card-head">
+        <span class="rule-card-id">{{ outcome.title }}</span>
+        {% if choice %}
+          <span class="rule-card-kind">{{ decisions[choice.decision] }}{{ " · 재확인 필요" if choice.needs_recheck }}</span>
+        {% endif %}
+      </div>
+      <p class="rule-card-message">{{ outcome.message }}</p>
+
+      {% if outcome.options %}
+        <form method="post" action="/step/4" class="choice-form">
+          <input type="hidden" name="question_key" value="{{ outcome.question_key }}" />
+
+          {% if errors and error_key == outcome.question_key and errors.get("decision") %}
+            <p class="error">{{ errors["decision"] }}</p>
+          {% endif %}
+
+          <div class="chips">
+            {% for value, label in decisions.items() %}
+              {% if value != "adopt" or outcome.options %}
+                <label class="chip">
+                  <input type="radio" name="decision" value="{{ value }}" {{ "checked" if on_decision == value }} />
+                  <span>{{ label }}</span>
+                </label>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <div class="option-grid">
+            {% for option in outcome.options %}
+              {{ option_card(option, outcome.question_key, on_option == option.id) }}
+            {% endfor %}
+          </div>
+          {% if errors and error_key == outcome.question_key and errors.get("option_id") %}
+            <p class="error">{{ errors["option_id"] }}</p>
+          {% endif %}
+
+          <label class="field">
+            <span class="label">수정할 내용 <span class="hint">‘수정’을 고른 경우</span></span>
+            <textarea class="input" name="modified_text" rows="2">{{ on_modified }}</textarea>
+            {% if errors and error_key == outcome.question_key and errors.get("modified_text") %}
+              <span class="error">{{ errors["modified_text"] }}</span>
+            {% endif %}
+          </label>
+
+          {% set needs_execution = outcome.options | selectattr("execution_fields") | list %}
+          {% if needs_execution %}
+            <fieldset class="field execution-box">
+              <legend class="label">실행 조건 <span class="hint">대안 A를 고른 경우</span></legend>
+              {% if outcome.related_rule_ids %}
+                {# 함께 묻는 질문이 없으면 "(없음)"으로 채우지 않고 문장을 생략한다 (6-4a) #}
+                <p class="note">같은 자료를 묻는 질문({{ outcome.related_titles | join(", ") }})과 함께 쓰는 입력입니다. 한 번만 적으면 됩니다.</p>
+              {% endif %}
+              <label class="field">
+                <span class="label">수집할 자료 <span class="req">필수</span></span>
+                <textarea class="input" name="collect_items" rows="2" placeholder="줄바꿈이나 쉼표로 구분">{{ on_items }}</textarea>
+                {% if errors and error_key == outcome.question_key and errors.get("collect_items") %}
+                  <span class="error">{{ errors["collect_items"] }}</span>
+                {% endif %}
+              </label>
+              <div class="grid-fields">
+                <label class="field">
+                  <span class="label">자료 확보 여부 <span class="opt">선택</span></span>
+                  <select class="input" name="availability">
+                    <option value="">선택 안 함</option>
+                    {% for value, label in availabilities.items() %}
+                      <option value="{{ value }}" {{ "selected" if on_availability == value }}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="label">수집 담당자 <span class="opt">선택</span></span>
+                  <input class="input" name="owner" value="{{ on_owner }}" placeholder="비우면 추가 확정 필요" />
+                </label>
+                <label class="field">
+                  <span class="label">확인 주기 <span class="opt">선택</span></span>
+                  <input class="input" name="cycle" value="{{ on_cycle }}" placeholder="예: 월 1회" />
+                </label>
+              </div>
+            </fieldset>
+          {% endif %}
+
+          <label class="field">
+            <span class="label">선택 이유 <span class="opt">선택</span></span>
+            <input class="input" name="reason" value="{{ on_reason }}" />
+          </label>
+
+          <div class="form-foot">
+            <span class="muted small">{{ "이미 고른 선택을 바꿉니다." if choice else "고른 뒤 저장하면 보완 기획안에 반영됩니다." }}</span>
+            <span class="head-actions">
+              {% if choice %}
+                <button type="submit" class="btn btn-ghost" formaction="/step/4/cancel">선택 취소</button>
+              {% endif %}
+              <button type="submit" class="btn btn-primary">저장</button>
+            </span>
+          </div>
+        </form>
+      {% else %}
+        <p class="note">이 항목은 선택 없이 보완 기획안의 추가 확인사항에 기록됩니다.</p>
+      {% endif %}
+    </section>
+  {% endfor %}
+
+  {% if pending %}
+    <section class="card">
+      <h2 class="section-title">추가 확정 필요 {{ pending | length }}건</h2>
+      <div class="pending-list">{% for item in pending %}{{ pending_badge(item) }}{% endfor %}</div>
+    </section>
+  {% endif %}
+
+  <section class="card">
+    {% if blocking %}
+      <h2 class="section-title">보완 기획안을 만들기 전에 확인할 것</h2>
+      <ul class="plain-list">{% for reason in blocking %}<li>{{ reason }}</li>{% endfor %}</ul>
+    {% endif %}
+    <div class="form-foot">
+      <a class="btn btn-ghost" href="/step/3">← 검토 질문으로</a>
+      {% if blocking %}
+        <span class="muted small">위 항목을 정하면 다음 단계로 갈 수 있습니다.</span>
+      {% else %}
+        <a class="btn btn-primary" href="/step/5">보완 기획안 만들기 →</a>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/choices.js') }}?v={{ asset_version | default('') }}"></script>
+{% endblock %}

@@ -1,0 +1,7 @@
+# 저장소 안의 텍스트 파일 줄바꿈을 LF로 통일한다 (Windows autocrlf 경고·혼재 방지)
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary

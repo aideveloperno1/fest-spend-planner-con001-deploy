@@ -1,0 +1,241 @@
+{#
+  랜딩 화면. base.html을 쓰지 않는다 — base.html은 단계 레일·세션 값이 필수인데 여기엔 없다.
+  글자는 전부 web/landing_content.py에 있다. 화면과 어긋나지 않게 한곳에 모아 둔 것이다.
+  동적 효과는 향상일 뿐이다: JS가 꺼져 있어도, ?motion=off로 열어도 모든 글자가 그대로 보인다.
+#}
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+    <title>콕콕 — 소비데이터로 기획안 한 번 더 보기</title>
+    <meta name="description" content="소비데이터에서 찾은 근거를 질문으로 바꾸고, 담당자의 선택을 보완 기획안 문장에 반영합니다." />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v={{ asset_version | default('') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', path='css/landing.css') }}?v={{ asset_version | default('') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', path='css/landing-hero.css') }}?v={{ asset_version | default('') }}-bare-hand-1" />
+    <link rel="preload" as="image" href="{{ url_for('static', path='images/landing-hero-bare-hand.png') }}" />
+  </head>
+  <body class="landing">
+    <header class="lp-nav">
+      <div class="lp-nav-inner">
+        <a class="brand" href="/"><span class="brand-mark"></span><span>콕콕</span></a>
+        <nav class="lp-nav-links" aria-label="서비스 소개">
+          {% for href, label in c.nav %}<a href="{{ href }}">{{ label }}</a>{% endfor %}
+        </nav>
+        <a class="btn btn-primary lp-nav-cta" href="/step/1">예시 기획으로 체험</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="lp-intro">
+      {# ---------------------------------------------------------- 1. 머리말 #}
+      <section class="lp-hero" aria-labelledby="hero-title">
+        <div class="lp-wrap">
+          <p class="lp-eyebrow">{{ c.hero_eyebrow }}</p>
+          <h1 class="lp-title" id="hero-title">
+            {{ c.hero_title_1 }}<br /><strong>{{ c.hero_title_strong }}</strong>{{ c.hero_title_2 }}.
+          </h1>
+          <p class="lp-lead">{{ c.hero_lead }}</p>
+          <div class="lp-cta-row">
+            <a class="btn btn-primary btn-lg" href="/step/1">예시 기획으로 체험<span class="lp-cta-orb" aria-hidden="true"></span></a>
+            <a class="btn btn-ghost btn-lg" href="#evidence">근거 설계 보기</a>
+          </div>
+          <p class="lp-note">{{ c.hero_note }}</p>
+        </div>
+      </section>
+
+      {# ---------------------------------------------------------- 2. 검토 흐름 #}
+      <section class="lp-section lp-flow" id="flow" aria-labelledby="flow-title">
+        <div class="lp-wrap">
+          <h2 class="lp-h2" id="flow-title">다섯 단계로 기획안을 고칩니다</h2>
+          <div class="lp-flow-track">
+          <svg class="lp-flow-ribbon" viewBox="0 0 884 138" fill="none" aria-hidden="true" focusable="false">
+            <path class="lp-flow-line" d="M69 12 C162 12 147 126 255 126 S348 12 441 12 S534 126 627 126 S720 12 813 12" />
+            <path class="lp-flow-line lp-flow-line-back" d="M69 126 C162 126 147 12 255 12 S348 126 441 126 S534 12 627 12 S720 126 813 126" />
+            <path class="lp-flow-light" pathLength="100" d="M69 12 C162 12 147 126 255 126 S348 12 441 12 S534 126 627 126 S720 12 813 12" />
+            <path class="lp-flow-light" pathLength="100" d="M69 126 C162 126 147 12 255 12 S348 126 441 126 S534 12 627 12 S720 126 813 126" />
+          </svg>
+          <ol class="lp-steps">
+            {% for s in c.steps %}
+              <li class="lp-step" style="--i: {{ loop.index0 }}">
+                <span class="lp-step-title">{{ s.title }}</span>
+                <span class="lp-step-note">{{ s.note }}</span>
+              </li>
+            {% endfor %}
+          </ol>
+          </div>
+          <p class="lp-flow-accessible-note">{{ c.steps_note }}</p>
+        </div>
+      </section>
+      </div>
+
+      {# ---------------------------------------------------------- 3. 왜 다른가 #}
+      <section class="lp-section lp-section-alt">
+        <div class="lp-wrap">
+          <h2 class="lp-h2 reveal">분석 결과를 확인하는 데서 끝나지 않습니다</h2>
+          <div class="lp-compare">
+            {% for card, kind in [(c.before, 'before'), (c.after, 'after'), (c.outputs, 'out')] %}
+              <div class="lp-card lp-card-{{ kind }} reveal" style="--i: {{ loop.index0 }}">
+                <h3 class="lp-card-title">{{ card.title }}</h3>
+                <ul class="plain-list">
+                  {% for line in card.lines %}<li>{{ line }}</li>{% endfor %}
+                </ul>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      {# ---------------------------------------------------------- 4. 근거 설계 #}
+      <section class="lp-section" id="evidence">
+        <div class="lp-wrap">
+          <h2 class="lp-h2 reveal">근거는 금액과 비중을 따로 봅니다</h2>
+
+          {# 방향 비교: 숫자를 붙이지 않는다. 개념 그림이지 수치 표시가 아니다 #}
+          <figure class="lp-bars reveal" aria-label="외국인 결제금액은 줄고 전체 분모 비중은 늘어난 구간을 나타낸 그림">
+            <div class="lp-bar-row">
+              <span class="lp-bar-label">외국인 결제금액</span>
+              <span class="lp-bar"><span class="lp-bar-fill lp-bar-down"></span></span>
+              <span class="lp-bar-dir">감소</span>
+            </div>
+            <div class="lp-bar-row">
+              <span class="lp-bar-label">전체 분모 비중</span>
+              <span class="lp-bar"><span class="lp-bar-fill lp-bar-up"></span></span>
+              <span class="lp-bar-dir">증가</span>
+            </div>
+            <figcaption>한 구간에서 두 지표의 방향이 달랐습니다. 이럴 때 서비스가 질문을 만듭니다.</figcaption>
+          </figure>
+
+          <p class="lp-summary reveal">{{ c.evidence_summary }}</p>
+
+          <figure class="lp-shot reveal">
+            <img src="/shots/02_evidence_region.png" alt="2단계 근거 확인 화면" loading="lazy" width="1440" />
+            <figcaption>실제 2단계 화면 (시연용 합성 수치)</figcaption>
+          </figure>
+
+          <div class="lp-two reveal">
+            <div class="lp-card">
+              <h3 class="lp-card-title">계산 방법</h3>
+              <ul class="plain-list">{% for line in c.method_lines %}<li>{{ line }}</li>{% endfor %}</ul>
+            </div>
+            <div class="lp-card">
+              <h3 class="lp-card-title">해석 한계</h3>
+              <p class="note">{{ c.limitation_line }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {# ---------------------------------------------------------- 5. 지역 사다리 #}
+      <section class="lp-section lp-section-alt" id="region">
+        <div class="lp-wrap">
+          <h2 class="lp-h2 reveal">지역은 좁은 범위부터, 못 쓰면 밝히고 넓힙니다</h2>
+          <p class="lp-lead-sm reveal">{{ c.ladder_intro }}</p>
+
+          <div class="lp-ladder reveal" data-ladder>
+            <div class="lp-chips" role="tablist" aria-label="지역 예시">
+              {% for case in c.ladder_cases %}
+                <button
+                  type="button"
+                  class="lp-chip{{ ' is-on' if loop.first }}"
+                  role="tab"
+                  aria-selected="{{ 'true' if loop.first else 'false' }}"
+                  aria-controls="ladder-{{ case.key }}"
+                  data-chip="{{ case.key }}"
+                >{{ case.chip }}</button>
+              {% endfor %}
+            </div>
+
+            {% for case in c.ladder_cases %}
+              <div
+                class="lp-ladder-panel{{ ' is-on' if loop.first }}"
+                id="ladder-{{ case.key }}"
+                role="tabpanel"
+                data-panel="{{ case.key }}"
+              >
+                <div class="lp-rungs" aria-hidden="true">
+                  {% for level, label in [('sigungu', '시군구'), ('sido', '시도'), ('national', '전국')] %}
+                    <span class="lp-rung {{ 'is-used' if case.used == level }}">{{ label }}</span>
+                    {% if not loop.last %}<span class="lp-rung-arrow">→</span>{% endif %}
+                  {% endfor %}
+                </div>
+                <p class="lp-scope">{{ case.scope_label }}</p>
+                <p class="lp-ladder-note">{{ case.note }}</p>
+              </div>
+            {% endfor %}
+          </div>
+
+          <p class="lp-foot-note reveal">{{ c.ladder_foot }}</p>
+        </div>
+      </section>
+
+      {# ---------------------------------------------------------- 6. 신뢰 원칙 #}
+      <section class="lp-section" id="trust">
+        <div class="lp-wrap">
+          <h2 class="lp-h2 reveal">모르는 것을 지어내지 않습니다</h2>
+          <div class="lp-three">
+            {% for card in c.trust_cards %}
+              <div class="lp-card reveal" style="--i: {{ loop.index0 }}">
+                <h3 class="lp-card-title">{{ card.title }}</h3>
+                {% for line in card.lines %}<p class="{{ 'lp-card-lead' if loop.first else 'note' }}">{{ line }}</p>{% endfor %}
+                {% if loop.first %}
+                  <ul class="lp-hold" data-hold>
+                    {% for label, status in c.hold_months %}
+                      <li class="lp-hold-row{{ ' is-held' if not loop.first }}" style="--i: {{ loop.index0 }}">
+                        <span>{{ label }}</span><span>{{ status }}</span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+
+          {# 추적: 문장에 마우스를 올리면 그 근거 표시가 밝아진다 (5단계의 실제 기능) #}
+          <div class="lp-trace lp-card reveal" data-trace>
+            <h3 class="lp-card-title">변경 문장에는 근거가 붙습니다</h3>
+            <p class="lp-trace-line" data-trace-line>
+              주요 지표: 쿠폰 사용 실적, 참여 점포 정산 자료
+              <span class="lp-trace-chip" data-trace-chip>근거 · 금액·비중과 성과지표 확인</span>
+            </p>
+            <p class="note">문장에 마우스를 올리면 어떤 근거에서 나온 변경인지 표시됩니다.</p>
+          </div>
+        </div>
+      </section>
+
+      {# ---------------------------------------------------------- 7. 규칙 현황 #}
+      <section class="lp-section lp-section-alt">
+        <div class="lp-wrap">
+          <h2 class="lp-h2 reveal">지금 무엇까지 하는지 밝힙니다</h2>
+          <ul class="lp-rules">
+            {% for rule in c.rules %}
+              <li class="lp-rule reveal" style="--i: {{ loop.index0 }}">
+                <span class="lp-rule-stage lp-stage-{{ loop.index }}">{{ rule.stage }}</span>
+                <span class="lp-rule-title">{{ rule.title }}</span>
+                <span class="lp-rule-note">{{ rule.note }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </section>
+
+      {# ---------------------------------------------------------- 8. 맺음 #}
+      <section class="lp-section lp-closing">
+        <div class="lp-wrap reveal">
+          <h2 class="lp-h2">{{ c.closing_title }}</h2>
+          <p class="lp-lead">{{ c.closing_lead }}</p>
+          <div class="lp-cta-row">
+            <a class="btn btn-primary btn-lg" href="/step/1">예시 기획으로 체험 →</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {# 캡처 안전장치가 "시연용 합성 수치"를 확인하는 자리. 상단 띠가 없는 화면이라 여기에 표시한다 #}
+    <footer class="lp-foot" data-evidence-badge>{{ c.foot }}</footer>
+
+    <script src="{{ url_for('static', path='js/landing.js') }}?v={{ asset_version | default('') }}" defer></script>
+  </body>
+</html>

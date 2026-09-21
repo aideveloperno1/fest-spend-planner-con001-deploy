@@ -1,0 +1,1277 @@
+/* 디자인 기준: 프론트_예시/정책맵 워크스페이스 시안 */
+:root {
+  --bg: #f1f4f9;
+  --card: #ffffff;
+  --field: #fbfcfe;
+  --text: #1b2430;
+  --text-2: #33445a;
+  --text-3: #4a5a70;
+  --muted: #7a889b;
+  --label: #66748a;
+  --line: rgba(27, 36, 48, 0.08);
+  --line-2: rgba(27, 36, 48, 0.14);
+  --primary: #2563eb;
+  --primary-soft: #e9f0fe;
+  --primary-line: rgba(37, 99, 235, 0.28);
+  --warn: #a8761a;
+  --warn-soft: #fdf4de;
+  --error: #c2410c;
+  --ok: #15803d;
+  --tag: #e7ebf2;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --radius-lg: 22px;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-size: 14.5px;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- 상단 ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(241, 244, 249, 0.9);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar-inner,
+.rail,
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-inline: 24px;
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-block: 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.brand-mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #6aa5fb, var(--primary));
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.28);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.topbar form {
+  margin: 0;
+}
+
+.alert {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff4ed;
+  color: var(--error);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.tag-error {
+  background: var(--card);
+  border: 1px solid var(--line-2);
+}
+
+.site-foot {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.tag {
+  padding: 4px 9px;
+  border-radius: 7px;
+  background: var(--tag);
+  font-size: 12px;
+  font-weight: 600;
+  color: #5c6b7f;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.rail {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+}
+
+.rail-item {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line-2);
+  background: var(--card);
+  color: #8b98aa;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.rail-item.locked {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.rail-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: #edf1f7;
+}
+
+.rail-item.done {
+  color: var(--text-3);
+}
+
+.rail-item.done .rail-num {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.rail-item.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.rail-item.active .rail-num {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* ---------- 레이아웃 ---------- */
+.page {
+  padding-block: 24px 64px;
+}
+
+.layout-main-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.side {
+  display: grid;
+  gap: 16px;
+  position: sticky;
+  top: 140px;
+}
+
+@media (max-width: 900px) {
+  .layout-main-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    position: static;
+  }
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.card-lg {
+  padding: 28px;
+  box-shadow: 0 12px 32px rgba(30, 60, 120, 0.06);
+}
+
+@media (max-width: 520px) {
+  .card,
+  .card-lg {
+    padding: 18px;
+  }
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.head-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ---------- 버튼 ---------- */
+.btn {
+  border: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-ghost {
+  padding: 8px 14px;
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.btn-ghost:hover {
+  border-color: var(--primary-line);
+  color: var(--primary);
+}
+
+.btn-primary {
+  padding: 13px 24px;
+  border-radius: var(--radius);
+  background: linear-gradient(145deg, #4c8df7, var(--primary));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.26);
+}
+
+/* ---------- 입력 ---------- */
+.grid-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px 16px;
+  margin-top: 22px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.grid-fields .field {
+  margin-top: 0;
+}
+
+.label,
+.label-strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--label);
+}
+
+.label-strong {
+  font-size: 14.5px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.req,
+.opt,
+.hint {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.req {
+  color: var(--primary);
+}
+
+.opt,
+.hint {
+  color: var(--muted);
+}
+
+.input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(27, 36, 48, 0.12);
+  background: var(--field);
+  font-size: 14.5px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.input:disabled {
+  background: #eef1f5;
+  color: var(--muted);
+}
+
+textarea.input {
+  resize: vertical;
+}
+
+.has-error .input {
+  border-color: var(--error);
+}
+
+.error {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--error);
+}
+
+.error:empty,
+.note:empty {
+  display: none;
+}
+
+.note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-3);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip input,
+.seg input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip span {
+  display: inline-block;
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--card);
+  color: var(--text-3);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip input:checked + span {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.chip input:focus-visible + span,
+.seg input:focus-visible + span {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.region-row,
+.period-row,
+.budget-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.region-row select {
+  flex: 1;
+  min-width: 150px;
+}
+
+.period-row .input {
+  flex: 1;
+  min-width: 130px;
+}
+
+.budget-row .input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.segmented {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #edf1f7;
+}
+
+.seg span {
+  display: inline-block;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.seg input:checked + span {
+  background: var(--card);
+  color: var(--primary);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-3);
+  cursor: pointer;
+}
+
+.emphasis {
+  margin-top: 22px;
+  padding: 22px;
+  border: 1px solid var(--primary-line);
+  border-radius: 18px;
+  background: linear-gradient(170deg, #fbfcff, #f2f7fe);
+}
+
+.emphasis .field:first-child {
+  margin-top: 0;
+}
+
+.form-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  margin: 0;
+  font-size: 13px;
+}
+
+.mt {
+  margin-top: 22px;
+}
+
+/* ---------- 오른쪽 패널 ---------- */
+.side-title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: var(--text-3);
+}
+
+.text-warn {
+  color: var(--error);
+}
+
+.text-ok {
+  color: var(--ok);
+}
+
+.pending-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.badge-warn {
+  padding: 3px 9px;
+  border-radius: 7px;
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.badge-warn.inline {
+  display: inline-block;
+  margin-top: 14px;
+}
+
+.rule-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.rule {
+  padding: 13px 14px;
+  border-radius: var(--radius);
+  background: var(--field);
+  border: 1px solid rgba(27, 36, 48, 0.07);
+}
+
+.rule-id {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.rule-example .rule-id {
+  color: var(--label);
+}
+
+.rule-future .rule-id {
+  color: var(--warn);
+}
+
+.rule-text {
+  margin-top: 6px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-3);
+}
+
+.side-foot {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line-2);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 8px 12px;
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+
+.kv dt {
+  color: var(--label);
+  font-weight: 700;
+}
+
+.kv dd {
+  margin: 0;
+  color: var(--text-2);
+}
+
+/* ---------- 근거 화면 (2단계) ---------- */
+.stack {
+  display: grid;
+  /* minmax(0, 1fr): 격자 칸이 표의 최소 폭(640px)만큼 늘어나 본문 전체가 가로 스크롤되는 것을 막는다 */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+
+.stack > *,
+.chart-grid > *,
+.info-grid > * {
+  min-width: 0;
+}
+
+.section-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.scope-badge {
+  padding: 5px 10px;
+  border-radius: 7px;
+  background: var(--tag);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #5c6b7f;
+}
+
+.notice {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f3f5f8;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-3);
+}
+
+.notice-held {
+  background: #f7f8fa;
+  border: 1px dashed var(--line-2);
+}
+
+.summary-sentence {
+  margin: 18px 0 0;
+  max-width: 860px;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.55;
+  letter-spacing: -0.02em;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .chart-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.chart-grid .chart-fallback {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.chart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chart-box {
+  position: relative;
+  height: 220px;
+  margin-top: 12px;
+}
+
+.segmented-buttons {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #edf1f7;
+}
+
+.segmented-buttons button {
+  border: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.segmented-buttons button[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--primary);
+}
+
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.data-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.data-table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.data-table th,
+.data-table td {
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table thead th {
+  border-top: 0;
+  background: #f3f6fa;
+  font-size: 12.5px;
+  color: var(--label);
+  white-space: nowrap;
+}
+
+.data-table tbody th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.data-table .num,
+.num-inline {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.row-held th,
+.row-held td {
+  color: #96a2b3;
+  background: #fafbfc;
+}
+
+.cmp-opposite {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cell-note {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.kv-wide {
+  grid-template-columns: max-content auto;
+  max-width: 420px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .info-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.notes-heading {
+  margin: 12px 0 6px;
+}
+
+.plain-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-3);
+}
+
+.hold-examples summary {
+  cursor: pointer;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.hold-example {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.picked-region {
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  color: var(--text-3);
+}
+
+.picked-region strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* ---------- 검토 질문 (3단계) ---------- */
+
+/* 질문마다 상자를 나누지 않고 한 상자 안에 문서처럼 이어 붙인다 (사용자 확인 2026-09-19).
+   구분은 테두리 대신 가로선과 여백으로 준다. */
+.review-doc .rule-item {
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+/* 종류별 구분은 왼쪽 선으로만 준다 (상자 색을 쓰지 않는다) */
+.review-doc .rule-card-question {
+  border-left: 3px solid var(--primary);
+  padding-left: 16px;
+}
+
+.review-doc .rule-card-pending {
+  border-left: 3px solid rgba(168, 118, 26, 0.45);
+  padding-left: 16px;
+}
+
+.review-doc .rule-card-held {
+  border-left: 3px dashed var(--line-2);
+  padding-left: 16px;
+}
+
+.rule-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.rule-card-id {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.rule-card-kind {
+  padding: 4px 10px;
+  border-radius: 7px;
+  background: var(--tag);
+  font-size: 12px;
+  font-weight: 700;
+  color: #5c6b7f;
+}
+
+.rule-card-pending .rule-card-kind {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.rule-card-message {
+  margin: 12px 0 0;
+  max-width: 820px;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+
+.rule-card-why {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #edf1f7;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-3);
+}
+
+.evidence-chip {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* ---------- 보완 선택 (4단계) ---------- */
+.choice-card .chips {
+  margin-top: 16px;
+}
+
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.option-card {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  cursor: pointer;
+}
+
+.option-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.option-card-on {
+  border-color: var(--primary-line);
+  background: #f6f9ff;
+}
+
+.option-card-off {
+  opacity: 0.55;
+}
+
+.option-card-title {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.option-card-detail {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.execution-box {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px dashed var(--primary-line);
+  border-radius: 16px;
+  background: #fbfcff;
+}
+
+.execution-box .field:first-of-type {
+  margin-top: 8px;
+}
+
+.error-list {
+  margin: 18px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+
+/* ---------- 보완 기획안 ---------- */
+.doc-lines {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.doc-line {
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--field);
+  color: var(--text-2);
+  line-height: 1.55;
+}
+
+.doc-line-changed,
+.doc-line-added {
+  border-color: var(--primary-line);
+  background: var(--primary-soft);
+  color: var(--text);
+}
+
+.doc-line-pending {
+  border-style: dashed;
+  border-color: rgba(168, 118, 26, 0.4);
+  background: var(--warn-soft);
+}
+
+.doc-line .badge-row {
+  margin-top: 8px;
+}
+
+.doc-text {
+  overflow-wrap: anywhere;
+}
+
+.trace-list {
+  margin-top: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.trace-item {
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--field);
+}
+
+.trace-item.trace-on {
+  border-color: var(--primary-line);
+  background: var(--primary-soft);
+}
+
+.cell-add {
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+.print-note {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.doc-source {
+  margin: 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--field);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 인쇄·PDF 저장 ----------
+   [PDF로 저장]은 브라우저 인쇄 대화상자를 연다(대상: PDF로 저장).
+   배경색은 인쇄에서 꺼지는 경우가 많아, 변경 표시는 왼쪽 선과 글자로 남긴다. */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+
+  body {
+    background: #fff;
+    font-size: 10.5pt;
+  }
+
+  .topbar,
+  .rail,
+  .head-actions,
+  .form-foot,
+  .btn,
+  .print-note,
+  [data-save-note] {
+    display: none !important;
+  }
+
+  .page {
+    padding: 0;
+    max-width: none;
+  }
+
+  .stack {
+    gap: 0;
+  }
+
+  .card,
+  .card-lg {
+    box-shadow: none;
+    border: 1px solid #c8d0dc;
+    border-radius: 6px;
+    margin-bottom: 6mm;
+    padding: 6mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .doc-line,
+  .trace-item {
+    background: #fff;
+    border-color: #c8d0dc;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .doc-line-changed,
+  .doc-line-added {
+    border-left: 3px solid #1b2430;
+  }
+
+  .doc-line-pending {
+    border-left: 3px dashed #1b2430;
+  }
+
+  .table-scroll {
+    overflow: visible;
+  }
+
+  /* A4 인쇄 폭은 약 186mm다. 표가 잘리지 않게 최소 폭을 풀고 칸 안에서 줄을 바꾼다 */
+  .data-table {
+    font-size: 9pt;
+    min-width: 0;
+  }
+
+  .data-table th,
+  .data-table td {
+    overflow-wrap: break-word; /* anywhere는 "(추가)" 같은 짧은 말도 쪼갠다 */
+  }
+
+  .doc-source {
+    font-size: 8.5pt;
+    border-color: #c8d0dc;
+  }
+
+  .site-foot {
+    margin-top: 4mm;
+    color: #1b2430;
+  }
+
+  /* 화면 안 이동 링크의 주소는 인쇄물에 적지 않는다 */
+  a[href]::after {
+    content: "";
+  }
+}
+
+/* ---------- AI 참고 의견 ---------- */
+.ai-card {
+  border-style: dashed;
+  border-color: var(--line-2);
+  background: #fbfcfe;
+}
+
+.ai-opinion {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.ai-model-form {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.ai-model-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.ai-opinion-about {
+  margin: 0 0 8px;
+}
+
+/* 무엇에 대한 의견인지 먼저 눈에 들어오게 하늘색으로 둔다 */
+.ai-badge {
+  background: #e3f2fd;
+  border-color: rgba(37, 99, 235, 0.18);
+  color: #1c5fb8;
+  font-weight: 700;
+}
+
+.ai-opinion-text {
+  margin: 0;
+}
+
+/* 안내는 의견을 읽은 뒤에 보도록 맨 아래에 작게 */
+.ai-foot {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* 지역 소비 프로필 카드 (2단계 맨 위). 좁은 화면에서는 한 줄로 쌓인다 */
+/* 칸이 둘뿐인 표는 최소 폭을 풀어 준다. 640px을 그대로 두면 값이 있는 칸이 가로 스크롤 밖으로 밀린다 */
+.data-table-narrow {
+  min-width: 0;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 16px;
+}
+
+.profile-facts {
+  margin-top: 12px;
+}
+
+.profile-facts p {
+  margin: 4px 0;
+}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="stack">
+  <section class="card card-lg">
+    <div class="card-head">
+      <div>
+        <h1 class="title">정밀 분석 요청서 (초안)</h1>
+        <p class="subtitle">초안입니다. 계약이나 자료 제공이 확정된 것이 아닙니다.</p>
+      </div>
+      <span class="head-actions">
+        <a class="btn btn-ghost" href="/step/5">← 비교 화면으로</a>
+        <button type="button" class="btn btn-ghost" data-print-button>PDF로 저장</button>
+        <button type="button" class="btn btn-primary" data-save-button data-url="/step/5/download?kind=request" data-filename="{{ filename }}">요청서 저장</button>
+      </span>
+    </div>
+    <p class="note" data-save-note hidden></p>
+  </section>
+
+  <section class="card">
+    <dl class="kv kv-wide">
+      <dt>요청 목적</dt><dd>{{ draft.purpose }}</dd>
+      <dt>분석 대상</dt><dd>{{ draft.targets }}</dd>
+      <dt>대상 기간</dt><dd>{{ draft.period }}</dd>
+      <dt>필요 지표</dt><dd>{{ draft.metrics }}</dd>
+    </dl>
+    <h2 class="section-title">보내기 전에 확인할 것</h2>
+    <ul class="plain-list">{% for item in draft.to_confirm %}<li>{{ item }}</li>{% endfor %}</ul>
+    <p class="note">참여 점포·참여자의 결제 실적은 현재 제공 자료로 조회할 수 없습니다.</p>
+  </section>
+
+  <section class="card">
+    <h2 class="section-title">파일로 저장될 내용</h2>
+    <div class="table-scroll">
+      <pre class="doc-source">{{ markdown }}</pre>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/save.js') }}?v={{ asset_version | default('') }}"></script>
+<script src="{{ url_for('static', path='js/print.js') }}?v={{ asset_version | default('') }}"></script>
+{% endblock %}

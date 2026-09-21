@@ -1,0 +1,722 @@
+/* 랜딩 화면 전용 스타일. 색·글꼴·버튼은 style.css의 :root 토큰을 그대로 쓴다.
+   움직임 규칙 (서비스 원칙: 판정하지 않는다 · 과장하지 않는다):
+   - 설명하는 움직임만 넣는다. 숫자를 세어 올리거나 배경을 흐르게 하지 않는다
+   - 등장은 12px 올라오며 0.35초. 화면에 들어올 때마다 재생된다(위로 올렸다 내리면 또 보인다)
+   - 동작 줄이기를 켠 사람, JS가 꺼진 브라우저, 인쇄·캡처에서는 모두 최종 상태로 보인다 */
+
+body.landing {
+  background: var(--bg);
+}
+
+.lp-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+/* ---------- 위쪽 막대 ---------- */
+
+.lp-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(241, 244, 249, 0.86);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+
+.lp-nav-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.lp-nav-links {
+  display: flex;
+  gap: 20px;
+  margin-left: auto;
+  font-size: 0.94rem;
+}
+
+.lp-nav-links a {
+  color: var(--text-3);
+  text-decoration: none;
+}
+
+.lp-nav-links a:hover {
+  color: var(--primary);
+}
+
+/* ---------- 구역 공통 ---------- */
+
+.lp-section {
+  padding: 72px 0;
+}
+
+.lp-section-alt {
+  background: var(--card);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.lp-h2 {
+  margin: 0 0 12px;
+  font-size: 1.62rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.lp-lead {
+  margin: 0 0 22px;
+  font-size: 1.06rem;
+  line-height: 1.7;
+  color: var(--text-2);
+  max-width: 62ch;
+}
+
+.lp-lead-sm {
+  margin: 0 0 22px;
+  color: var(--text-3);
+  line-height: 1.65;
+  max-width: 68ch;
+}
+
+.lp-note {
+  margin: 18px 0 0;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.lp-foot-note {
+  margin: 22px 0 0;
+  color: var(--text-3);
+  line-height: 1.65;
+}
+
+.lp-card {
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+
+.lp-section-alt .lp-card {
+  background: var(--field);
+}
+
+.lp-card-title {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.lp-card-lead {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+/* ---------- 1. 머리말 ---------- */
+
+.lp-hero {
+  padding: 84px 0 64px;
+}
+
+.lp-eyebrow {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 0.01em;
+}
+
+.lp-title {
+  margin: 0 0 20px;
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.03em;
+}
+
+.lp-title strong {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.lp-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-lg {
+  padding: 12px 22px;
+  font-size: 1rem;
+}
+
+/* ---------- 2. 검토 흐름 ---------- */
+
+.lp-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-step {
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lp-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.86rem;
+  display: grid;
+  place-items: center;
+}
+
+.lp-step-title {
+  font-weight: 700;
+}
+
+.lp-step-note {
+  font-size: 0.88rem;
+  color: var(--text-3);
+  line-height: 1.55;
+}
+
+/* ---------- 3. 왜 다른가 ---------- */
+
+.lp-compare,
+.lp-three {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.lp-two {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.lp-card-before .lp-card-title {
+  color: var(--muted);
+}
+
+.lp-card-after {
+  border-color: var(--primary-line);
+}
+
+.lp-card-after .lp-card-title {
+  color: var(--primary);
+}
+
+/* ---------- 4. 근거 설계 ---------- */
+
+/* 방향 비교. 숫자를 붙이지 않는다 — 개념 그림이지 수치 표시가 아니다 */
+.lp-bars {
+  margin: 26px 0 0;
+  padding: 22px;
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+}
+
+.lp-bar-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 56px;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.lp-bar-label {
+  font-size: 0.92rem;
+  color: var(--text-2);
+}
+
+.lp-bar {
+  height: 14px;
+  border-radius: 7px;
+  background: var(--tag);
+  overflow: hidden;
+}
+
+.lp-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 7px;
+  background: var(--primary);
+}
+
+.lp-bar-down {
+  width: 52%;
+}
+
+.lp-bar-up {
+  width: 78%;
+  background: #6aa5fb;
+}
+
+.lp-bar-dir {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-3);
+  text-align: right;
+}
+
+.lp-bars figcaption,
+.lp-shot figcaption {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.lp-summary {
+  margin: 26px 0 0;
+  padding: 18px 20px;
+  background: var(--primary-soft);
+  border-radius: var(--radius);
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.lp-shot {
+  margin: 22px 0 0;
+}
+
+.lp-shot img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+}
+
+/* ---------- 5. 지역 사다리 ---------- */
+
+.lp-ladder {
+  margin-top: 8px;
+}
+
+.lp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.lp-chip {
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--card);
+  color: var(--text-2);
+  font: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.lp-chip:hover {
+  border-color: var(--primary-line);
+  color: var(--primary);
+}
+
+.lp-chip.is-on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.lp-ladder-panel {
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 12px;
+}
+
+.lp-rungs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.lp-rung {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px dashed var(--line-2);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.lp-rung.is-used {
+  border-style: solid;
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.lp-rung-arrow {
+  color: var(--muted);
+}
+
+.lp-scope {
+  margin: 0 0 8px;
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--tag);
+  font-size: 0.86rem;
+  color: var(--text-3);
+}
+
+.lp-ladder-note {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+
+/* ---------- 6. 신뢰 원칙 ---------- */
+
+.lp-hold {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.lp-hold-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.92rem;
+}
+
+.lp-hold-row.is-held {
+  color: var(--muted);
+}
+
+.lp-trace {
+  margin-top: 14px;
+}
+
+.lp-trace-line {
+  margin: 0 0 10px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--line-2);
+  background: var(--field);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  line-height: 1.7;
+}
+
+.lp-trace-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--tag);
+  color: var(--muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+/* ---------- 7. 규칙 현황 ---------- */
+
+.lp-rules {
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.lp-rule {
+  display: grid;
+  grid-template-columns: 96px 220px 1fr;
+  align-items: center;
+  gap: 16px;
+  background: var(--field);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+
+.lp-rule-stage {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  background: var(--tag);
+  color: var(--text-3);
+}
+
+.lp-stage-1,
+.lp-stage-2 {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.lp-rule-title {
+  font-weight: 700;
+}
+
+.lp-rule-note {
+  color: var(--text-3);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+/* ---------- 8. 맺음·꼬리말 ---------- */
+
+.lp-closing {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.lp-closing .lp-lead {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lp-closing .lp-cta-row {
+  justify-content: center;
+}
+
+.lp-foot {
+  padding: 26px 28px 40px;
+  text-align: center;
+  font-size: 0.86rem;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- 1층: 미세 반응 ---------- */
+
+.landing .btn,
+.lp-chip,
+.lp-nav-links a,
+.lp-card,
+.lp-step {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.landing .lp-card-after:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(27, 36, 48, 0.07);
+}
+
+/* ---------- 2층: 등장 ----------
+   JS가 켜졌을 때만 숨긴다(.js-on). JS가 꺼져 있으면 처음부터 다 보인다.
+   화면 밖으로 나가면 .is-shown이 떨어져 다시 들어올 때 효과가 재생된다. */
+
+.js-on .reveal {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.js-on .reveal.is-shown {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.35s ease-out,
+    transform 0.35s ease-out;
+  transition-delay: calc(var(--i, 0) * 0.07s);
+}
+
+/* ---------- 3층: 설명형 ---------- */
+
+/* 사다리: 고른 칸만 보인다. JS가 꺼져 있으면 전부 세로로 쌓여 보인다 */
+.js-on .lp-ladder-panel {
+  display: none;
+}
+
+.js-on .lp-ladder-panel.is-on {
+  display: block;
+  animation: lp-fade 0.25s ease-out;
+}
+
+@keyframes lp-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* 방향 비교: 화면에 들어오면 두 막대가 반대로 움직인다 (숫자는 없다) */
+.js-on .lp-bars.is-shown .lp-bar-down {
+  animation: lp-shrink 0.8s ease-out both;
+}
+
+.js-on .lp-bars.is-shown .lp-bar-up {
+  animation: lp-grow 0.8s ease-out both;
+}
+
+@keyframes lp-shrink {
+  from {
+    width: 78%;
+  }
+  to {
+    width: 52%;
+  }
+}
+
+@keyframes lp-grow {
+  from {
+    width: 52%;
+  }
+  to {
+    width: 78%;
+  }
+}
+
+/* 보류 표시: 세 줄이 차례로 나타난다 */
+.js-on .lp-hold-row {
+  opacity: 0;
+}
+
+.js-on .lp-hold.is-shown .lp-hold-row {
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+  transition-delay: calc(var(--i, 0) * 0.15s + 0.2s);
+}
+
+/* 추적: 문장에 마우스를 올리면 근거 표시가 밝아진다 */
+.lp-trace-line:hover {
+  border-left-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.lp-trace-line:hover .lp-trace-chip {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ---------- 움직임을 줄이는 설정 ----------
+   운영체제에서 "동작 줄이기"를 켠 사람에게는 모든 움직임을 끈다. 내용은 그대로 보인다. */
+
+@media (prefers-reduced-motion: reduce) {
+  .js-on .reveal,
+  .js-on .lp-hold-row {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .js-on .lp-bars.is-shown .lp-bar-down,
+  .js-on .lp-bars.is-shown .lp-bar-up,
+  .js-on .lp-ladder-panel.is-on {
+    animation: none;
+  }
+
+  .landing * {
+    transition: none !important;
+  }
+}
+
+/* ---------- 좁은 화면 ---------- */
+
+@media (max-width: 900px) {
+  .lp-steps,
+  .lp-compare,
+  .lp-three,
+  .lp-two {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-rule {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .lp-rule-stage {
+    justify-self: start;
+  }
+
+  .lp-title {
+    font-size: 2rem;
+  }
+
+  .lp-nav-links {
+    display: none;
+  }
+
+  .lp-wrap,
+  .lp-nav-inner {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .lp-bar-row {
+    grid-template-columns: 110px 1fr 48px;
+    gap: 10px;
+  }
+}
+
+/* ---------- 인쇄 ----------
+   style.css의 인쇄 규칙이 .btn과 위쪽 막대를 숨기므로, 랜딩에서는 되살린다.
+   움직임은 끄고 모든 내용을 펼친 상태로 인쇄한다. */
+
+@media print {
+  body.landing .lp-nav {
+    display: none;
+  }
+
+  body.landing .btn {
+    display: inline-block;
+    border: 1px solid var(--line-2);
+    color: var(--text);
+  }
+
+  body.landing .lp-section,
+  body.landing .lp-hero,
+  body.landing .lp-closing {
+    padding: 18px 0;
+    break-inside: avoid;
+  }
+
+  body.landing .reveal,
+  body.landing .lp-hold-row {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  body.landing .lp-ladder-panel {
+    display: block !important;
+    animation: none !important;
+  }
+
+  body.landing .lp-bar-fill {
+    animation: none !important;
+  }
+}

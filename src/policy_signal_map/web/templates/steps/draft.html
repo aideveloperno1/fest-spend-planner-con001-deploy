@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% from "partials/evidence_trace.html" import evidence_trace %}
+{% from "partials/pending_badge.html" import pending_badge %}
+
+{% block content %}
+<div class="stack">
+  <section class="card card-lg">
+    <div class="card-head">
+      <div>
+        <h1 class="title">{{ document.title }}</h1>
+        <p class="subtitle">{{ document.created_on }} · {{ document.data_notice }} · 담당자 확인 전 초안입니다.</p>
+      </div>
+      <span class="head-actions">
+        <a class="btn btn-ghost" href="/step/5/document">전체 문서 보기</a>
+        {% if document.request_draft %}
+          <a class="btn btn-ghost" href="/step/5/request">정밀 분석 요청서 초안</a>
+        {% endif %}
+        <button type="button" class="btn btn-ghost" data-print-button>PDF로 저장</button>
+        <button type="button" class="btn btn-primary" data-save-button data-url="/step/5/download" data-filename="{{ filename }}">결과 저장</button>
+      </span>
+    </div>
+    <p class="summary-sentence">
+      변경 {{ document.changes | length }}건 · 추가 확정 필요 {{ document.pending | length }}건 · 원안 유지 {{ document.unchanged_sections }}개 장
+    </p>
+    <p class="note" data-save-note hidden></p>
+    <p class="print-note">[결과 저장]은 고쳐 쓸 수 있는 Markdown 파일, [PDF로 저장]은 그대로 공유하는 사본입니다. PDF는 인쇄 창에서 대상을 ‘PDF로 저장’으로 고르세요.</p>
+  </section>
+
+  {% for section in document.sections %}
+    <section class="card">
+      <div class="rule-card-head">
+        <span class="rule-card-id">{{ section.number }}. {{ section.title }}</span>
+        {% if section.changed %}<span class="rule-card-kind">보완함</span>{% endif %}
+      </div>
+      {% if section.lines %}
+        <ul class="doc-lines">
+          {% for line in section.lines %}
+            <li class="doc-line doc-line-{{ line.state }}">
+              <span class="doc-text">{{ line.text }}</span>
+              {% if line.state in ("changed", "added") %}
+                <span class="badge-row">
+                  <span class="scope-badge">{{ "변경" if line.state == "changed" else "추가" }}</span>
+                  <span class="scope-badge">{{ line.change_id }}</span>
+                  {% for evidence_id in line.evidence_ids %}
+                    <a class="scope-badge evidence-chip" href="#trace-{{ evidence_id }}" data-trace-link="{{ evidence_id }}">근거 {{ evidence_id }}</a>
+                  {% endfor %}
+                </span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="note">해당 사항 없음</p>
+      {% endif %}
+    </section>
+  {% endfor %}
+
+  {% if document.pending %}
+    <section class="card">
+      <h2 class="section-title">추가 확정 필요 {{ document.pending | length }}건</h2>
+      <div class="pending-list">{% for item in document.pending %}{{ pending_badge(item) }}{% endfor %}</div>
+      <p class="side-foot">서비스가 값을 채우지 않습니다. 담당자가 정해야 하는 항목입니다.</p>
+    </section>
+  {% endif %}
+
+  {% if document.changes %}
+    <section class="card">
+      <h2 class="section-title">변경 전후 {{ document.changes | length }}건</h2>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr><th>장</th><th>원안</th><th>보완안</th><th>검토 질문·대안</th><th>담당자 선택</th><th>근거</th></tr>
+          </thead>
+          <tbody>
+            {% for change in document.changes %}
+              <tr>
+                <td>{{ change.section }}</td>
+                {% if change.before %}
+                  <td>{{ change.before }}</td>
+                {% else %}
+                  <td class="cell-add">(추가)</td>
+                {% endif %}
+                <td>{{ change.after }}</td>
+                <td>{{ change.change_id }} · {{ change.rule_title }}{% if change.option_id %} · 대안 {{ change.option_id }}{% endif %}</td>
+                <td>{{ change.decision_label }}</td>
+                <td>{{ change.evidence_ids | join(", ") or "-" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  {{ evidence_trace(document) }}
+
+  <section class="card">
+    <div class="form-foot">
+      <a class="btn btn-ghost" href="/step/4">← 보완 선택으로</a>
+      <span class="muted small">저장 버튼을 누르면 저장 위치를 고를 수 있습니다. 서비스는 파일을 서버에 남기지 않습니다.</span>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/save.js') }}?v={{ asset_version | default('') }}"></script>
+<script src="{{ url_for('static', path='js/trace.js') }}?v={{ asset_version | default('') }}"></script>
+<script src="{{ url_for('static', path='js/print.js') }}?v={{ asset_version | default('') }}"></script>
+{% endblock %}

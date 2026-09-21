@@ -1,0 +1,40 @@
+{# 인접 월 구간 표. 모든 구간을 보여주고, 비교 A와 B를 별도 열로 둔다 (워크플로우 8-2·8-3). 경고색을 쓰지 않는다 #}
+{% macro pair_table(record_view) %}
+<div class="table-scroll">
+  <table class="data-table">
+    <caption>인접 월 구간별 변화</caption>
+    <thead>
+      <tr>
+        <th scope="col">구간</th>
+        <th scope="col" class="num">외국인 금액 증감률</th>
+        <th scope="col" class="num">전체 금액 증감률</th>
+        <th scope="col" class="num">전체 분모 비중 변화</th>
+        <th scope="col">비교 A</th>
+        <th scope="col" class="num">미상 제외 비중 변화</th>
+        <th scope="col">비교 B</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in record_view.pairs %}
+        {% set p = row.pair %}
+        {% if row.held %}
+          <tr class="row-held" data-row="pair">
+            <th scope="row">{{ row.label }}</th>
+            <td colspan="6">보류 — {{ p.skip_reason }}</td>
+          </tr>
+        {% else %}
+          <tr data-row="pair">
+            <th scope="row">{{ row.label }}</th>
+            <td class="num">{{ p.foreign_amount_growth_pct | growth }}</td>
+            <td class="num">{{ p.total_amount_growth_pct | growth }}</td>
+            <td class="num">{{ p.share_change_pp | pp_change }}</td>
+            <td class="{{ 'cmp-opposite' if p.comparison_a.opposite }}">{{ p.comparison_a.opposite | comparison }}</td>
+            <td class="num">{{ p.known_only_share_change_pp | pp_change }}</td>
+            <td>{{ p.comparison_b.opposite | comparison }}</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endmacro %}

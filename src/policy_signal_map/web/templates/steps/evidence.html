@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% from "partials/evidence_badges.html" import evidence_badges %}
+{% from "partials/month_table.html" import month_table %}
+{% from "partials/pair_table.html" import pair_table %}
+{% from "partials/profile_card.html" import profile_card %}
+
+{% block content %}
+{% set main = view.main %}
+<div class="stack">
+  {{ profile_card(profile) }}
+
+  <section class="card card-lg">
+    <h1 class="title">근거 확인</h1>
+    <p class="subtitle">기획안의 성과지표와 관련된 소비 자료를 먼저 확인합니다. 판정이 아니라 확인할 점을 찾기 위한 자료입니다.</p>
+
+    {# 고른 지역을 먼저 적는다. 같은 시도 안의 시군구는 자료가 같아서, 이 줄이 없으면
+       지역을 바꿔도 화면이 안 바뀐 것처럼 보인다 (사용자 확인 2026-09-19) #}
+    {% if view.plan_region_label %}
+      <p class="picked-region">고른 지역 <strong>{{ view.plan_region_label }}</strong></p>
+    {% endif %}
+    {% if main %}{{ evidence_badges(main, view.dataset_version, view.data_kind, true, view.main_scope_label) }}{% endif %}
+    {% if view.region_note %}<p class="notice">{{ view.region_note }}</p>{% endif %}
+    {% if view.period_note %}<p class="notice">{{ view.period_note }}</p>{% endif %}
+    {% if view.missing_main_message %}<p class="notice notice-held">{{ view.missing_main_message }}</p>{% endif %}
+    {% if view.summary_sentence %}<p class="summary-sentence">{{ view.summary_sentence }}</p>{% endif %}
+    {% if view.held_message %}<p class="notice notice-held">{{ view.held_message }}</p>{% endif %}
+    {% if view.show_held_months and main %}
+      {# 표본 부족: 수치는 접고 계산하지 못한 달만 알린다 #}
+      <h2 class="section-title">계산하지 못한 달</h2>
+      <ul class="plain-list">
+        {% for m in main.months if m.held %}
+          <li>{{ m.label }} — {{ m.status_label }}{% if m.warnings %} ({{ m.warnings | join(", ") }}){% endif %}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  {% if view.show_numbers %}
+    <section class="chart-grid" aria-label="차트">
+      <div class="card chart-card">
+        <h2 class="side-title">외국인 결제금액 ({{ main.unit }})</h2>
+        <div class="chart-box"><canvas id="amount-chart" role="img" aria-label="월별 외국인 결제금액 막대 차트. 같은 수치는 아래 월별 표에 있습니다."></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <div class="chart-head">
+          <h2 class="side-title">외국인 결제 비중 (%)</h2>
+          <div class="segmented-buttons" role="group" aria-label="비중 분모 선택">
+            <button type="button" data-denominator="all" aria-pressed="true">전체 분모</button>
+            <button type="button" data-denominator="known" aria-pressed="false">미상 제외</button>
+          </div>
+        </div>
+        <div class="chart-box"><canvas id="share-chart" role="img" aria-label="월별 외국인 결제 비중 선 차트. 같은 수치는 아래 월별 표에 있습니다."></canvas></div>
+      </div>
+      <p class="notice chart-fallback" hidden>차트를 표시하지 못했습니다. 아래 표에서 같은 수치를 확인하세요.</p>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">월별 외국인 결제금액과 비중</h2>
+      {{ month_table(main) }}
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">인접 월 구간별 변화</h2>
+      <p class="note">비교 A: 외국인 금액과 전체 분모 비중의 방향 · 비교 B: 전체 분모와 미상 제외 비중의 방향</p>
+      {{ pair_table(main) }}
+    </section>
+
+    <section class="card">
+      {% set totals = main.totals %}
+      <h2 class="section-title">기간 합산 (계산 가능 {{ totals.months_used | length }}개월)</h2>
+      <dl class="kv kv-wide">
+        <dt>외국인 결제금액</dt><dd class="num-inline">{{ totals.foreign_amount | amount(main.unit) }}</dd>
+        <dt>전체 분모 비중</dt><dd class="num-inline">{{ totals.foreign_share_pct | pct }}</dd>
+        <dt>미상 제외 비중</dt><dd class="num-inline">{{ totals.known_only_share_pct | pct }}</dd>
+        <dt>미상 비중</dt><dd class="num-inline">{{ totals.unknown_share_pct | pct }}</dd>
+      </dl>
+      {% if totals.months_excluded %}
+        <p class="note">제외한 월: {% for m in totals.months_excluded %}{{ m | month_label }}{{ ", " if not loop.last }}{% endfor %}</p>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  <section class="info-grid">
+    <div class="card info-card">
+      <h2 class="section-title">계산 방법</h2>
+      <ul class="plain-list">{% for line in view.method_lines %}<li>{{ line }}</li>{% endfor %}</ul>
+    </div>
+    <div class="card info-card">
+      <h2 class="section-title">해석 한계</h2>
+      {% if view.data_limitations %}
+        <h3 class="label-strong notes-heading">자료의 한계 <span class="hint">분석 담당 작성</span></h3>
+        <ul class="plain-list">{% for line in view.data_limitations %}<li>{{ line }}</li>{% endfor %}</ul>
+      {% endif %}
+      <h3 class="label-strong notes-heading">서비스 해석 원칙</h3>
+      <ul class="plain-list">{% for line in view.service_notes %}<li>{{ line }}</li>{% endfor %}</ul>
+    </div>
+  </section>
+
+  {% if view.hold_examples %}
+    <details class="card hold-examples">
+      <summary>자료가 부족한 경우 보기 (보류 사례 예시)</summary>
+      {% for example in view.hold_examples %}
+        <div class="hold-example">
+          <p class="notice">{{ hold_note }}</p>
+          {{ evidence_badges(example, view.dataset_version, view.data_kind, false) }}
+          {{ month_table(example) }}
+          {{ pair_table(example) }}
+        </div>
+      {% endfor %}
+    </details>
+  {% endif %}
+
+  <div class="form-foot">
+    <a class="btn btn-ghost" href="/step/1">← 기획 입력으로</a>
+    <a class="btn btn-primary" href="/step/3">검토 질문 보기 →</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if view.show_numbers %}
+  <script type="application/json" id="chart-data">{{ view.chart_data | tojson }}</script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
+    integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ"
+    crossorigin="anonymous"
+  ></script>
+  <script src="{{ url_for('static', path='js/charts.js') }}?v={{ asset_version | default('') }}"></script>
+{% endif %}
+{% endblock %}

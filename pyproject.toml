@@ -1,0 +1,28 @@
+[project]
+name = "policy-signal-map"
+version = "0.1.0"
+description = "콕콕 — 소비데이터 근거로 기획안을 검토하고 보완 기획안을 만드는 서비스"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.141.1",
+    "jinja2>=3.1.6",
+    "python-multipart>=0.0.32",
+    "uvicorn[standard]>=0.53.0",
+]
+
+[project.scripts]
+policy-signal-map = "policy_signal_map:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.13.0",
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests", "scripts"]

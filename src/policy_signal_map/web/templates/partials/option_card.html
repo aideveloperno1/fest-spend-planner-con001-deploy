@@ -1,0 +1,10 @@
+{# 대안 카드. 성공 확률·점수·추천 순위를 표시하지 않는다 (최종기획서 4-4) #}
+{% macro option_card(option, question_key, checked) %}
+<label class="option-card {{ 'option-card-on' if checked }}">
+  <input type="radio" name="option_id" value="{{ option.id }}" {{ "checked" if checked }} data-has-execution="{{ 1 if option.execution_fields else 0 }}" />
+  <span class="option-card-title">{{ option.id }} {{ option.title }}</span>
+  <span class="option-card-detail">바뀌는 곳 · {{ option.where }}</span>
+  <span class="option-card-detail">필요 자료 · {{ option.need }}</span>
+  <span class="option-card-detail">운영 부담 · {{ option.load }}</span>
+</label>
+{% endmacro %}

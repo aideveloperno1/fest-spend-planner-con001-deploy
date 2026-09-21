@@ -1,0 +1,431 @@
+{
+  "_case": "2.1 정상 — 전국·시도 프로필과 운영 기준",
+  "schema_version": "2.1",
+  "dataset_version": "fixture-profiles_ok",
+  "records": [
+    {
+      "evidence_id": "FX-01",
+      "data_kind": "synthetic",
+      "scope": {
+        "geographic_scope": "national",
+        "region_key": "ALL",
+        "population": "foreign_code_3",
+        "industry_scope": "all_provided",
+        "age_scope": "all",
+        "period_start": "2026-01",
+        "period_end": "2026-06"
+      },
+      "region_basis": "unknown",
+      "applicability": {
+        "R07": {
+          "status": "allowed",
+          "reason": "합성 전국 금액·비중 및 분모 점검 예시로만 사용"
+        },
+        "R06": {
+          "status": "blocked",
+          "reason": "업종·월 보정 자료 없음"
+        },
+        "R02": {
+          "status": "needs_review",
+          "reason": "지역 기준과 업종 후보 자료 미확인"
+        }
+      },
+      "amount_unit": "KRW",
+      "months": [
+        {
+          "month": "2026-01",
+          "calculation_status": "ok",
+          "foreign_amount": 805,
+          "total_amount": 10040,
+          "unknown_amount": 503,
+          "transaction_count": 502,
+          "foreign_share_pct": 8.0179282869,
+          "known_only_share_pct": 8.4408094789,
+          "unknown_share_pct": 5.0099601594,
+          "warnings": []
+        },
+        {
+          "month": "2026-02",
+          "calculation_status": "ok",
+          "foreign_amount": 810,
+          "total_amount": 10080,
+          "unknown_amount": 506,
+          "transaction_count": 504,
+          "foreign_share_pct": 8.0357142857,
+          "known_only_share_pct": 8.4604136202,
+          "unknown_share_pct": 5.0198412698,
+          "warnings": []
+        },
+        {
+          "month": "2026-03",
+          "calculation_status": "ok",
+          "foreign_amount": 815,
+          "total_amount": 10120,
+          "unknown_amount": 509,
+          "transaction_count": 506,
+          "foreign_share_pct": 8.0533596838,
+          "known_only_share_pct": 8.4798668193,
+          "unknown_share_pct": 5.0296442688,
+          "warnings": []
+        },
+        {
+          "month": "2026-04",
+          "calculation_status": "ok",
+          "foreign_amount": 820,
+          "total_amount": 10160,
+          "unknown_amount": 512,
+          "transaction_count": 508,
+          "foreign_share_pct": 8.0708661417,
+          "known_only_share_pct": 8.4991708126,
+          "unknown_share_pct": 5.0393700787,
+          "warnings": []
+        },
+        {
+          "month": "2026-05",
+          "calculation_status": "ok",
+          "foreign_amount": 825,
+          "total_amount": 10200,
+          "unknown_amount": 515,
+          "transaction_count": 510,
+          "foreign_share_pct": 8.0882352941,
+          "known_only_share_pct": 8.5183273103,
+          "unknown_share_pct": 5.0490196078,
+          "warnings": []
+        },
+        {
+          "month": "2026-06",
+          "calculation_status": "ok",
+          "foreign_amount": 830,
+          "total_amount": 10240,
+          "unknown_amount": 518,
+          "transaction_count": 512,
+          "foreign_share_pct": 8.10546875,
+          "known_only_share_pct": 8.5373379963,
+          "unknown_share_pct": 5.05859375,
+          "warnings": []
+        }
+      ],
+      "limitations": [
+        "합성 자료",
+        "전국 참고 예시이며 선택 지역 진단이 아님",
+        "미상 제외 비중을 정답으로 해석하지 않음"
+      ]
+    },
+    {
+      "evidence_id": "FX-SIDO-SEOUL",
+      "data_kind": "synthetic",
+      "scope": {
+        "geographic_scope": "sido",
+        "region_key": "1100000000",
+        "population": "foreign_code_3",
+        "industry_scope": "all_provided",
+        "age_scope": "all",
+        "period_start": "2026-01",
+        "period_end": "2026-06"
+      },
+      "region_basis": "merchant_location",
+      "applicability": {
+        "R07": {
+          "status": "allowed",
+          "reason": "합성 전국 금액·비중 및 분모 점검 예시로만 사용"
+        },
+        "R06": {
+          "status": "blocked",
+          "reason": "업종·월 보정 자료 없음"
+        },
+        "R02": {
+          "status": "needs_review",
+          "reason": "지역 기준과 업종 후보 자료 미확인"
+        }
+      },
+      "amount_unit": "KRW",
+      "months": [
+        {
+          "month": "2026-01",
+          "calculation_status": "ok",
+          "foreign_amount": 305,
+          "total_amount": 4040,
+          "unknown_amount": 203,
+          "transaction_count": 202,
+          "foreign_share_pct": 7.5495049505,
+          "known_only_share_pct": 7.9489184259,
+          "unknown_share_pct": 5.0247524752,
+          "warnings": []
+        },
+        {
+          "month": "2026-02",
+          "calculation_status": "ok",
+          "foreign_amount": 310,
+          "total_amount": 4080,
+          "unknown_amount": 206,
+          "transaction_count": 204,
+          "foreign_share_pct": 7.5980392157,
+          "known_only_share_pct": 8.002065049,
+          "unknown_share_pct": 5.0490196078,
+          "warnings": []
+        },
+        {
+          "month": "2026-03",
+          "calculation_status": "ok",
+          "foreign_amount": 315,
+          "total_amount": 4120,
+          "unknown_amount": 209,
+          "transaction_count": 206,
+          "foreign_share_pct": 7.645631068,
+          "known_only_share_pct": 8.0542060854,
+          "unknown_share_pct": 5.072815534,
+          "warnings": []
+        },
+        {
+          "month": "2026-04",
+          "calculation_status": "ok",
+          "foreign_amount": 320,
+          "total_amount": 4160,
+          "unknown_amount": 212,
+          "transaction_count": 208,
+          "foreign_share_pct": 7.6923076923,
+          "known_only_share_pct": 8.1053698075,
+          "unknown_share_pct": 5.0961538462,
+          "warnings": []
+        },
+        {
+          "month": "2026-05",
+          "calculation_status": "ok",
+          "foreign_amount": 325,
+          "total_amount": 4200,
+          "unknown_amount": 215,
+          "transaction_count": 210,
+          "foreign_share_pct": 7.7380952381,
+          "known_only_share_pct": 8.1555834379,
+          "unknown_share_pct": 5.119047619,
+          "warnings": []
+        },
+        {
+          "month": "2026-06",
+          "calculation_status": "ok",
+          "foreign_amount": 330,
+          "total_amount": 4240,
+          "unknown_amount": 218,
+          "transaction_count": 212,
+          "foreign_share_pct": 7.7830188679,
+          "known_only_share_pct": 8.2048731974,
+          "unknown_share_pct": 5.141509434,
+          "warnings": []
+        }
+      ],
+      "limitations": [
+        "합성 자료",
+        "전국 참고 예시이며 선택 지역 진단이 아님",
+        "미상 제외 비중을 정답으로 해석하지 않음"
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "region_key": "ALL",
+      "geographic_scope": "national",
+      "region_basis": "unconfirmed",
+      "period_start": "2026-01",
+      "period_end": "2026-06",
+      "industry": [
+        {
+          "code": "IND01",
+          "label": "가상업종 가",
+          "amount": 5000,
+          "share_pct": 50.0,
+          "status": "ok"
+        },
+        {
+          "code": "IND02",
+          "label": "가상업종 나",
+          "amount": 3000,
+          "share_pct": 30.0,
+          "status": "ok"
+        },
+        {
+          "code": "IND03",
+          "label": "가상업종 다",
+          "amount": 2000,
+          "share_pct": 20.0,
+          "status": "ok"
+        }
+      ],
+      "age": [
+        {
+          "code": "AGE01",
+          "label": "가상연령 1",
+          "amount": 6000,
+          "share_pct": 60.0,
+          "status": "ok"
+        },
+        {
+          "code": "AGE02",
+          "label": "가상연령 2",
+          "amount": 4000,
+          "share_pct": 40.0,
+          "status": "ok"
+        }
+      ],
+      "age_denominator": "known_only",
+      "months": [
+        {
+          "month": "2026-01",
+          "status": "ok",
+          "season_index": 1.0
+        },
+        {
+          "month": "2026-02",
+          "status": "no_data",
+          "season_index": null
+        },
+        {
+          "month": "2026-03",
+          "status": "ok",
+          "season_index": 1.2
+        },
+        {
+          "month": "2026-04",
+          "status": "ok",
+          "season_index": 0.9
+        },
+        {
+          "month": "2026-05",
+          "status": "ok",
+          "season_index": 1.1
+        },
+        {
+          "month": "2026-06",
+          "status": "ok",
+          "season_index": 1.0
+        }
+      ],
+      "foreign_share_pct": 4.0,
+      "unknown_share_pct": 2.0,
+      "ranks": {
+        "foreign_share": {
+          "percentile": 40.0,
+          "regions": 12
+        }
+      },
+      "readiness": {
+        "profile": "ok",
+        "industry": "ok",
+        "age": "ok",
+        "season": "ok",
+        "foreign": "ok",
+        "peers": "unlinked"
+      },
+      "limitations": [
+        "시연용 가상 수치입니다."
+      ]
+    },
+    {
+      "region_key": "1100000000",
+      "geographic_scope": "sido",
+      "region_basis": "unconfirmed",
+      "period_start": "2026-01",
+      "period_end": "2026-06",
+      "industry": [
+        {
+          "code": "IND01",
+          "label": "가상업종 가",
+          "amount": 5000,
+          "share_pct": 50.0,
+          "status": "ok"
+        },
+        {
+          "code": "IND02",
+          "label": "가상업종 나",
+          "amount": 3000,
+          "share_pct": 30.0,
+          "status": "ok"
+        },
+        {
+          "code": "IND03",
+          "label": "가상업종 다",
+          "amount": 2000,
+          "share_pct": 20.0,
+          "status": "ok"
+        }
+      ],
+      "age": [
+        {
+          "code": "AGE01",
+          "label": "가상연령 1",
+          "amount": 6000,
+          "share_pct": 60.0,
+          "status": "ok"
+        },
+        {
+          "code": "AGE02",
+          "label": "가상연령 2",
+          "amount": 4000,
+          "share_pct": 40.0,
+          "status": "ok"
+        }
+      ],
+      "age_denominator": "known_only",
+      "months": [
+        {
+          "month": "2026-01",
+          "status": "ok",
+          "season_index": 1.0
+        },
+        {
+          "month": "2026-02",
+          "status": "no_data",
+          "season_index": null
+        },
+        {
+          "month": "2026-03",
+          "status": "ok",
+          "season_index": 1.2
+        },
+        {
+          "month": "2026-04",
+          "status": "ok",
+          "season_index": 0.9
+        },
+        {
+          "month": "2026-05",
+          "status": "ok",
+          "season_index": 1.1
+        },
+        {
+          "month": "2026-06",
+          "status": "ok",
+          "season_index": 1.0
+        }
+      ],
+      "foreign_share_pct": 4.0,
+      "unknown_share_pct": 2.0,
+      "ranks": {
+        "foreign_share": {
+          "percentile": 40.0,
+          "regions": 12
+        }
+      },
+      "readiness": {
+        "profile": "ok",
+        "industry": "ok",
+        "age": "ok",
+        "season": "ok",
+        "foreign": "ok",
+        "peers": "unlinked"
+      },
+      "limitations": [
+        "시연용 가상 수치입니다."
+      ]
+    }
+  ],
+  "thresholds": {
+    "version": "fixture-th-1",
+    "R02": {
+      "low_share_percentile": 20.0
+    },
+    "R04": {
+      "season_index": 1.1,
+      "season_index_small_region": 1.25
+    }
+  }
+}

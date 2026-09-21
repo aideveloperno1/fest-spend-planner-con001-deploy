@@ -1,0 +1,60 @@
+{# 근거 추적 패널. 문서의 어떤 줄이 어떤 근거에서 나왔는지 되짚는다 (워크플로우 12장) #}
+{% macro evidence_trace(document) %}
+<section class="card" id="evidence-trace">
+  <h2 class="section-title">근거 추적</h2>
+  <article class="trace-item">
+    <div class="rule-card-head">
+      <span class="rule-card-id">지역 소비 프로필 — {{ document.profile_summary.region_label }}</span>
+      <span class="rule-card-kind">{{ "합성 자료" if document.profile_summary.data_kind == "synthetic" else "실제 자료" }} · {{ document.profile_summary.dataset_version }}</span>
+    </div>
+    {% if document.profile_summary.available %}
+      <div class="badge-row">
+        <span class="scope-badge">{{ document.profile_summary.period_label }}</span>
+        <span class="scope-badge">{{ document.profile_summary.basis_note }}</span>
+      </div>
+      <ul class="plain-list">
+        {% for line in document.profile_summary.lines %}<li>{{ line }}</li>{% endfor %}
+      </ul>
+      {% for limitation in document.profile_summary.limitations %}
+        <p class="note">프로필 한계: {{ limitation }}</p>
+      {% endfor %}
+    {% else %}
+      <p class="note">{{ document.profile_summary.note }}</p>
+    {% endif %}
+  </article>
+  {% if document.evidence_refs %}
+    <div class="trace-list">
+      {% for ref in document.evidence_refs %}
+        <article class="trace-item" id="trace-{{ ref.evidence_id }}" data-trace="{{ ref.evidence_id }}">
+          <div class="rule-card-head">
+            <span class="rule-card-id">{{ ref.evidence_id }}</span>
+            <span class="rule-card-kind">{{ "합성 자료" if ref.data_kind == "synthetic" else "실제 자료" }} · {{ ref.dataset_version }}</span>
+          </div>
+          <div class="badge-row">
+            <span class="scope-badge">{{ ref.scope_label }}</span>
+            <span class="scope-badge">{{ ref.period_label }}</span>
+          </div>
+          {% set used = [] %}
+          {% for change in document.changes if ref.evidence_id in change.evidence_ids %}{{ used.append(change) or "" }}{% endfor %}
+          {% if used %}
+            <ul class="plain-list">
+              {% for change in used %}
+                <li>{{ change.section }}장 · {{ change.after }} <span class="muted small">({{ change.rule_title }} · {{ change.decision_label }})</span></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="note">이 근거로 바꾼 문장은 없습니다.</p>
+          {% endif %}
+          {% for limitation in ref.limitations %}
+            <p class="note">한계: {{ limitation }}</p>
+          {% endfor %}
+          <a class="scope-badge evidence-chip" href="/step/2">근거 화면에서 보기 ↗</a>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="note">이 문서의 변경에 사용한 소비데이터 근거가 없습니다.</p>
+  {% endif %}
+  <p class="side-foot">전국 자료는 참고 범위이며 선택한 지역의 진단이 아닙니다. 금액과 비중은 서로 다른 질문에 답합니다.</p>
+</section>
+{% endmacro %}

@@ -1,0 +1,69 @@
+{
+  "_case": "02월 미상 금액 = 전체 금액 → 미상 제외 비중 null, 비교 B 계산 불가",
+  "schema_version": "2.0",
+  "dataset_version": "fixture-unknown_equals_total",
+  "records": [
+    {
+      "evidence_id": "FX-01",
+      "data_kind": "synthetic",
+      "scope": {
+        "geographic_scope": "national",
+        "region_key": "ALL",
+        "population": "foreign_code_3",
+        "industry_scope": "all_provided",
+        "age_scope": "all",
+        "period_start": "2026-01",
+        "period_end": "2026-02"
+      },
+      "region_basis": "unknown",
+      "applicability": {
+        "R07": {
+          "status": "allowed",
+          "reason": "합성 전국 금액·비중 및 분모 점검 예시로만 사용"
+        },
+        "R06": {
+          "status": "blocked",
+          "reason": "업종·월 보정 자료 없음"
+        },
+        "R02": {
+          "status": "needs_review",
+          "reason": "지역 기준과 업종 후보 자료 미확인"
+        }
+      },
+      "amount_unit": "KRW",
+      "months": [
+        {
+          "month": "2026-01",
+          "calculation_status": "ok",
+          "foreign_amount": 800,
+          "total_amount": 10000,
+          "unknown_amount": 1000,
+          "transaction_count": 500,
+          "foreign_share_pct": 8.0,
+          "known_only_share_pct": 8.8888888889,
+          "unknown_share_pct": 10.0,
+          "warnings": []
+        },
+        {
+          "month": "2026-02",
+          "calculation_status": "ok",
+          "foreign_amount": 0,
+          "total_amount": 5000,
+          "unknown_amount": 5000,
+          "transaction_count": 250,
+          "foreign_share_pct": 0.0,
+          "known_only_share_pct": null,
+          "unknown_share_pct": 100.0,
+          "warnings": [
+            "미상 제외 분모 0"
+          ]
+        }
+      ],
+      "limitations": [
+        "합성 자료",
+        "전국 참고 예시이며 선택 지역 진단이 아님",
+        "미상 제외 비중을 정답으로 해석하지 않음"
+      ]
+    }
+  ]
+}

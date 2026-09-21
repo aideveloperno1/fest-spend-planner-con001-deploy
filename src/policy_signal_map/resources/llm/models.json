@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "description": "3단계 AI 참고 의견에서 담당자가 고르는 모델의 표시 이름과 설명. 실제로 고를 수 있는 모델은 .env의 PSM_LLM_MODELS가 정한다. 여기에 없는 모델은 모델 이름을 그대로 표시한다. 순위·점수·추천 표현을 넣지 않는다.",
+  "models": [
+    {
+      "id": "exaone3.5:7.8b",
+      "label": "EXAONE 3.5 7.8B (4비트)",
+      "description": "LG AI연구원의 한국어·영어 모델. 파일 4.8GB로 그래픽카드 메모리에 모두 올라가 응답이 빠른 편입니다."
+    },
+    {
+      "id": "exaone3.5:7.8b-instruct-q8_0",
+      "label": "EXAONE 3.5 7.8B (8비트)",
+      "description": "같은 모델을 덜 압축한 버전. 파일 8.3GB로 4비트보다 크고 응답이 조금 느릴 수 있습니다."
+    },
+    {
+      "id": "gemma4:26b-a4b-it-qat",
+      "label": "Gemma 4 26B A4B (QAT 4비트)",
+      "description": "Google의 다국어 모델. 파일 15GB로 일부를 CPU에서 계산하므로 응답이 느릴 수 있습니다."
+    }
+  ]
+}

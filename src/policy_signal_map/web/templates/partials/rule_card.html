@@ -1,0 +1,36 @@
+{# 검토 결과 항목. 질문·안내·추가 확정 필요·보류를 구분해 표시하고 판정·경고색을 쓰지 않는다.
+   항목마다 상자를 두지 않고 한 상자 안에 문서처럼 이어 붙인다 (사용자 확인 2026-09-19) #}
+{% macro rule_card(outcome, rule_kind_labels) %}
+<article class="rule-item rule-card-{{ outcome.kind }}">
+  <div class="rule-card-head">
+    <span class="rule-card-id">{{ outcome.title }}</span>
+    <span class="rule-card-kind">{{ rule_kind_labels[outcome.kind] }}</span>
+    {% if outcome.display_level == "reference" %}<span class="scope-badge">참고 기준</span>{% endif %}
+  </div>
+
+  <p class="rule-card-message">{{ outcome.message }}</p>
+
+  {% if outcome.why %}
+    <p class="rule-card-why"><b>왜 묻나요?</b> {{ outcome.why }}</p>
+  {% endif %}
+
+  {# 근거 칩의 `DEMO-R07-NATIONAL`은 규칙 관리 번호가 아니라 데이터 담당이 파일에 붙인
+     근거 자료 이름(evidence_id)이다. 검수·심사에서 "이 수치가 어느 자료에서 왔는지"를
+     짚는 데 쓰므로 화면에 남긴다. 규칙 번호(R01~R07)는 화면에 쓰지 않는다
+     (사용자 결정 2026-09-18, checks.md 1장 "검토 규칙 관리 번호 화면 표시"). #}
+  {% if outcome.scope_label or outcome.evidence_ids %}
+    <div class="badge-row">
+      {% if outcome.scope_label %}<span class="scope-badge">{{ outcome.scope_label }}</span>{% endif %}
+      {% for evidence_id in outcome.evidence_ids %}
+        <a class="scope-badge evidence-chip" href="/step/2">근거 {{ evidence_id }} ↗</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if outcome.region_note %}<p class="note">{{ outcome.region_note }}</p>{% endif %}
+
+  {% if outcome.related_rule_ids %}
+    <p class="note">함께 확인: {{ outcome.related_titles | join(", ") }} · 같은 자료를 묻는 질문이라 보완 선택에서 한 번만 입력하면 됩니다.</p>
+  {% endif %}
+</article>
+{% endmacro %}

@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "description": "사업 유형별로 켜지는 검토 질문. 공통(common)은 유형과 상관없이 항상 켠다. 유형을 고르지 않은 기획은 아무 질문도 숨기지 않고 모두 실행한다 (마음대로 분류하지 않는다). 여기에는 review_rules.json에 있는 번호만 적는다.",
+  "common": [
+    "R04",
+    "R05",
+    "R10"
+  ],
+  "packs": {
+    "coupon": {
+      "rules": [
+        "R01",
+        "R02",
+        "R08"
+      ]
+    },
+    "foreign_tourism": {
+      "rules": [
+        "R03",
+        "R07"
+      ]
+    },
+    "festival": {
+      "rules": [
+        "R02",
+        "R03",
+        "R07",
+        "R12",
+        "R11"
+      ]
+    },
+    "age_target": {
+      "rules": [
+        "R02",
+        "R08"
+      ]
+    }
+  }
+}

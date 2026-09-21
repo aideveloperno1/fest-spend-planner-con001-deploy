@@ -1,0 +1,20 @@
+{
+  "sido": {
+    "code": "DEMO",
+    "name": "공개 시연 지역",
+    "sigungu": [
+      {"code": "DEMO-SGG-A", "name": "A · 대도시 기본형"},
+      {"code": "DEMO-SGG-B", "name": "B · 농촌 소액형"},
+      {"code": "DEMO-SGG-C", "name": "C · 생활유통형"},
+      {"code": "DEMO-SGG-D", "name": "D · 한식외식형"},
+      {"code": "DEMO-SGG-E", "name": "E · 복합형"},
+      {"code": "DEMO-SGG-F", "name": "F · 외국인 결제 비중 낮음"},
+      {"code": "DEMO-SGG-G", "name": "G · 특정 달 소비 증가"},
+      {"code": "DEMO-SGG-H", "name": "H · 성별·연령 미상 비중 큼"},
+      {"code": "DEMO-SGG-I", "name": "I · 외국인 결제 규모 작음"},
+      {"code": "DEMO-SGG-J", "name": "J · 인구감소지역 예시"},
+      {"code": "DEMO-SGG-K", "name": "K · 연령 대상 사업 예시"},
+      {"code": "DEMO-SGG-L", "name": "L · 외부 인구 자료 없음"}
+    ]
+  }
+}

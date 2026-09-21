@@ -1,0 +1,33 @@
+{# 월별 표. 계산할 수 없는 월은 회색 행이며 비중은 "계산 불가"로 표시된다 (0으로 표시하지 않음) #}
+{% macro month_table(record_view) %}
+<div class="table-scroll">
+  <table class="data-table">
+    <caption>월별 외국인 결제금액과 비중</caption>
+    <thead>
+      <tr>
+        <th scope="col">월</th>
+        <th scope="col" class="num">외국인 결제금액</th>
+        <th scope="col" class="num">전체 분모 비중</th>
+        <th scope="col" class="num">미상 비중</th>
+        <th scope="col" class="num">미상 제외 비중</th>
+        <th scope="col">상태</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in record_view.months %}
+        <tr class="{{ 'row-held' if row.held }}" data-row="month">
+          <th scope="row">{{ row.label }}</th>
+          <td class="num">{{ row.foreign_amount | amount(record_view.unit) }}</td>
+          <td class="num">{{ row.foreign_share_pct | pct }}</td>
+          <td class="num">{{ row.unknown_share_pct | pct }}</td>
+          <td class="num">{{ row.known_only_share_pct | pct }}</td>
+          <td>
+            {{ row.status | calc_status }}
+            {% for warning in row.warnings %}<span class="cell-note">{{ warning }}</span>{% endfor %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endmacro %}
