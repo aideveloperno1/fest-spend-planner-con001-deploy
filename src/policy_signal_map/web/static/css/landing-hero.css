@@ -81,29 +81,19 @@
   border: 1px solid #c8d0dd;
   box-shadow: inset 0 1px 1px rgba(255,255,255,.7);
 }
-.lp-cta-orb {
-  width: 23px;
-  height: 23px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 28% 25%, #e2fff3, transparent 48%),
-    conic-gradient(from 20deg, #a5d5f3, #b294e6, #6b97e2, #83dfd0, #a5d5f3);
-  box-shadow: inset 0 0 3px #fff9, 0 0 13px #c6effb80;
-}
 .lp-intro .lp-note { margin-top: 14px; font-size: 13px; color: #59616d; letter-spacing: -.025em; }
 .lp-intro .lp-flow { padding: 4px 0 76px; scroll-margin-top: 85px; }
 .lp-intro .lp-h2 { margin: 0 0 16px; font-size: 24px; letter-spacing: -.045em; }
 .lp-flow-track { position: relative; width: 884px; max-width: 100%; }
-.lp-flow-ribbon { position: absolute; inset: 0; width: 100%; height: 148px; stroke: #7597d6; stroke-width: 3; }
-.lp-flow-ribbon .lp-flow-line { opacity: .78; }
-.lp-flow-ribbon .lp-flow-line-back { opacity: .35; }
+.lp-flow-ribbon { position: absolute; inset: 0; width: 100%; height: 148px; overflow: visible; pointer-events: none; }
 .lp-flow-light {
   opacity: 0;
-  stroke: #e8fcff;
-  stroke-width: 5;
+  stroke: #c3f3ff;
+  stroke-width: 4;
   stroke-linecap: round;
   stroke-dasharray: 3 100;
   stroke-dashoffset: 3;
-  filter: drop-shadow(0 0 4px #39a9ff) drop-shadow(0 0 8px #69c8ff);
+  filter: url(#flow-soft-glow);
 }
 .lp-flow-ready .lp-flow-light { animation: lp-light-travel 6s linear infinite; }
 .lp-intro .lp-step::after {

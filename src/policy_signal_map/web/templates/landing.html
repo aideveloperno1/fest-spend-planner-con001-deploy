@@ -39,7 +39,7 @@
           </h1>
           <p class="lp-lead">{{ c.hero_lead }}</p>
           <div class="lp-cta-row">
-            <a class="btn btn-primary btn-lg" href="/step/1">예시 기획으로 체험<span class="lp-cta-orb" aria-hidden="true"></span></a>
+            <a class="btn btn-primary btn-lg" href="/step/1">예시 기획으로 체험</a>
             <a class="btn btn-ghost btn-lg" href="#evidence">근거 설계 보기</a>
           </div>
           <p class="lp-note">{{ c.hero_note }}</p>
@@ -52,8 +52,13 @@
           <h2 class="lp-h2" id="flow-title">다섯 단계로 기획안을 고칩니다</h2>
           <div class="lp-flow-track">
           <svg class="lp-flow-ribbon" viewBox="0 0 884 138" fill="none" aria-hidden="true" focusable="false">
-            <path class="lp-flow-line" d="M69 12 C162 12 147 126 255 126 S348 12 441 12 S534 126 627 126 S720 12 813 12" />
-            <path class="lp-flow-line lp-flow-line-back" d="M69 126 C162 126 147 12 255 12 S348 126 441 126 S534 12 627 12 S720 126 813 126" />
+            <defs>
+              <filter id="flow-soft-glow" x="-30%" y="-50%" width="160%" height="200%" color-interpolation-filters="sRGB">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="soft" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="halo" />
+                <feMerge><feMergeNode in="halo" /><feMergeNode in="soft" /></feMerge>
+              </filter>
+            </defs>
             <path class="lp-flow-light" pathLength="100" d="M69 12 C162 12 147 126 255 126 S348 12 441 12 S534 126 627 126 S720 12 813 12" />
             <path class="lp-flow-light" pathLength="100" d="M69 126 C162 126 147 12 255 12 S348 126 441 126 S534 12 627 12 S720 126 813 126" />
           </svg>
@@ -111,7 +116,7 @@
           <p class="lp-summary reveal">{{ c.evidence_summary }}</p>
 
           <figure class="lp-shot reveal">
-            <img src="/static/images/screenshot-evidence-region.png" alt="2단계 근거 확인 화면" loading="lazy" width="1440" />
+            <img src="{{ url_for('static', path='images/screenshot-evidence-region.png') }}?v={{ asset_version | default('') }}" alt="2단계 근거 확인 화면" loading="lazy" width="1440" />
             <figcaption>실제 2단계 화면 (시연용 합성 수치)</figcaption>
           </figure>
 
