@@ -5,7 +5,7 @@
   border-bottom: 1px solid rgba(111, 129, 157, .15);
 }
 .landing .lp-nav-inner {
-  width: min(916px, calc(100% - 48px));
+  width: min(var(--service-content-width), calc(100% - 48px));
   max-width: none;
   height: 64px;
   padding: 0;
@@ -44,7 +44,7 @@
   color: #101522;
   background: #e7ecf2 url('../images/landing-hero-bare-hand.png') center bottom / max(1338px, 100vw) auto no-repeat;
 }
-.lp-intro .lp-wrap { width: min(916px, calc(100% - 48px)); max-width: none; padding: 0; }
+.lp-intro .lp-wrap { width: min(var(--service-content-width), calc(100% - 48px)); max-width: none; padding: 0; }
 .lp-intro .lp-hero { min-height: 474px; padding: 74px 0 40px; }
 .lp-intro .lp-eyebrow { margin-bottom: 12px; font-size: 14px; color: #315d9f; letter-spacing: -.02em; }
 .lp-intro .lp-title {
@@ -84,7 +84,8 @@
 .lp-intro .lp-note { margin-top: 14px; font-size: 13px; color: #59616d; letter-spacing: -.025em; }
 .lp-intro .lp-flow { padding: 4px 0 76px; scroll-margin-top: 85px; }
 .lp-intro .lp-h2 { margin: 0 0 16px; font-size: 24px; letter-spacing: -.045em; }
-.lp-flow-track { position: relative; width: 884px; max-width: 100%; }
+.lp-flow-track { position: relative; width: 100%; max-width: var(--service-content-width); }
+.lp-hex-clip-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .lp-flow-ribbon { position: absolute; inset: 0; width: 100%; height: 148px; overflow: visible; pointer-events: none; }
 .lp-flow-light {
   opacity: 0;
@@ -112,11 +113,11 @@
   0%, 25%, 100% { filter: drop-shadow(0 10px 11px rgba(47, 91, 145, .22)) brightness(1); }
   11%, 15% { filter: drop-shadow(0 12px 14px rgba(74, 144, 210, .28)) brightness(1.07); }
 }
-.lp-intro .lp-steps { position: relative; grid-template-columns: repeat(5, 164px); justify-content: space-between; gap: 0; margin: 0; }
+.lp-intro .lp-steps { position: relative; grid-template-columns: repeat(5, 180px); justify-content: space-between; gap: 0; margin: 0; }
 .lp-intro .lp-step {
   position: relative;
-  width: 164px;
-  height: 190px;
+  width: 180px;
+  height: 208px;
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -127,6 +128,7 @@
   background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(235,244,253,.94));
   box-shadow: inset 0 0 0 1px rgba(156, 187, 222, .55);
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  clip-path: url("#lp-rounded-hex");
   filter: drop-shadow(0 10px 11px rgba(47, 91, 145, .22));
 }
 .lp-intro .lp-step:last-child {
@@ -162,8 +164,8 @@
   .lp-intro .lp-hero { min-height: 475px; padding-top: 58px; }
   .lp-intro .lp-lead { max-width: 470px; }
   .lp-intro .lp-title { font-size: 34px; }
-  .lp-intro .lp-steps { grid-template-columns: repeat(5, 138px); gap: 8px; }
-  .lp-intro .lp-step { width: 138px; height: 159px; padding: 15px 10px; }
+  .lp-intro .lp-steps { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .lp-intro .lp-step { width: 100%; max-width: 140px; height: auto; aspect-ratio: .8660254; padding: 15px 10px; justify-self: center; }
   .lp-step-icon { width: 23px; height: 23px; margin-bottom: 2px; }
   .lp-flow-ribbon { height: 126px; }
 }
@@ -184,7 +186,7 @@
   .lp-intro .lp-h2 { font-size: 21px; margin-bottom: 23px; }
   .lp-flow-ribbon { display: none; }
   .lp-intro .lp-steps { grid-template-columns: repeat(6, 1fr); gap: 24px 8px; justify-items: center; }
-  .lp-intro .lp-step { grid-column: span 2; width: 148px; height: 171px; }
+  .lp-intro .lp-step { grid-column: span 2; width: min(148px, 100%); max-width: none; height: auto; aspect-ratio: .8660254; }
   .lp-intro .lp-step:nth-child(4) { grid-column: 2 / span 2; }
   .lp-intro .lp-step:nth-child(5) { grid-column: 4 / span 2; }
 }

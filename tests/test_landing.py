@@ -88,7 +88,8 @@ def test_process_cards_are_hexagons_with_step_icons():
     for icon in ("file-edit", "bar-chart-3", "help-circle", "mouse-pointer-click", "file-check-2"):
         assert f'data-icon="{icon}"' in html
     assert "clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" in css
-    assert "width: 164px" in css and "height: 190px" in css
+    assert 'id="lp-rounded-hex"' in html and 'clip-path: url("#lp-rounded-hex")' in css
+    assert "width: 180px" in css and "height: 208px" in css
     assert "lp-card-brighten" in css and "lp-card-shimmer" not in css
     assert "lp-card-grow" not in css and "transform: scale(1.06)" not in css
 

@@ -9,9 +9,9 @@ body.landing {
 }
 
 .lp-wrap {
-  max-width: 1080px;
+  max-width: var(--service-shell-width);
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 24px;
 }
 
 /* ---------- 위쪽 막대 ---------- */
@@ -26,9 +26,9 @@ body.landing {
 }
 
 .lp-nav-inner {
-  max-width: 1080px;
+  max-width: var(--service-shell-width);
   margin: 0 auto;
-  padding: 14px 28px;
+  padding: 14px 24px;
   display: flex;
   align-items: center;
   gap: 22px;
