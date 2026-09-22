@@ -86,6 +86,7 @@ def _render(
         "pending_labels": _pending_labels(summary.pending),
         "sido_list": sido_list(),
         "regions_json": load_regions(),
+        "region_level_options": (("national", "전국"), ("sido", "시도"), ("sigungu", "시군구")),
         "budget_status": BudgetStatus,
         "business_type": BusinessType,
         # 고를 수 있는 업종·연령은 근거 파일이 알려 준다. 없으면 그 입력칸을 두지 않는다

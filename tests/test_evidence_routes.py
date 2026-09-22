@@ -151,3 +151,17 @@ def test_step_two_uses_the_shared_sticky_navigation():
     assert 'class="stack step-with-sticky"' in html
     assert 'class="workflow-sticky-bar"' in html
     assert 'href="/step/1"' in html and 'href="/step/3"' in html
+
+
+def test_step_two_prioritizes_evidence_and_collapses_reference_sections():
+    html = reviewed_client().get("/step/2").text
+    markers = (
+        'class="evidence-insight"',
+        '<h2 class="section-title">인접 월 구간별 변화</h2>',
+        '<h2 class="section-title">월별 외국인 결제금액과 비중</h2>',
+        'id="region-profile"',
+        'id="evidence-methodology"',
+    )
+    assert [html.index(marker) for marker in markers] == sorted(html.index(marker) for marker in markers)
+    assert '<details class="card evidence-accordion" id="region-profile">' in html
+    assert '<details class="card evidence-accordion" id="evidence-methodology">' in html

@@ -29,9 +29,9 @@
   {% endif %}
 {% endmacro %}
 
-{% macro profile_card(profile) %}
-<section class="card card-lg" aria-label="지역 소비 프로필">
-  <h2 class="section-title">지역 소비 프로필 — {{ profile.region_label }}</h2>
+{% macro profile_card(profile, embedded=false) %}
+{% if not embedded %}<section class="card card-lg" aria-label="지역 소비 프로필">
+  <h2 class="section-title">지역 소비 프로필 — {{ profile.region_label }}</h2>{% endif %}
 
   {% if not profile.available %}
     <p class="notice notice-held">{{ profile.note }}</p>
@@ -115,5 +115,5 @@
       </ul>
     {% endif %}
   {% endif %}
-</section>
+{% if not embedded %}</section>{% endif %}
 {% endmacro %}

@@ -17,6 +17,7 @@
   // 쿠폰 사용처는 쿠폰·지역화폐 사업에서만 받는다.
   const couponField = form.querySelector('[data-business-field="coupon"]');
   const usagePlace = form.elements.namedItem("usage_place");
+  const visitorNote = form.querySelector("[data-visitor-note]");
 
   function isCouponBusiness() {
     return checkedValues("business_type").includes("coupon");
@@ -26,6 +27,7 @@
     const showCouponField = isCouponBusiness();
     couponField.hidden = !showCouponField;
     usagePlace.disabled = !showCouponField;
+    visitorNote.hidden = !checkedValues("business_type").includes("festival");
   }
 
   form.querySelectorAll('input[name="business_type"]').forEach((radio) =>
@@ -70,6 +72,13 @@
 
   function syncRegion() {
     const lv = level();
+    for (const option of sido.options) {
+      option.disabled = lv === "sido" && option.dataset.selectable === "false";
+    }
+    if (lv === "sido" && sido.selectedOptions[0]?.disabled) {
+      sido.value = "";
+      fillSigungu();
+    }
     sido.hidden = lv !== "sido" && lv !== "sigungu";
     sigungu.hidden = lv !== "sigungu";
     regionNote.hidden = sido.hidden;
@@ -128,12 +137,17 @@
     const lv = level();
     const start = value("period_start");
     const end = value("period_end");
+    const selectedSido = regions.find((row) => row.code === sido.value);
+    const regionReady = lv === "national" || (
+      lv === "sido" ? Boolean(selectedSido && selectedSido.selectable !== false) :
+      lv === "sigungu" && Boolean(selectedSido?.sigungu?.some((row) => row.code === sigungu.value))
+    );
     return [
       Boolean(value("name")),
       checkedValues("business_type").length > 0,
       goals.length > 0 && (!goals.includes("other") || Boolean(value("goal_other"))),
       Boolean(value("target")),
-      Boolean(lv) && (lv === "national" || Boolean(sido.value)) && (lv !== "sigungu" || Boolean(sigungu.value)),
+      regionReady,
       Boolean(start && end && end >= start),
       metrics.length > 0 || customMetricValues().length > 0,
       checkedValues("indicator_use").length > 0,
@@ -170,8 +184,33 @@
   form.addEventListener("input", syncSummary);
   form.addEventListener("change", syncSummary);
   syncBusinessFields();
+  syncRegion();
   syncSummary();
 
-  // 잘못된 항목이 있으면 첫 오류로 이동
-  form.querySelector(".has-error")?.scrollIntoView({ block: "center" });
+  // 서버 검증 결과를 요약에서 바로 고칠 수 있게 연결한다.
+  function focusError(key) {
+    const groupKey = key === "goal_other" ? "goals" : key;
+    const group = document.getElementById(`field-${groupKey}`);
+    if (!group) return;
+    let control = key === "goal_other" ? form.elements.namedItem("goal_other") : null;
+    if (key === "region") control = level() === "sigungu" ? sigungu : level() === "sido" ? sido : null;
+    if (key === "period") control = form.elements.namedItem("period_start");
+    if (key === "budget") control = krw;
+    control ||= group.querySelector("input:not(:disabled), select:not(:disabled), textarea");
+    if (control && !control.hidden) {
+      control.setAttribute("aria-invalid", "true");
+      control.setAttribute("aria-describedby", `error-${key}`);
+      control.focus({ preventScroll: true });
+    }
+    group.scrollIntoView({ block: "center" });
+  }
+
+  const errorLinks = [...document.querySelectorAll("[data-error-key]")];
+  for (const link of errorLinks) {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      focusError(link.dataset.errorKey);
+    });
+  }
+  if (errorLinks.length) focusError(errorLinks[0].dataset.errorKey);
 })();

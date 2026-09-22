@@ -7,11 +7,9 @@
 {% block content %}
 {% set main = view.main %}
 <div class="stack step-with-sticky">
-  {{ profile_card(profile) }}
-
-  <section class="card card-lg">
-    <h1 class="title">근거 확인</h1>
-    <p class="subtitle">기획안의 성과지표와 관련된 소비 자료를 먼저 확인합니다. 판정이 아니라 확인할 점을 찾기 위한 자료입니다.</p>
+  <section class="card card-lg evidence-hero" aria-labelledby="evidence-title">
+    <h1 class="title" id="evidence-title">근거 확인</h1>
+    <p class="subtitle">사업 시행 전 소비 자료입니다. 기획안의 성과를 판정하지 않고 확인할 점을 찾습니다.</p>
 
     {# 고른 지역을 먼저 적는다. 같은 시도 안의 시군구는 자료가 같아서, 이 줄이 없으면
        지역을 바꿔도 화면이 안 바뀐 것처럼 보인다 (사용자 확인 2026-09-19) #}
@@ -22,7 +20,12 @@
     {% if view.region_note %}<p class="notice">{{ view.region_note }}</p>{% endif %}
     {% if view.period_note %}<p class="notice">{{ view.period_note }}</p>{% endif %}
     {% if view.missing_main_message %}<p class="notice notice-held">{{ view.missing_main_message }}</p>{% endif %}
-    {% if view.summary_sentence %}<p class="summary-sentence">{{ view.summary_sentence }}</p>{% endif %}
+    {% if view.summary_sentence %}
+      <div class="evidence-insight" aria-label="핵심 관측">
+        <p class="evidence-insight-label">핵심 관측</p>
+        <p class="summary-sentence">{{ view.summary_sentence }}</p>
+      </div>
+    {% endif %}
     {% if view.held_message %}<p class="notice notice-held">{{ view.held_message }}</p>{% endif %}
     {% if view.show_held_months and main %}
       {# 표본 부족: 수치는 접고 계산하지 못한 달만 알린다 #}
@@ -55,14 +58,14 @@
     </section>
 
     <section class="card">
-      <h2 class="section-title">월별 외국인 결제금액과 비중</h2>
-      {{ month_table(main) }}
+      <h2 class="section-title">인접 월 구간별 변화</h2>
+      <p class="note">비교 A: 외국인 금액과 전체 분모 비중의 방향 · 비교 B: 전체 분모와 미상 제외 비중의 방향. ‘방향 다름’은 오류나 성과 판정이 아닙니다.</p>
+      {{ pair_table(main) }}
     </section>
 
     <section class="card">
-      <h2 class="section-title">인접 월 구간별 변화</h2>
-      <p class="note">비교 A: 외국인 금액과 전체 분모 비중의 방향 · 비교 B: 전체 분모와 미상 제외 비중의 방향</p>
-      {{ pair_table(main) }}
+      <h2 class="section-title">월별 외국인 결제금액과 비중</h2>
+      {{ month_table(main) }}
     </section>
 
     <section class="card">
@@ -80,21 +83,32 @@
     </section>
   {% endif %}
 
-  <section class="info-grid">
-    <div class="card info-card">
-      <h2 class="section-title">계산 방법</h2>
-      <ul class="plain-list">{% for line in view.method_lines %}<li>{{ line }}</li>{% endfor %}</ul>
+  <details class="card evidence-accordion" id="region-profile">
+    <summary>
+      <span class="evidence-accordion-title">참고 자료: {{ profile.region_label }} 지역 소비 프로필{% if profile.peers %} 및 유사 지역 분석{% endif %}</span>
+      {% if not profile.available %}<span class="evidence-accordion-status">자료 없음 — {{ profile.note }}</span>{% endif %}
+    </summary>
+    <div class="evidence-accordion-content">{{ profile_card(profile, true) }}</div>
+  </details>
+
+  <details class="card evidence-accordion" id="evidence-methodology">
+    <summary><span class="evidence-accordion-title">산식 및 데이터 해석 유의사항</span></summary>
+    <div class="evidence-accordion-content info-grid">
+      <section class="info-card" aria-labelledby="method-title">
+        <h2 class="section-title" id="method-title">계산 방법</h2>
+        <ul class="plain-list">{% for line in view.method_lines %}<li>{{ line }}</li>{% endfor %}</ul>
+      </section>
+      <section class="info-card" aria-labelledby="limits-title">
+        <h2 class="section-title" id="limits-title">해석 한계</h2>
+        {% if view.data_limitations %}
+          <h3 class="label-strong notes-heading">자료의 한계 <span class="hint">분석 담당 작성</span></h3>
+          <ul class="plain-list">{% for line in view.data_limitations %}<li>{{ line }}</li>{% endfor %}</ul>
+        {% endif %}
+        <h3 class="label-strong notes-heading">서비스 해석 원칙</h3>
+        <ul class="plain-list">{% for line in view.service_notes %}<li>{{ line }}</li>{% endfor %}</ul>
+      </section>
     </div>
-    <div class="card info-card">
-      <h2 class="section-title">해석 한계</h2>
-      {% if view.data_limitations %}
-        <h3 class="label-strong notes-heading">자료의 한계 <span class="hint">분석 담당 작성</span></h3>
-        <ul class="plain-list">{% for line in view.data_limitations %}<li>{{ line }}</li>{% endfor %}</ul>
-      {% endif %}
-      <h3 class="label-strong notes-heading">서비스 해석 원칙</h3>
-      <ul class="plain-list">{% for line in view.service_notes %}<li>{{ line }}</li>{% endfor %}</ul>
-    </div>
-  </section>
+  </details>
 
   {% if view.hold_examples %}
     <details class="card hold-examples">

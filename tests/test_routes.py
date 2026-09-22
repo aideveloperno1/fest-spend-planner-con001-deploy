@@ -30,8 +30,20 @@ def test_static_files_are_served():
 def test_empty_submit_shows_errors():
     response = client().post("/step/1", data={"action": "submit"})
     assert response.status_code == 422
-    assert "필수 항목 8개를 확인해 주세요." in response.text
+    assert "입력 항목 8개를 확인해 주세요." in response.text
     assert "사업명을 입력해 주세요." in response.text
+
+
+def test_input_sections_and_error_links():
+    html = client().get("/step/1").text
+    assert [html.index(f'id="plan-section-{name}"') for name in ("basic", "goals", "details")] == sorted(
+        html.index(f'id="plan-section-{name}"') for name in ("basic", "goals", "details")
+    )
+    assert 'aria-label="목표 방문객 수 도움말"' in html
+    assert 'class="plan-sticky-bar"' in html
+    error_html = client().post("/step/1", data={"action": "submit"}).text
+    assert 'href="#field-name" data-error-key="name"' in error_html
+    assert 'aria-invalid="true" aria-describedby="error-name"' in error_html
 
 
 def test_valid_submit_keeps_original_and_opens_step_two():
