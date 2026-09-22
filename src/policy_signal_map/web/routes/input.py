@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, Response
 
 from ...plan.models import BusinessType, BudgetStatus, PlanInput, Region, RegionLevel, sample_plan
-from ...plan.regions import load_regions, sido_list
+from ...plan.regions import display_sigungu_name, load_regions
 from ...plan.validation import ValidationResult, validate_plan
 from ..dependencies import evidence_state_dep, session_dep
 from ..evidence_state import EvidenceState
@@ -56,14 +56,51 @@ def _pending_labels(items: list[str]) -> list[str]:
 
 
 def sample_plan_for(evidence: EvidenceState) -> PlanInput:
-    """공개 전달본을 쓰면 선택 가능한 가상 지역과 제공 기간으로 예시를 맞춘다."""
+    """선택 가능한 공개 합성 지역과 제공 기간으로 예시를 맞춘다."""
     plan = sample_plan()
+    if evidence.result is not None and evidence.result.file.dataset_version == "demo-hierarchy-001":
+        plan.period_start = "2026-05-01"
+        plan.period_end = "2026-06-30"
+        return plan
     if evidence.result is None or evidence.result.profile("DEMO-SGG-A") is None:
         return plan
     plan.region = Region(RegionLevel.SIGUNGU, sido_code="DEMO", sigungu_code="DEMO-SGG-A")
     plan.period_start = "2026-05-01"
     plan.period_end = "2026-06-30"
     return plan
+
+
+def _region_catalog(evidence: EvidenceState) -> dict:
+    regions = load_regions()
+    if evidence.result is None or evidence.result.file.dataset_version != "demo-hierarchy-001":
+        return regions
+    records = {(item.scope.geographic_scope, item.scope.region_key) for item in evidence.result.file.records}
+    sidos = []
+    for sido in regions["sido"]:
+        if ("sido", sido["code"]) not in records:
+            continue
+        sigungus = []
+        for item in sido["sigungu"]:
+            if ("sigungu", item["code"]) not in records:
+                continue
+            sigungus.append({**item, "display_name": display_sigungu_name(sido, item)})
+        sidos.append({**sido, "sigungu": sigungus})
+    return {**regions, "sido": sidos}
+
+
+def _validate_supported_region(result: ValidationResult, plan: PlanInput, evidence: EvidenceState) -> None:
+    if "region" in result.errors or plan.region is None or evidence.result is None:
+        return
+    if evidence.result.file.dataset_version != "demo-hierarchy-001":
+        return
+    region = plan.region
+    scope, key = (
+        ("national", "ALL") if region.level is RegionLevel.NATIONAL else
+        ("sido", region.sido_code) if region.level is RegionLevel.SIDO else
+        ("sigungu", region.sigungu_code)
+    )
+    if not any(item.scope.geographic_scope == scope and item.scope.region_key == key for item in evidence.result.file.records):
+        result.errors["region"] = "현재 시연 자료가 연결된 지역을 골라 주세요."
 
 
 def _render(
@@ -76,6 +113,7 @@ def _render(
     session_id, state = session
     plan = state.plan
     summary = result or validate_plan(plan)
+    regions = _region_catalog(evidence)
     context = {
         "plan": plan,
         # 제출 전에는 오류를 보여주지 않고, 요약만 현재 입력 기준으로 보여준다
@@ -84,8 +122,8 @@ def _render(
         "required_total": len(REQUIRED_ERROR_GROUPS),
         "required_completed": _required_completed(summary),
         "pending_labels": _pending_labels(summary.pending),
-        "sido_list": sido_list(),
-        "regions_json": load_regions(),
+        "sido_list": regions["sido"],
+        "regions_json": regions,
         "region_level_options": (("national", "전국"), ("sido", "시도"), ("sigungu", "시군구")),
         "budget_status": BudgetStatus,
         "business_type": BusinessType,
@@ -133,6 +171,7 @@ async def submit(request: Request, session: Session, evidence: Evidence) -> Resp
     )
 
     result = validate_plan(state.plan)
+    _validate_supported_region(result, state.plan, evidence)
     if not result.ok:
         return _render(request, session, evidence, result, status_code=422)
 

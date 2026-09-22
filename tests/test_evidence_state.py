@@ -19,7 +19,7 @@ GOOGLE = {
 def test_default_state_loads_demo():
     state = load_evidence_state({})
     assert state.ok
-    assert state.badge == "시연용 합성 수치 · demo-2.1-003"
+    assert state.badge == "시연용 합성 수치 · demo-hierarchy-001"
     assert not state.is_real and not state.blocked
 
 

@@ -66,7 +66,7 @@
     const found = regions.find((s) => s.code === sido.value);
     const options = found?.sigungu ?? [];
     sigungu.replaceChildren(new Option(found ? (options.length ? "시군구 선택" : "시군구 없음 (시도 단위 선택)") : "시도를 먼저 선택", ""));
-    for (const g of options) sigungu.add(new Option(g.name, g.code));
+    for (const g of options) sigungu.add(new Option(g.display_name ?? g.name, g.code));
     sigungu.disabled = Boolean(found) && options.length === 0;
   }
 

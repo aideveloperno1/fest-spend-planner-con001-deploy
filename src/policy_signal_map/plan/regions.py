@@ -28,6 +28,13 @@ def find_sido(code: str) -> dict | None:
     return next((s for s in sido_list() if s["code"] == code), None)
 
 
+def display_sigungu_name(sido: dict, sigungu: dict) -> str:
+    """같은 목록에 하위 구가 있는 시는 집계 범위임을 명시한다."""
+    name = sigungu["name"]
+    has_wards = any(item["name"].startswith(name + " ") for item in sido["sigungu"])
+    return name + " 전체" if has_wards else name
+
+
 def is_known_region(region: Region) -> bool:
     if region.level is RegionLevel.NATIONAL:
         return True
@@ -50,7 +57,7 @@ def region_label(region: Region | None) -> str:
     if region.level is RegionLevel.SIDO:
         return sido["name"]
     sigungu = next((g for g in sido["sigungu"] if g["code"] == region.sigungu_code), None)
-    return f"{sido['name']} {sigungu['name']}" if sigungu else sido["name"]
+    return f"{sido['name']} {display_sigungu_name(sido, sigungu)}" if sigungu else sido["name"]
 
 
 def find_sigungu(code: str) -> tuple[dict, dict] | None:
@@ -65,4 +72,4 @@ def find_sigungu(code: str) -> tuple[dict, dict] | None:
 def sigungu_name(code: str) -> str:
     """시군구 코드를 "강원특별자치도 강릉시"처럼 바꾼다. 목록에 없으면 빈 글자."""
     found = find_sigungu(code)
-    return f"{found[0]['name']} {found[1]['name']}" if found else ""
+    return f"{found[0]['name']} {display_sigungu_name(*found)}" if found else ""

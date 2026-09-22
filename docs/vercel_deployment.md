@@ -1,6 +1,6 @@
 # Vercel 배포 안내
 
-> 기준: 2026-09-21
+> 기준: 2026-09-22
 
 이 저장소는 Vercel의 Python 3.12 FastAPI 런타임과 Upstash Redis 세션을 사용한다.
 `run_deploy.ps1`은 로컬 실행용이며 Vercel에서는 실행하지 않는다.
@@ -43,7 +43,7 @@ PSM_LLM_MODELS=gemini-3.8-flash,gemini-3.6-flash,gemini-2.5-pro,gemma-4-31b-it
 PSM_LLM_MODEL=gemini-3.8-flash
 ```
 
-`PSM_EVIDENCE_PATH`는 설정하지 않아도 저장소의 공개 합성 파일을 사용한다.
+`PSM_EVIDENCE_PATH`는 설정하지 않아도 저장소의 계층 합성 파일(`review_evidence_hierarchy_v1.json`)을 사용한다. 기존 배포에 이 환경변수가 옛 파일로 설정돼 있다면 새 경로로 변경하거나 변수를 제거해야 한다.
 `PSM_REGION_MAPPING_PATH`는 공개 배포에 등록하지 않는다.
 
 ## 4. 배포 확인
@@ -52,10 +52,11 @@ Preview 배포가 끝나면 다음을 확인한다.
 
 1. `GET /health`가 HTTP 200과 `status: ok`, `session_backend: redis`를 반환한다.
 2. 랜딩 화면의 CSS·JS·이미지가 표시된다.
-3. 1단계 예시 기획부터 5단계 문서 다운로드까지 이어진다.
-4. 새로고침하거나 다음 요청이 다른 인스턴스로 전달돼도 입력과 선택이 유지된다.
-5. 3단계에서 모델을 고르고 **AI 의견 생성**을 눌렀을 때 Google AI 응답이 표시된다.
-6. Vercel 로그에 API 키·Redis 토큰·전체 세션 JSON이 출력되지 않는다.
+3. 상단 배지가 `demo-hierarchy-001`인지 확인한다. 안양시 전체·만안구·동안구를 각각 고를 때 2단계 차트 값이 달라지고, 안양시의 월별 원금액은 두 구의 합과 같다.
+4. 1단계 예시 기획부터 5단계 문서 다운로드까지 이어진다.
+5. 새로고침하거나 다음 요청이 다른 인스턴스로 전달돼도 입력과 선택이 유지된다.
+6. 3단계에서 모델을 고르고 **AI 의견 생성**을 눌렀을 때 Google AI 응답이 표시된다.
+7. Vercel 로그에 API 키·Redis 토큰·전체 세션 JSON이 출력되지 않는다.
 
 코드 검증 명령은 다음과 같다.
 

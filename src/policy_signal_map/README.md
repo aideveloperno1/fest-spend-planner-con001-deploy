@@ -62,8 +62,8 @@ llm → review 결과·plan·labels·config만 사용
 
 | 환경변수 | 기본값 | 의미 |
 |---|---|---|
-| `PSM_EVIDENCE_PATH` | `resources/evidence/review_evidence_public_v2.1.json` | 읽을 공개 합성 근거 파일. 바꾸면 서버 재시작 |
-| `PSM_REGION_MAPPING_PATH` | 사용하지 않음 | 공개 전달본은 가상 지역 키를 그대로 사용 |
+| `PSM_EVIDENCE_PATH` | `resources/evidence/review_evidence_hierarchy_v1.json` | 읽을 공개 합성 근거 파일. 바꾸면 서버 재시작 |
+| `PSM_REGION_MAPPING_PATH` | 사용하지 않음 | 합성자료는 행정구역 선택 코드와 직접 연결 |
 | `PSM_LLM_PROVIDER` | `none` | `none` / `google_ai` |
 | `GEMINI_API_KEY` | 없음 | Google AI Studio API 키. 설정 객체의 문자열 표현에서도 제외 |
 | `PSM_LLM_MODEL` | Google 목록의 첫 모델 | 기본 모델 이름 |

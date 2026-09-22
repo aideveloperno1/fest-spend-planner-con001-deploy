@@ -2,7 +2,7 @@
 
 > 소비데이터로 기획안 한 번 더 보기
 
-> 최신화: 2026-09-21
+> 최신화: 2026-09-22
 
 ## 이 저장소는 무엇인가
 
@@ -21,8 +21,8 @@
 - 사용법: [docs/usage_guide.md](docs/usage_guide.md)
 - 합의·진행 기록: [checks.md](./checks.md)
 
-**화면과 저장소의 모든 수치는 공개 시연용 합성 수치입니다.** 기본 데이터는 데이터 담당이 전달한
-`review_evidence_public_v2.1.json`이며, 가상 지역 12곳과 전국 예시 1건을 담고 있습니다.
+**화면의 모든 수치는 공개 시연용 합성 수치입니다.** 기본 데이터는
+`review_evidence_hierarchy_v1.json`(`demo-hierarchy-001`)이며, 실제 지명에 대응하는 269개 시군구 선택 항목·17개 시도·전국의 합성 월별 근거를 담습니다. 실제 지역명의 실제 소비 관측값이 아닙니다. 기존 데이터 담당 공개 전달본은 회귀시험용으로 보존합니다.
 
 ## 바로 실행하기
 
@@ -36,6 +36,7 @@ uv run pytest                                    # 테스트
 uv run python scripts/check_public_bundle.py     # 공개 저장소 검사 (push 전)
 uv run python scripts/capture_screenshots.py     # 제출용 화면 캡처 다시 찍기
 uv run python scripts/build_regions.py           # 지역 선택 목록 다시 만들기
+uv run python scripts/build_hierarchy_evidence.py # 계층 합성 근거 재생성
 ```
 
 ### Vercel 배포
@@ -54,8 +55,8 @@ uv run --env-file .env policy-signal-map
 
 | 환경변수 | 기본값 | 의미 |
 |---|---|---|
-| `PSM_EVIDENCE_PATH` | 공개 합성 파일 `resources/evidence/review_evidence_public_v2.1.json` | 배포 서비스가 읽는 분석 근거 파일 |
-| `PSM_REGION_MAPPING_PATH` | 사용하지 않음 | 공개 합성 전달본은 가상 지역 키를 그대로 사용하므로 대응표가 필요 없다 |
+| `PSM_EVIDENCE_PATH` | 공개 합성 파일 `resources/evidence/review_evidence_hierarchy_v1.json` | 배포 서비스가 읽는 분석 근거 파일 |
+| `PSM_REGION_MAPPING_PATH` | 사용하지 않음 | 합성자료는 기존 행정구역 선택 코드와 직접 연결된다 |
 | `PSM_SESSION_BACKEND` | 로컬 `memory`, Vercel `redis` | 작업 중인 기획과 선택을 저장할 곳 |
 | `PSM_SESSION_TTL_S` | `86400` | Redis 세션의 마지막 이용 후 유지 시간(초) |
 | `UPSTASH_REDIS_REST_URL` | 없음 | Vercel Marketplace가 넣는 Redis REST 주소. Secret으로만 관리 |
@@ -67,7 +68,7 @@ uv run --env-file .env policy-signal-map
 | `PSM_LLM_TIMEOUT_S` | `45` | Google AI 응답을 기다릴 최대 시간(초) |
 
 - 근거 파일은 서버가 처음 필요할 때 한 번 읽어 보관한다. **파일을 바꾸면 서버를 다시 시작한다** (`--reload`는 코드 변경에만 반응)
-- 화면 상단 칩에 불러온 파일의 종류와 버전이 표시된다 (`시연용 합성 수치 · demo-2.1-003`). 파일에 문제가 있으면 `근거 파일 오류`로 바뀌고, 2단계부터 안내 화면이 나온다
+- 화면 상단 칩에 불러온 파일의 종류와 버전이 표시된다 (`시연용 합성 수치 · demo-hierarchy-001`). 파일에 문제가 있으면 `근거 파일 오류`로 바뀌고, 2단계부터 안내 화면이 나온다
 - 테스트는 `tests/conftest.py`가 `PSM_` 환경변수를 비우고 합성 파일로 고정하므로, 셸 설정과 상관없이 같은 결과가 나온다
 
 ## 파일 목록 (저장소 맨 위)

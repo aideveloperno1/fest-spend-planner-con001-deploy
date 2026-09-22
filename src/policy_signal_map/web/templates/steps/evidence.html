@@ -88,7 +88,7 @@
       <span class="evidence-accordion-title">참고 자료: {{ profile.region_label }} 지역 소비 프로필{% if profile.peers %} 및 유사 지역 분석{% endif %}</span>
       {% if not profile.available %}<span class="evidence-accordion-status">자료 없음 — {{ profile.note }}</span>{% endif %}
     </summary>
-    <div class="evidence-accordion-content">{{ profile_card(profile, true) }}</div>
+    <div class="evidence-accordion-content">{{ profile_card(profile, true, view.data_kind == 'synthetic') }}</div>
   </details>
 
   <details class="card evidence-accordion" id="evidence-methodology">

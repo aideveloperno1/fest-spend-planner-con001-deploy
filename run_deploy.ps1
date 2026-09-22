@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 Set-Location -LiteralPath $PSScriptRoot
 
 $env:UV_PROJECT_ENVIRONMENT = Join-Path $PSScriptRoot ".venv"
-$env:PSM_EVIDENCE_PATH = Join-Path $PSScriptRoot "src\policy_signal_map\resources\evidence\review_evidence_public_v2.1.json"
+$env:PSM_EVIDENCE_PATH = Join-Path $PSScriptRoot "src\policy_signal_map\resources\evidence\review_evidence_hierarchy_v1.json"
 $env:PSM_SESSION_BACKEND = "memory"
 Remove-Item Env:PSM_REGION_MAPPING_PATH -ErrorAction SilentlyContinue
 

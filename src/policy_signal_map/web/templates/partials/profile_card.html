@@ -29,7 +29,7 @@
   {% endif %}
 {% endmacro %}
 
-{% macro profile_card(profile, embedded=false) %}
+{% macro profile_card(profile, embedded=false, synthetic=false) %}
 {% if not embedded %}<section class="card card-lg" aria-label="지역 소비 프로필">
   <h2 class="section-title">지역 소비 프로필 — {{ profile.region_label }}</h2>{% endif %}
 
@@ -37,6 +37,7 @@
     <p class="notice notice-held">{{ profile.note }}</p>
     <p class="note">이 지역의 구성을 다른 지역 자료로 대신 보여 주지 않습니다.</p>
   {% else %}
+    {% if synthetic %}<p class="notice">이 지역 프로필은 실제 지역명을 사용한 시연용 합성 수치입니다. 실제 관측값이 아닙니다.</p>{% endif %}
     <p class="note">{{ profile.period }} 자료입니다. {{ profile.basis_note }}</p>
 
     <div class="profile-grid">
@@ -85,7 +86,7 @@
         <p class="notice notice-held">외국인 결제 비중 — {{ profile.foreign_note }}</p>
       {% endif %}
       {% if profile.unknown_share_pct is not none %}
-        <p><strong>성별·연령 미상 비중</strong> {{ "%.1f"|format(profile.unknown_share_pct) }}%
+        <p><strong>성별 미상 비중</strong> {{ "%.1f"|format(profile.unknown_share_pct) }}%
           <span class="note">미상 제외 비중이 더 정확한 값이라는 뜻은 아닙니다.</span>
         </p>
       {% endif %}

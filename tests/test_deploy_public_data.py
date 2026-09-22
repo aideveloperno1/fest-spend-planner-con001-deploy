@@ -56,9 +56,9 @@ def test_공개_전달본으로_근거화면과_검토질문을_완성한다():
     assert review.outcomes
 
 
-def test_배포_실행_스크립트는_공개자료와_Google_AI만_지정한다():
+def test_배포_실행_스크립트는_계층합성자료와_Google_AI만_지정한다():
     script = (Path(__file__).resolve().parent.parent / "run_deploy.ps1").read_text(encoding="utf-8")
-    assert "review_evidence_public_v2.1.json" in script
+    assert "review_evidence_hierarchy_v1.json" in script
     assert 'PSM_LLM_PROVIDER = "google_ai"' in script
     assert "GEMINI_API_KEY" in script
     assert "gemini-3.5-flash-lite" not in script

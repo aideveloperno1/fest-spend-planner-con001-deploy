@@ -133,11 +133,6 @@
 
           <p class="lp-summary reveal">{{ c.evidence_summary }}</p>
 
-          <figure class="lp-shot reveal">
-            <img src="{{ url_for('static', path='images/screenshot-evidence-region.png') }}?v={{ asset_version | default('') }}" alt="2단계 근거 확인 화면" loading="lazy" width="1440" />
-            <figcaption>실제 2단계 화면 (시연용 합성 수치)</figcaption>
-          </figure>
-
           <div class="lp-two reveal">
             <div class="lp-card">
               <h3 class="lp-card-title">계산 방법</h3>
@@ -154,7 +149,7 @@
       {# ---------------------------------------------------------- 5. 지역 사다리 #}
       <section class="lp-section lp-section-alt" id="region">
         <div class="lp-wrap">
-          <h2 class="lp-h2 reveal">지역은 좁은 범위부터, 못 쓰면 밝히고 넓힙니다</h2>
+          <h2 class="lp-h2 reveal">지역별 합성 자료는 하위에서 상위로 합산합니다</h2>
           <p class="lp-lead-sm reveal">{{ c.ladder_intro }}</p>
 
           <div class="lp-ladder reveal" data-ladder>

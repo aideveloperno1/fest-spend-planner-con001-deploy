@@ -102,13 +102,13 @@
           <option value="">시군구 선택</option>
           {% for sido in sido_list if region and sido.code == region.sido_code %}
             {% for g in sido.sigungu %}
-              <option value="{{ g.code }}" {{ "selected" if region.sigungu_code == g.code }}>{{ g.name }}</option>
+              <option value="{{ g.code }}" {{ "selected" if region.sigungu_code == g.code }}>{{ g.display_name | default(g.name) }}</option>
             {% endfor %}
           {% endfor %}
         </select>
       </div>
       <p class="note" data-note="region" {{ "hidden" if level not in ("sido", "sigungu") }}>
-        {% if evidence.is_real %}선택한 지역에 연결된 실제 분석 자료를 사용합니다. 전국 자료는 별도 참고 근거로 표시됩니다.{% else %}카드 소비 근거는 전국 자료부터 제공합니다. 선택한 지역의 진단이 아니라 전국 참고 자료로 표시됩니다.{% endif %}
+        {% if evidence.is_real %}선택한 지역에 연결된 실제 분석 자료를 사용합니다. 전국 자료는 별도 참고 근거로 표시됩니다.{% elif evidence.result and evidence.result.file.dataset_version == 'demo-hierarchy-001' %}선택한 지역의 시연용 합성 자료를 사용합니다. 실제 소비 관측값이나 사업 성과가 아닙니다.{% else %}카드 소비 근거는 전국 자료부터 제공합니다. 선택한 지역의 진단이 아니라 전국 참고 자료로 표시됩니다.{% endif %}
       </p>
       {{ error("region") }}
     </fieldset>
