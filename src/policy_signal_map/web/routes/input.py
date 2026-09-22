@@ -58,7 +58,7 @@ def _pending_labels(items: list[str]) -> list[str]:
 def sample_plan_for(evidence: EvidenceState) -> PlanInput:
     """선택 가능한 공개 합성 지역과 제공 기간으로 예시를 맞춘다."""
     plan = sample_plan()
-    if evidence.result is not None and evidence.result.file.dataset_version == "demo-hierarchy-001":
+    if evidence.result is not None and evidence.result.file.dataset_version == "demo-hierarchy-002":
         plan.period_start = "2026-05-01"
         plan.period_end = "2026-06-30"
         return plan
@@ -72,7 +72,7 @@ def sample_plan_for(evidence: EvidenceState) -> PlanInput:
 
 def _region_catalog(evidence: EvidenceState) -> dict:
     regions = load_regions()
-    if evidence.result is None or evidence.result.file.dataset_version != "demo-hierarchy-001":
+    if evidence.result is None or evidence.result.file.dataset_version != "demo-hierarchy-002":
         return regions
     records = {(item.scope.geographic_scope, item.scope.region_key) for item in evidence.result.file.records}
     sidos = []
@@ -91,7 +91,7 @@ def _region_catalog(evidence: EvidenceState) -> dict:
 def _validate_supported_region(result: ValidationResult, plan: PlanInput, evidence: EvidenceState) -> None:
     if "region" in result.errors or plan.region is None or evidence.result is None:
         return
-    if evidence.result.file.dataset_version != "demo-hierarchy-001":
+    if evidence.result.file.dataset_version != "demo-hierarchy-002":
         return
     region = plan.region
     scope, key = (

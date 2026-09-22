@@ -11,6 +11,10 @@ HERE = Path(__file__).resolve().parent
 SRC = HERE.parent.parent / "데이터" / "2" / "202601_202606_주민등록인구및세대현황_월간.csv"
 OUT = HERE.parent / "src" / "policy_signal_map" / "resources" / "regions.json"
 
+# The resident-population export includes service-office rows that are not
+# disjoint city/county/district areas. They must not become region choices.
+EXCLUDED_NON_GEOGRAPHIC_CODES = {"4159200000", "4159400000"}
+
 JUNE_TOTAL_COLUMN = "2026년06월_총인구수"
 
 
@@ -23,6 +27,8 @@ def main() -> None:
             raw = row["행정구역"]
             name_part, _, code_part = raw.rpartition("(")
             code = code_part.rstrip(")").strip()
+            if code in EXCLUDED_NON_GEOGRAPHIC_CODES:
+                continue
             if len(code) != 10 or not code.isdigit():
                 raise ValueError(f"행정구역 형식을 읽을 수 없음: {raw}")
             name = " ".join(name_part.split())

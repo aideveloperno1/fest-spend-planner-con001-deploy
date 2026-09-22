@@ -16,7 +16,7 @@ from policy_signal_map.paths import RESOURCES_DIR
 from policy_signal_map.plan.regions import load_regions
 
 OUT = RESOURCES_DIR / "evidence" / "review_evidence_hierarchy_v1.json"
-VERSION = "demo-hierarchy-001"
+VERSION = "demo-hierarchy-002"
 SEED = "public-hierarchy-2026-09-v1"
 MONTHS = tuple(f"2026-{month:02d}" for month in range(1, 7))
 
@@ -126,6 +126,8 @@ def hierarchy() -> tuple[dict[str, tuple[str, ...]], dict[str, tuple[str, str]],
         items = {item["code"]: item["name"] for item in sido["sigungu"]}
         if len(items) != len(sido["sigungu"]):
             raise ValueError(f"duplicate subregion in {code}")
+        if any(not name.endswith(("시", "군", "구")) for name in items.values()):
+            raise ValueError(f"non-geographic region in {code}")
         roots = tuple(item for item in items if item not in {child for group in CITY_WARDS.values() for child in group})
         if roots:
             children[code] = roots
@@ -135,7 +137,7 @@ def hierarchy() -> tuple[dict[str, tuple[str, ...]], dict[str, tuple[str, str]],
             observed.add(item)
             shown = name + " 전체" if item in CITY_WARDS else name
             labels[item] = ("sigungu", f"{sido['name']} {shown}")
-    if len(observed) != 269 or len(CITY_WARDS) != 13 or sum(map(len, CITY_WARDS.values())) != 39:
+    if len(observed) != 267 or len(CITY_WARDS) != 13 or sum(map(len, CITY_WARDS.values())) != 39:
         raise ValueError("region hierarchy changed; review all direct-child mappings")
     for parent, wards in CITY_WARDS.items():
         if parent not in labels or any(ward not in labels for ward in wards):
@@ -159,7 +161,7 @@ def hierarchy() -> tuple[dict[str, tuple[str, ...]], dict[str, tuple[str, str]],
     if reachable != set(labels):
         raise ValueError(f"unreachable region nodes: {set(labels) - reachable}")
     leaves = set(labels) - set(children)
-    if len(leaves) != 257:  # 256 sigungu leaves plus Sejong province
+    if len(leaves) != 255:  # 254 sigungu leaves plus Sejong province
         raise ValueError("unexpected disjoint leaf count")
     return children, labels, leaves
 
@@ -175,7 +177,7 @@ def build() -> dict:
             values[code] = tuple(sum_months([part[index] for part in parts]) for index in range(6))
         return values[code]
     value_for("ALL")
-    if len(values) != 287:
+    if len(values) != 285:
         raise ValueError("every selectable region needs one record")
 
     national = values["ALL"]

@@ -12,7 +12,7 @@ from policy_signal_map.app import app
 from policy_signal_map.config import DEFAULT_EVIDENCE_PATH
 from policy_signal_map.evidence.loader import load_evidence
 from policy_signal_map.plan.models import PlanInput, Region, RegionLevel
-from policy_signal_map.plan.regions import region_label
+from policy_signal_map.plan.regions import load_regions, region_label
 from policy_signal_map.review.context import select_main
 from policy_signal_map.review.engine import run_review
 
@@ -20,13 +20,13 @@ from policy_signal_map.review.engine import run_review
 def test_generated_file_is_reproducible_and_valid():
     assert DEFAULT_EVIDENCE_PATH.read_text(encoding="utf-8") == to_json_text(generated.build())
     loaded = load_evidence(DEFAULT_EVIDENCE_PATH)
-    assert (len(loaded.file.records), len(loaded.profiles), len(loaded.warnings)) == (287, 287, 0)
+    assert (len(loaded.file.records), len(loaded.profiles), len(loaded.warnings)) == (285, 285, 0)
     assert loaded.file.data_kind == "synthetic"
 
 
 def test_every_parent_is_exact_sum_of_direct_children():
     children, labels, leaves = generated.hierarchy()
-    assert (len(labels), len(leaves)) == (287, 257)
+    assert (len(labels), len(leaves)) == (285, 255)
     data = generated.build()
     records = {row["scope"]["region_key"]: row for row in data["records"]}
     for parent, child_codes in children.items():
@@ -37,6 +37,23 @@ def test_every_parent_is_exact_sum_of_direct_children():
     assert records["4117000000"]["months"][0]["total_amount"] == sum(
         records[key]["months"][0]["total_amount"] for key in ("4117100000", "4117300000")
     )
+    assert children["4159000000"] == ("4159100000", "4159300000", "4159500000", "4159700000")
+    assert all(code not in labels for code in ("4159200000", "4159400000"))
+
+
+def test_region_catalog_excludes_service_offices_and_marks_snapshot():
+    regions = load_regions()["sido"]
+    actual = [row for row in regions if row["code"].isdigit()]
+    choices = [item for sido in actual for item in sido["sigungu"]]
+    assert (len(actual), len(choices)) == (17, 267)
+    assert all(item["name"].endswith(("시", "군", "구")) for item in choices)
+    assert not {"4159200000", "4159400000"} & {item["code"] for item in choices}
+    assert {item["name"] for item in next(row for row in actual if row["name"] == "인천광역시")["sigungu"]} >= {"중구", "동구", "서구"}
+    client = TestClient(app)
+    html = client.get("/step/1").text
+    assert "지역 선택지는 2026년 6월 기준" in html
+    assert "화성시동부출장소" not in html
+    assert "화성시동탄출장소" not in html
 
 
 def test_profile_marginals_and_period_share_match_records():
@@ -92,6 +109,11 @@ def test_step_two_uses_selected_ward_and_rejects_old_demo_code(use_evidence):
     bad = TestClient(app).post("/step/1", data={**VALID_FORM, "sido": "DEMO", "sigungu": "DEMO-SGG-A"})
     assert bad.status_code == 422
     assert "시연 자료가 연결된 지역" in bad.text or "지역" in bad.text
+    for code in ("4159200000", "4159400000"):
+        office = TestClient(app).post(
+            "/step/1", data={**VALID_FORM, "sido": "4100000000", "sigungu": code}
+        )
+        assert office.status_code == 422
 
 
 def test_switching_city_and_wards_changes_chart_series(use_evidence):
@@ -128,7 +150,7 @@ def test_hierarchy_dataset_completes_five_steps_and_word_download(use_evidence):
         assert answer.status_code == 200
     draft = client.get("/step/5")
     assert draft.status_code == 200
-    assert "demo-hierarchy-001" in draft.text
+    assert "demo-hierarchy-002" in draft.text
     download = client.get("/step/5/download")
     assert download.status_code == 200
     assert download.content[:2] == b"PK"

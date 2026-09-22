@@ -52,7 +52,7 @@ def test_landing_has_no_administrative_codes():
 def test_landing_has_no_real_dataset_version():
     """실제 자료 버전(real-…)을 쓰지 않는다. 시연용 합성(demo-) 기준이다."""
     assert not re.findall(r"real-[\w-]+", landing_text())
-    assert "demo-hierarchy-001" in landing_text()
+    assert "demo-hierarchy-002" in landing_text()
 
 
 def test_landing_states_synthetic_and_not_official():

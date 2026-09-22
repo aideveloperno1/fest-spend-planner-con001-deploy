@@ -23,9 +23,9 @@ def test_default_settings_point_to_demo_file_and_it_loads_without_warnings():
     result = load_evidence(load_settings({}).evidence_path)
     assert result.warnings == ()
     assert result.source_path == DEFAULT_EVIDENCE_PATH
-    assert result.file.dataset_version == "demo-hierarchy-001"
+    assert result.file.dataset_version == "demo-hierarchy-002"
     assert result.file.data_kind == "synthetic"
-    assert (len(result.file.records), len(result.profiles)) == (287, 287)
+    assert (len(result.file.records), len(result.profiles)) == (285, 285)
     assert not is_real_evidence(result.source_path, result.file)
 
 

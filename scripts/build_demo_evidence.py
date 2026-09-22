@@ -23,7 +23,7 @@ from policy_signal_map.plan.regions import sido_list  # noqa: E402
 OUT_PATH = RESOURCES_DIR / "evidence" / "review_evidence_demo_v1.json"
 DATASET_VERSION = "demo-001"
 # 순위 표시의 분모. 시연 파일 안에서 프로필이 있는 지역 수를 그대로 쓴다
-DEMO_RANK_REGIONS = 286
+DEMO_RANK_REGIONS = 283
 
 # 시도 레코드 공통값. 지역 자료가 생겨도 업종 후보 검토(R02)는 켜지 않는다 (워크플로우 8-4)
 SIDO_APPLICABILITY = {
