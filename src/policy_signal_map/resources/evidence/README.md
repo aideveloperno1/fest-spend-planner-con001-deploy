@@ -11,7 +11,7 @@
 
 | 파일 | 하는 일 (쉬운 말) | 언제 보거나 고치나 |
 |---|---|---|
-| `review_evidence_hierarchy_v1.json` | **배포 기본값.** 267개 시군구·17개 시도·전국의 합성 레코드와 지역 프로필. 화성시 출장소 2곳은 제외하며 상위 금액·건수는 하위의 정확한 합 | `scripts/build_hierarchy_evidence.py`로 재생성할 때 |
+| `review_evidence_hierarchy_v1.json` | **배포 기본값.** 267개 시군구·17개 시도·전국의 합성 레코드와 지역 프로필. 화성시 출장소 2곳은 제외하며 상위 금액·건수는 하위의 정확한 합. A~L과 합산하지 않음 | `scripts/build_hierarchy_evidence.py`로 재생성할 때 |
 | `review_evidence_public_v2.1.json` | 이전 공개 전달본. 가상 시군구 12건 + 전국 1건 | 이전 시나리오 회귀시험·복귀용. 기본값 아님 |
 | `review_evidence_demo_v1.json` | **시연용 가짜 근거.** 전국 1건 + 시도 17건 + **시군구 268건** + 보류 사례 예시 1건. 어느 지역을 골라도 그 지역 자료가 나온다 | 직접 고치지 않음 — 바꿀 때는 `scripts/build_demo_evidence.py`를 고쳐 다시 만듦 |
 | `README.md` | 이 문서. 가짜 자료가 어떻게 구성됐는지 | 가짜 자료 구성을 바꿀 때 |

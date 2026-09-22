@@ -13,8 +13,15 @@ from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 
-from ..config import Settings, SettingsError, load_settings
+from ..config import (
+    DEFAULT_EVIDENCE_PATH,
+    PUBLIC_SCENARIO_EVIDENCE_PATH,
+    Settings,
+    SettingsError,
+    load_settings,
+)
 from ..evidence.loader import EvidenceError, LoadResult, is_real_evidence, load_evidence
+from ..plan.models import Region
 
 log = logging.getLogger(__name__)
 
@@ -77,3 +84,42 @@ def load_evidence_state(environ: Mapping[str, str] | None = None) -> EvidenceSta
 @cache
 def get_evidence_state() -> EvidenceState:
     return load_evidence_state()
+
+
+@cache
+def get_scenario_evidence_state() -> EvidenceState:
+    """The separate A–L scenario file is never mixed into geographic totals."""
+    environ = dict(os.environ)
+    environ["PSM_EVIDENCE_PATH"] = str(PUBLIC_SCENARIO_EVIDENCE_PATH)
+    environ.pop("PSM_REGION_MAPPING_PATH", None)
+    return load_evidence_state(environ)
+
+
+def dual_source_enabled(primary: EvidenceState) -> bool:
+    """Only the bundled public hierarchy may offer the second demo source."""
+    return bool(
+        primary.settings
+        and primary.settings.evidence_path.resolve() == DEFAULT_EVIDENCE_PATH.resolve()
+        and primary.result
+        and primary.result.file.dataset_version == "demo-hierarchy-002"
+        and not primary.is_real
+    )
+
+
+def primary_evidence_for(current: EvidenceState) -> EvidenceState:
+    """Recover the geographic source while editing an A–L plan."""
+    if (
+        current.settings
+        and current.settings.evidence_path.resolve() == PUBLIC_SCENARIO_EVIDENCE_PATH.resolve()
+    ):
+        primary = get_evidence_state()
+        if dual_source_enabled(primary):
+            return primary
+    return current
+
+
+def evidence_for_region(region: Region | None, primary: EvidenceState | None = None) -> EvidenceState:
+    primary = primary or get_evidence_state()
+    if dual_source_enabled(primary) and region is not None and region.sido_code == "DEMO":
+        return get_scenario_evidence_state()
+    return primary

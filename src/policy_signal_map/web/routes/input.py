@@ -9,7 +9,13 @@ from ...plan.models import BusinessType, BudgetStatus, PlanInput, Region, Region
 from ...plan.regions import display_sigungu_name, load_regions
 from ...plan.validation import ValidationResult, validate_plan
 from ..dependencies import evidence_state_dep, session_dep
-from ..evidence_state import EvidenceState
+from ..evidence_state import (
+    EvidenceState,
+    dual_source_enabled,
+    evidence_for_region,
+    get_scenario_evidence_state,
+    primary_evidence_for,
+)
 from ..forms import parse_plan_form
 from ..profile_view import option_catalog
 from ..session import WorkState
@@ -72,8 +78,32 @@ def sample_plan_for(evidence: EvidenceState) -> PlanInput:
 
 def _region_catalog(evidence: EvidenceState) -> dict:
     regions = load_regions()
+    primary = primary_evidence_for(evidence)
+    if dual_source_enabled(primary):
+        scenario = get_scenario_evidence_state()
+        sidos = []
+        for sido in regions["sido"]:
+            source = scenario if sido["code"] == "DEMO" else primary
+            if source.result is None or source.errors:
+                continue
+            records = {(item.scope.geographic_scope, item.scope.region_key) for item in source.result.file.records}
+            sigungus = [
+                {**item, "display_name": display_sigungu_name(sido, item)}
+                for item in sido["sigungu"] if ("sigungu", item["code"]) in records
+            ]
+            if sido["code"] == "DEMO":
+                if sigungus:
+                    sidos.append({**sido, "selectable": False, "sigungu": sigungus})
+            elif ("sido", sido["code"]) in records:
+                sidos.append({**sido, "sigungu": sigungus})
+        return {**regions, "sido": sidos}
     if evidence.result is None or evidence.result.file.dataset_version != "demo-hierarchy-002":
-        return regions
+        if evidence.result is None:
+            return regions
+        records = {(item.scope.geographic_scope, item.scope.region_key) for item in evidence.result.file.records}
+        if any(scope == "sigungu" and key.startswith("DEMO-SGG-") for scope, key in records):
+            return regions
+        return {**regions, "sido": [sido for sido in regions["sido"] if sido["code"] != "DEMO"]}
     records = {(item.scope.geographic_scope, item.scope.region_key) for item in evidence.result.file.records}
     sidos = []
     for sido in regions["sido"]:
@@ -91,9 +121,9 @@ def _region_catalog(evidence: EvidenceState) -> dict:
 def _validate_supported_region(result: ValidationResult, plan: PlanInput, evidence: EvidenceState) -> None:
     if "region" in result.errors or plan.region is None or evidence.result is None:
         return
-    if evidence.result.file.dataset_version != "demo-hierarchy-002":
-        return
     region = plan.region
+    if evidence.result.file.dataset_version not in ("demo-hierarchy-002", "demo-2.1-003") and region.sido_code != "DEMO":
+        return
     scope, key = (
         ("national", "ALL") if region.level is RegionLevel.NATIONAL else
         ("sido", region.sido_code) if region.level is RegionLevel.SIDO else
@@ -154,7 +184,13 @@ async def submit(request: Request, session: Session, evidence: Evidence) -> Resp
     action = form.get("action")
 
     if action == "sample":
-        state.plan = sample_plan_for(evidence)
+        primary = primary_evidence_for(evidence)
+        selected_region = (
+            Region(RegionLevel.SIGUNGU, sido_code="DEMO", sigungu_code=str(form.get("sigungu", "")))
+            if form.get("region_level") == "sigungu" and form.get("sido") == "DEMO"
+            else None
+        )
+        state.plan = sample_plan_for(evidence_for_region(selected_region, primary))
         return redirect("/step/1", session_id)
     if action == "clear":
         state.plan = PlanInput()
@@ -165,12 +201,21 @@ async def submit(request: Request, session: Session, evidence: Evidence) -> Resp
         k: [v for v in form.getlist(k) if isinstance(v, str)]
         for k in ("goals", "metrics", "metric_others", "usage_industries", "target_ages")
     }
+    primary = primary_evidence_for(evidence)
+    selected_region = (
+        Region(RegionLevel.SIGUNGU, sido_code="DEMO", sigungu_code=single.get("sigungu", ""))
+        if single.get("region_level") == "sigungu" and single.get("sido") == "DEMO"
+        else None
+    )
+    evidence = evidence_for_region(selected_region, primary)
     catalog = option_catalog(evidence.result)
     state.plan = parse_plan_form(
         single, multi, industry_codes=catalog.industry_codes(), age_codes=catalog.age_codes()
     )
 
     result = validate_plan(state.plan)
+    if state.plan.region and state.plan.region.sido_code == "DEMO" and not evidence.ok:
+        result.errors["region"] = "A~L 시연 자료를 읽지 못했습니다."
     _validate_supported_region(result, state.plan, evidence)
     if not result.ok:
         return _render(request, session, evidence, result, status_code=422)

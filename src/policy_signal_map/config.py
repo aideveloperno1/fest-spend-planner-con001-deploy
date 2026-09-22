@@ -12,6 +12,7 @@ from typing import Literal, cast
 from .paths import PROJECT_ROOT, RESOURCES_DIR
 
 LEGACY_DEMO_EVIDENCE_PATH = RESOURCES_DIR / "evidence" / "review_evidence_demo_v1.json"
+PUBLIC_SCENARIO_EVIDENCE_PATH = RESOURCES_DIR / "evidence" / "review_evidence_public_v2.1.json"
 DEFAULT_EVIDENCE_PATH = RESOURCES_DIR / "evidence" / "review_evidence_hierarchy_v1.json"
 DEFAULT_REGION_MAPPING_PATH = PROJECT_ROOT / "private" / "region_mapping.json"
 

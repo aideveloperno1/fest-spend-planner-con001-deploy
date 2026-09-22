@@ -2,6 +2,7 @@
 
 import json
 import re
+from pathlib import Path
 
 import build_hierarchy_evidence as generated
 from _evidence_builder import to_json_text
@@ -15,6 +16,8 @@ from policy_signal_map.plan.models import PlanInput, Region, RegionLevel
 from policy_signal_map.plan.regions import load_regions, region_label
 from policy_signal_map.review.context import select_main
 from policy_signal_map.review.engine import run_review
+from policy_signal_map.web.dependencies import evidence_state_dep
+from policy_signal_map.web.evidence_state import get_evidence_state, get_scenario_evidence_state
 
 
 def test_generated_file_is_reproducible_and_valid():
@@ -51,7 +54,7 @@ def test_region_catalog_excludes_service_offices_and_marks_snapshot():
     assert {item["name"] for item in next(row for row in actual if row["name"] == "인천광역시")["sigungu"]} >= {"중구", "동구", "서구"}
     client = TestClient(app)
     html = client.get("/step/1").text
-    assert "지역 선택지는 2026년 6월 기준" in html
+    assert "실제 지명 선택지는 2026년 6월 기준" in html
     assert "화성시동부출장소" not in html
     assert "화성시동탄출장소" not in html
 
@@ -95,7 +98,7 @@ def test_all_selectable_regions_have_exact_main_record():
         assert selection.region_note is None
 
 
-def test_step_two_uses_selected_ward_and_rejects_old_demo_code(use_evidence):
+def test_step_two_uses_selected_ward_and_rejects_unknown_demo_code(use_evidence):
     use_evidence(DEFAULT_EVIDENCE_PATH)
     client = TestClient(app)
     form = {**VALID_FORM, "sido": "4100000000", "sigungu": "4117100000"}
@@ -106,7 +109,7 @@ def test_step_two_uses_selected_ward_and_rejects_old_demo_code(use_evidence):
     assert "전국 참고 — 특정 지역의 진단이 아님" not in response.text
     assert 'id="chart-data"' in response.text
 
-    bad = TestClient(app).post("/step/1", data={**VALID_FORM, "sido": "DEMO", "sigungu": "DEMO-SGG-A"})
+    bad = TestClient(app).post("/step/1", data={**VALID_FORM, "sido": "DEMO", "sigungu": "DEMO-SGG-Z"})
     assert bad.status_code == 422
     assert "시연 자료가 연결된 지역" in bad.text or "지역" in bad.text
     for code in ("4159200000", "4159400000"):
@@ -114,6 +117,50 @@ def test_step_two_uses_selected_ward_and_rejects_old_demo_code(use_evidence):
             "/step/1", data={**VALID_FORM, "sido": "4100000000", "sigungu": code}
         )
         assert office.status_code == 422
+
+
+def test_public_scenarios_and_geographic_regions_use_separate_evidence():
+    app.dependency_overrides.pop(evidence_state_dep, None)
+    get_evidence_state.cache_clear()
+    get_scenario_evidence_state.cache_clear()
+    client = TestClient(app)
+    form = {**VALID_FORM, "sido": "DEMO", "sigungu": "DEMO-SGG-A"}
+    input_html = client.get("/step/1").text
+    assert "공개 시연 지역" in input_html
+    assert "DEMO-SGG-A" in input_html
+    assert "화성시동부출장소" not in input_html
+    sample = client.post(
+        "/step/1",
+        data={"action": "sample", "region_level": "sigungu", "sido": "DEMO", "sigungu": "DEMO-SGG-A"},
+        follow_redirects=True,
+    )
+    assert "demo-2.1-003" in sample.text
+    assert 'value="DEMO-SGG-A" selected' in sample.text
+    assert client.post("/step/1", data=form, follow_redirects=False).status_code == 303
+    assert "demo-2.1-003" in client.get("/step/2").text
+    assert "demo-2.1-003" in client.get("/step/3").text
+    assert "demo-2.1-003" in client.get("/step/4").text
+
+    scenario = get_scenario_evidence_state().result
+    assert scenario is not None
+    for question in run_review(parse(form), scenario).questions:
+        assert client.post("/step/4", data={"question_key": question.question_key, "decision": "keep_original"}).status_code == 200
+    assert "demo-2.1-003" in client.get("/step/5").text
+    assert client.get("/step/5/download").content[:2] == b"PK"
+
+    real_form = {**VALID_FORM, "sido": "4100000000", "sigungu": "4117100000"}
+    assert client.post("/step/1", data=real_form, follow_redirects=False).status_code == 303
+    html = client.get("/step/2").text
+    assert "demo-hierarchy-002" in html
+    assert "안양시 만안구" in html
+
+
+def test_custom_evidence_does_not_offer_unbacked_public_scenarios(use_evidence):
+    use_evidence(Path(__file__).parent / "fixtures" / "evidence" / "sido_allowed.json")
+    client = TestClient(app)
+    assert "DEMO-SGG-A" not in client.get("/step/1").text
+    response = client.post("/step/1", data={**VALID_FORM, "sido": "DEMO", "sigungu": "DEMO-SGG-A"})
+    assert response.status_code == 422
 
 
 def test_switching_city_and_wards_changes_chart_series(use_evidence):

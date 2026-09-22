@@ -2,9 +2,9 @@
 
 from typing import Annotated
 
-from fastapi import Cookie, Request
+from fastapi import Cookie, Depends, Request
 
-from .evidence_state import EvidenceState, get_evidence_state
+from .evidence_state import EvidenceState, evidence_for_region, get_evidence_state
 from .session import COOKIE_NAME, WorkState, configured_session_store
 
 SessionCookie = Annotated[str | None, Cookie(alias=COOKIE_NAME)]
@@ -17,5 +17,9 @@ def session_dep(request: Request, session: SessionCookie = None) -> tuple[str, W
     return loaded.session_id, loaded.state
 
 
-def evidence_state_dep() -> EvidenceState:
-    return get_evidence_state()
+def evidence_state_dep(request: Request, session: Annotated[tuple[str, WorkState], Depends(session_dep)]) -> EvidenceState:
+    state = session[1]
+    # Editing uses the current form; review and document routes stay bound to
+    # the submitted original even when a new edit is in progress.
+    region = state.plan.region if request.url.path == "/step/1" else state.original.region if state.original else None
+    return evidence_for_region(region, get_evidence_state())
